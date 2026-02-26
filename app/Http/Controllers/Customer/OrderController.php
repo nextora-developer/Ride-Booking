@@ -13,7 +13,7 @@ class OrderController extends Controller
         $orders = Order::query()
             ->where('user_id', $request->user()->id)
             ->latest()
-            ->paginate(10);
+            ->paginate(5);
 
         return view('customer.orders.index', compact('orders'));
     }

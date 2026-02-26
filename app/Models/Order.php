@@ -13,6 +13,7 @@ class Order extends Model
         'service_type',
         'pickup',
         'dropoff',
+        'pax',
         'note',
         'schedule_type',
         'scheduled_at',

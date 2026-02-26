@@ -15,7 +15,13 @@ class HomeController extends Controller
         $totalTrips = Order::where('user_id', $userId)->count();
 
         $inProgress = Order::where('user_id', $userId)
-            ->whereIn('status', ['pending', 'assigned', 'on_the_way', 'arrived'])
+            ->whereIn('status', [
+                'pending',
+                'assigned',
+                'on_the_way',
+                'arrived',
+                'in_trip'
+            ])
             ->count();
 
         $completed = Order::where('user_id', $userId)
@@ -27,6 +33,24 @@ class HomeController extends Controller
             ->limit(5)
             ->get();
 
-        return view('customer.home', compact('totalTrips', 'inProgress', 'completed', 'recent'));
+        // ✅ 当前进行中的订单（只取一个）
+        $activeBooking = Order::where('user_id', $userId)
+            ->whereIn('status', [
+                'assigned',
+                'on_the_way',
+                'arrived',
+                'in_trip'
+            ])
+            ->latest()
+            ->with('driver') // 记得有 driver relationship
+            ->first();
+
+        return view('customer.home', compact(
+            'totalTrips',
+            'inProgress',
+            'completed',
+            'recent',
+            'activeBooking'
+        ));
     }
 }

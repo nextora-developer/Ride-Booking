@@ -9,28 +9,115 @@
             ->whereIn('status', ['assigned', 'on_the_way', 'arrived', 'in_trip'])
             ->latest()
             ->first();
+
+        $me = auth()->user();
+        $isOnline = (bool) ($me->is_online ?? false);
     @endphp
 
     <div class="space-y-8">
 
         {{-- 🔵 状态栏 --}}
-        <div class="rounded-3xl p-6 text-white
-        {{ $currentOrder ? 'bg-indigo-600' : 'bg-emerald-600' }}">
+        <div
+            class="relative overflow-hidden rounded-[2.5rem] p-6 text-white
+    {{ $currentOrder ? 'bg-indigo-600' : ($isOnline ? 'bg-emerald-600' : 'bg-slate-800') }}
+    shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
 
-            <div class="flex items-center justify-between">
-                <div>
-                    <div class="text-xs uppercase tracking-widest opacity-80 font-bold">
-                        {{ $currentOrder ? '进行中订单' : '你已上线' }}
+            {{-- Soft glow blobs --}}
+            <div class="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
+            <div class="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-black/20 blur-3xl"></div>
+
+            <div class="relative z-10 flex items-start justify-between gap-4">
+
+                {{-- Left: Title + Subtitle --}}
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-black uppercase tracking-[0.22em] text-white/75">
+                            {{ $currentOrder ? 'Active Trip' : 'Driver Status' }}
+                        </span>
+
+                        {{-- Capsule badge --}}
+                        <span
+                            class="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest
+                    border border-white/15 bg-white/10">
+                            <span
+                                class="h-1.5 w-1.5 rounded-full
+                        {{ $currentOrder ? 'bg-yellow-300 animate-pulse' : ($isOnline ? 'bg-white animate-pulse' : 'bg-white/40') }}"></span>
+                            {{ $currentOrder ? '进行中' : ($isOnline ? '已上线' : '已下线') }}
+                        </span>
                     </div>
-                    <div class="text-2xl font-extrabold mt-1">
-                        {{ $currentOrder ? '行程进行中' : '等待派单中' }}
-                    </div>
+
+                    <h2 class="mt-2 text-2xl font-black tracking-tight leading-tight">
+                        {{ $currentOrder ? '行程进行中' : ($isOnline ? '等待派单中' : '点击上线开始接单') }}
+                    </h2>
+
+                    <p class="mt-1 text-xs font-bold text-white/70 leading-relaxed">
+                        @if ($currentOrder)
+                            请按流程更新状态：出发 → 到达 → 行程中 → 完成
+                        @else
+                            {{ $isOnline ? '保持在线，经理会把订单派给你。' : '上线后才会收到派单通知。' }}
+                        @endif
+                    </p>
                 </div>
 
-                <div class="h-4 w-4 rounded-full
-                    {{ $currentOrder ? 'bg-yellow-300 animate-pulse' : 'bg-white animate-pulse' }}">
+                {{-- Right: Action --}}
+                {{-- Right: Action (Super clear) --}}
+                <div class="shrink-0 flex flex-col items-end gap-2">
+                    {{-- Big status text --}}
+                    <div class="text-right">
+                        <div class="text-[11px] font-black tracking-widest uppercase text-white/70">
+                            接单开关
+                        </div>
+                        <div class="text-lg font-black">
+                            {{ $isOnline ? '在线接单' : '离线休息' }}
+                        </div>
+                    </div>
+
+                    @if ($currentOrder)
+                        <div
+                            class="px-4 py-2 rounded-2xl bg-white/10 border border-white/15 text-white/70 text-xs font-black">
+                            行程中 · 不能下线
+                        </div>
+                    @else
+                        {{-- Toggle --}}
+                        <form method="POST" action="{{ $isOnline ? route('driver.offline') : route('driver.online') }}">
+                            @csrf
+                            <button type="submit"
+                                class="group relative w-[92px] h-[44px] rounded-full border border-white/20
+                       {{ $isOnline ? 'bg-white/20' : 'bg-white/10' }}
+                       shadow-[0_12px_30px_rgba(0,0,0,0.18)]
+                       active:scale-95 transition">
+                                {{-- Knob --}}
+                                <span
+                                    class="absolute top-1 left-1 h-9 w-9 rounded-full bg-white shadow-md transition-all
+                    {{ $isOnline ? 'translate-x-[48px]' : 'translate-x-0' }}">
+                                </span>
+
+                                {{-- ON / OFF labels --}}
+                                <span
+                                    class="absolute inset-0 flex items-center justify-between px-3 text-[11px] font-black">
+                                    <span class="{{ $isOnline ? 'text-white/80' : 'text-white/50' }}">OFF</span>
+                                    <span class="{{ $isOnline ? 'text-white' : 'text-white/50' }}">ON</span>
+                                </span>
+                            </button>
+                        </form>
+
+                        {{-- Clear hint text --}}
+                        <div class="text-[11px] font-bold text-white/70">
+                            {{ $isOnline ? '要休息就关掉开关' : '把开关打开开始接单' }}
+                        </div>
+                    @endif
                 </div>
             </div>
+
+            {{-- Heartbeat：上线时每次进来都刷新 last_active_at --}}
+            @if ($isOnline)
+                @php
+                    $last = optional($me->last_active_at)->timestamp ?? 0;
+                    if (now()->timestamp - $last > 60) {
+                        $me->forceFill(['last_active_at' => now()])->save();
+                    }
+                @endphp
+            @endif
         </div>
 
 
@@ -62,12 +149,28 @@
     @endswitch">
                             {{-- 这里把状态转成华文显示 --}}
                             @switch($currentOrder->status)
-                                @case('assigned') 已派单 @break
-                                @case('on_the_way') 前往中 @break
-                                @case('arrived') 已到达 @break
-                                @case('in_trip') 行程中 @break
-                                @case('completed') 已完成 @break
-                                @default {{ str_replace('_', ' ', $currentOrder->status) }}
+                                @case('assigned')
+                                    已派单
+                                @break
+
+                                @case('on_the_way')
+                                    前往中
+                                @break
+
+                                @case('arrived')
+                                    已到达
+                                @break
+
+                                @case('in_trip')
+                                    行程中
+                                @break
+
+                                @case('completed')
+                                    已完成
+                                @break
+
+                                @default
+                                    {{ str_replace('_', ' ', $currentOrder->status) }}
                             @endswitch
                         </span>
                     </div>

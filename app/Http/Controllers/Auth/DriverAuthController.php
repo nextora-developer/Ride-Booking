@@ -58,24 +58,44 @@ class DriverAuthController extends Controller
     public function register(Request $request)
     {
         $data = $request->validate([
-            'name'                  => ['required', 'string', 'max:120'],
+            'name'                  => ['required', 'string', 'max:120'], // display name / login name
+            'full_name'             => ['required', 'string', 'max:120'],
+            'ic_number'             => ['required', 'string', 'max:30'],
+            'phone'                 => ['required', 'string', 'max:30'],
+
             'email'                 => ['required', 'email', 'max:255', 'unique:users,email'],
             'password'              => ['required', 'confirmed', Password::defaults()],
+
+            'car_plate'             => ['required', 'string', 'max:30'],
+            'car_model'             => ['required', 'string', 'max:80'],
+
+            'bank_name'             => ['required', 'string', 'max:60'],
+            'bank_account'          => ['required', 'string', 'max:40'],
+
             'shift'                 => ['required', 'in:day,night'],
         ]);
 
         $user = User::create([
             'name'          => $data['name'],
-            'email'         => $data['email'],
-            'password'      => Hash::make($data['password']),
+            'full_name'     => $data['full_name'],
+            'ic_number'     => strtoupper($data['ic_number']),
+            'phone'         => $data['phone'],
+
+            'email'         => strtolower($data['email']),
+            'password'      => $data['password'],
+            'car_plate'     => strtoupper($data['car_plate']),
+            'car_model'     => $data['car_model'],
+
+            'bank_name'     => $data['bank_name'],
+            'bank_account'  => $data['bank_account'],
+
             'role'          => 'driver',
             'shift'         => $data['shift'],
             'driver_status' => 'approved',
         ]);
 
-        // 注册完不自动登录（因为还没批准）
         return redirect()
             ->route('driver.login')
-            ->with('status', 'Registration submitted. Please wait for admin approval.');
+            ->with('success', 'Registration successfully.');
     }
 }

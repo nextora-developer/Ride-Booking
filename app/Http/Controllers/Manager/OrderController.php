@@ -52,6 +52,9 @@ class OrderController extends Controller
 
         $driversQuery = User::query()
             ->where('role', 'driver')
+            ->where('driver_status', 'approved')
+            // ✅ 只显示在线 + 还活着（5分钟内有心跳）
+            ->where('is_online', 1)
             ->orderBy('name');
 
         // ✅ 默认只显示同 shift driver；点击 All Drivers 才显示全部
@@ -59,7 +62,23 @@ class OrderController extends Controller
             $driversQuery->where('shift', $manager->shift);
         }
 
-        // ✅ 不取 phone（你 users 表没有 phone）
+        // ✅ （可选）如果你要允许查看离线司机：?drivers=offline
+        if ($request->get('drivers') === 'offline') {
+            $driversQuery = User::query()
+                ->where('role', 'driver')
+                ->where('driver_status', 'approved')
+                ->where(function ($q) {
+                    $q->where('is_online', 0)
+                        ->orWhereNull('last_active_at')
+                        ->orWhere('last_active_at', '<', now()->subMinutes(5));
+                })
+                ->orderBy('name');
+
+            if (!empty($manager->shift) && $request->get('drivers') !== 'all') {
+                $driversQuery->where('shift', $manager->shift);
+            }
+        }
+
         $drivers = $driversQuery->get(['id', 'name', 'shift']);
 
         return view('manager.orders.show', compact('order', 'drivers'));
@@ -80,6 +99,12 @@ class OrderController extends Controller
             ->where('role', 'driver')
             ->firstOrFail();
 
+        if (!$driver->is_online) {
+            return back()
+                ->withErrors(['driver_id' => 'Driver is offline. Please select an online driver.'])
+                ->withInput();
+        }
+        
         // ✅ 默认限制：manager 只能派同 shift 的 driver（要允许跨班次就删掉）
         if (!empty($manager->shift) && !empty($driver->shift) && $driver->shift !== $manager->shift) {
             return back()->withErrors(['driver_id' => 'Selected driver is not in your shift.'])->withInput();

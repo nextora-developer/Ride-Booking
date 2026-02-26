@@ -19,11 +19,24 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'full_name',
         'email',
         'password',
+
         'role',
         'shift',
         'driver_status',
+
+        // driver fields
+        'phone',
+        'ic_number',
+        'car_plate',
+        'car_model',
+        'bank_name',
+        'bank_account',
+
+        'is_online',
+        'last_active_at',
     ];
 
     /**
@@ -46,6 +59,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_online' => 'boolean',
+            'last_active_at' => 'datetime',
         ];
     }
 }
