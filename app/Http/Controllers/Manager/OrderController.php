@@ -15,35 +15,59 @@ class OrderController extends Controller
     {
         $manager = $request->user();
 
+        $status = (string) $request->get('status', 'all');
+        $shift  = (string) $request->get('shift', 'all');
+        $search = (string) $request->get('search', '');
+
         $q = Order::query()->latest();
 
-        // ✅ 默认：只看自己 shift（想看全部就注释掉）
         if (!empty($manager->shift)) {
             $q->where(function ($qq) use ($manager) {
                 $qq->whereNull('shift')->orWhere('shift', $manager->shift);
             });
         }
 
-        if ($request->filled('status') && $request->status !== 'all') {
-            $q->where('status', $request->status);
+        if ($status !== 'all') {
+            $q->where('status', $status);
         }
 
-        if ($request->filled('shift') && $request->shift !== 'all') {
-            $q->where('shift', $request->shift);
+        if ($shift !== 'all') {
+            $q->where('shift', $shift);
         }
 
-        if ($request->filled('search')) {
-            $s = trim((string) $request->search);
+        if ($search !== '') {
+            $s = trim($search);
+
             $q->where(function ($qq) use ($s) {
+
+                // 订单字段
                 $qq->where('pickup', 'like', "%{$s}%")
-                    ->orWhere('dropoff', 'like', "%{$s}%")
-                    ->orWhere('id', $s);
+                    ->orWhere('dropoff', 'like', "%{$s}%");
+
+                // 如果是数字，搜订单ID
+                if (ctype_digit($s)) {
+                    $qq->orWhere('id', (int) $s);
+                }
+
+                // 搜司机
+                $qq->orWhereHas('driver', function ($d) use ($s) {
+                    $d->where('name', 'like', "%{$s}%")
+                        ->orWhere('full_name', 'like', "%{$s}%")
+                        ->orWhere('phone', 'like', "%{$s}%");
+                });
+
+                // 搜顾客
+                $qq->orWhereHas('user', function ($u) use ($s) {
+                    $u->where('name', 'like', "%{$s}%")
+                        ->orWhere('full_name', 'like', "%{$s}%")
+                        ->orWhere('phone', 'like', "%{$s}%");
+                });
             });
         }
 
         $orders = $q->paginate(12)->withQueryString();
 
-        return view('manager.orders.index', compact('orders'));
+        return view('manager.orders.index', compact('orders', 'status', 'shift', 'search'));
     }
 
     public function show(Request $request, Order $order)
@@ -89,8 +113,9 @@ class OrderController extends Controller
         $manager = $request->user();
 
         $data = $request->validate([
-            'driver_id' => ['required', 'integer', 'exists:users,id'],
+            'driver_id'   => ['required', 'integer', 'exists:users,id'],
             'payment_type' => ['required', Rule::in(['cash', 'credit', 'transfer'])],
+            'amount'      => ['required', 'numeric', 'min:0'],
         ]);
 
         // ✅ 确认选的是 driver
@@ -104,7 +129,7 @@ class OrderController extends Controller
                 ->withErrors(['driver_id' => 'Driver is offline. Please select an online driver.'])
                 ->withInput();
         }
-        
+
         // ✅ 默认限制：manager 只能派同 shift 的 driver（要允许跨班次就删掉）
         if (!empty($manager->shift) && !empty($driver->shift) && $driver->shift !== $manager->shift) {
             return back()->withErrors(['driver_id' => 'Selected driver is not in your shift.'])->withInput();
@@ -120,6 +145,7 @@ class OrderController extends Controller
             'manager_id'   => $manager->id,
             'assigned_at'  => Carbon::now(),
             'payment_type' => $data['payment_type'],
+            'amount'       => $data['amount'],
             'status'       => 'assigned',
         ]);
 

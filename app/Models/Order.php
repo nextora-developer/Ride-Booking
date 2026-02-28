@@ -22,6 +22,8 @@ class Order extends Model
         'assigned_at',
         'payment_type',
         'payment_status',
+        'amount',
+
     ];
 
     protected $casts = [
@@ -42,5 +44,10 @@ class Order extends Model
     public function manager()
     {
         return $this->belongsTo(User::class, 'manager_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

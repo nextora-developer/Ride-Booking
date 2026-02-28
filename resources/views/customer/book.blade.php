@@ -5,15 +5,20 @@
 @section('header')
     <div class="relative px-2">
         {{-- Mobile: App Header --}}
-        <div class="md:hidden flex items-center justify-between h-7">
-            <a href="{{ route('customer.home') }}"
-                class="inline-flex items-center justify-center h-11 w-11 rounded-2xl bg-white border border-slate-200 text-slate-700 active:scale-90 transition-all shadow-sm">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                </svg>
-            </a>
-            <h1 class="text-lg font-black text-slate-900 tracking-tight">创建预约</h1>
-            <div class="w-11"></div>
+        <div class="relative px-4 pt-4 pb-2 sticky top-0 z-30 border-b border-slate-50">
+            <div class="absolute left-0 top-1/2 -translate-y-1/2">
+                <a href="{{ route('customer.home') }}"
+                    class="inline-flex items-center justify-center h-11 w-11 rounded-2xl bg-white border border-slate-200 text-slate-700 active:scale-90 transition-all shadow-sm">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="text-center">
+                <h1 class="text-lg font-black text-slate-800 leading-none">创建预约</h1>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Create Booking</p>
+            </div>
         </div>
 
         {{-- Desktop: Breadcrumb-style Header --}}
@@ -133,10 +138,10 @@
 
                                         <div
                                             class="w-32 rounded-[2rem] border border-slate-200 bg-white/75 p-5 text-center
-                                                   shadow-[0_14px_35px_rgba(15,23,42,0.08)]
+                                                   shadow-[0_8px_20px_rgba(15,23,42,0.06)]
                                                    transition-all duration-300
                                                    peer-checked:bg-slate-900 peer-checked:border-slate-900
-                                                   peer-checked:shadow-[0_22px_55px_rgba(15,23,42,0.25)]
+                                                   peer-checked:shadow-[0_14px_30px_rgba(15,23,42,0.15)]
                                                    peer-checked:text-white">
                                             <div
                                                 class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl

@@ -37,6 +37,8 @@ class User extends Authenticatable
 
         'is_online',
         'last_active_at',
+
+        'credit_balance',
     ];
 
     /**
@@ -62,5 +64,10 @@ class User extends Authenticatable
             'is_online' => 'boolean',
             'last_active_at' => 'datetime',
         ];
+    }
+
+    public function creditLogs()
+    {
+        return $this->hasMany(CreditLog::class, 'customer_id');
     }
 }

@@ -15,6 +15,20 @@ class HistoryController extends Controller
 
         $orders = Order::query()
             ->where('driver_id', auth()->id())
+
+            // 🔥 状态筛选逻辑
+            ->when($status === 'ongoing', function ($query) {
+                $query->whereIn('status', ['assigned', 'on_the_way', 'arrived', 'in_trip']);
+            })
+
+            ->when($status === 'completed', function ($query) {
+                $query->where('status', 'completed');
+            })
+
+            ->when($status === 'cancelled', function ($query) {
+                $query->where('status', 'cancelled');
+            })
+
             ->when($q, function ($query) use ($q) {
                 $query->where(function ($qq) use ($q) {
                     $qq->where('pickup', 'like', "%{$q}%")
@@ -22,7 +36,7 @@ class HistoryController extends Controller
                         ->orWhere('id', $q);
                 });
             })
-            ->when($status, fn($query) => $query->where('status', $status))
+
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -30,6 +44,9 @@ class HistoryController extends Controller
         $counts = Order::where('driver_id', auth()->id())
             ->selectRaw("SUM(status='completed') as completed")
             ->selectRaw("SUM(status='cancelled') as cancelled")
+            ->selectRaw("
+            SUM(status IN ('assigned','on_the_way','arrived','in_trip')) as ongoing
+        ")
             ->selectRaw("COUNT(*) as total")
             ->first();
 

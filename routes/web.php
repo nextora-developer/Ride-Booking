@@ -13,10 +13,13 @@ use App\Http\Controllers\Customer\ProfileController as CustomerProfileController
 
 use App\Http\Controllers\Manager\OrderController as ManagerOrderController;
 use App\Http\Controllers\Manager\DriverController as ManagerDriverController;
+use App\Http\Controllers\Manager\CreditController as ManagerCreditController;
 
 use App\Http\Controllers\Driver\DashboardController;
 use App\Http\Controllers\Driver\HistoryController;
 use App\Http\Controllers\Driver\DriverOnlineController;
+use App\Http\Controllers\Driver\ProfileController as DriverProfileController;
+
 
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
@@ -126,6 +129,12 @@ Route::prefix('manager')
         Route::patch('/orders/{order}/assign', [ManagerOrderController::class, 'assign'])->name('orders.assign');
 
         Route::get('/drivers', [ManagerDriverController::class, 'index'])->name('drivers.index');
+        Route::get('/drivers/{driver}/edit', [ManagerDriverController::class, 'edit'])->name('drivers.edit');
+        Route::patch('/drivers/{driver}', [ManagerDriverController::class, 'update'])->name('drivers.update');
+
+        Route::get('/credits', [ManagerCreditController::class, 'index'])->name('credits.index');
+        Route::patch('/credits/{customer}', [ManagerCreditController::class, 'update'])->name('credits.update');
+        Route::post('/credits/{customer}/clear', [ManagerCreditController::class, 'clear'])->name('credits.clear');
     });
 
 Route::prefix('driver')
@@ -142,6 +151,8 @@ Route::prefix('driver')
 
         Route::post('/online', [DriverOnlineController::class, 'online'])->name('online');
         Route::post('/offline', [DriverOnlineController::class, 'offline'])->name('offline');
+
+        Route::get('/profile', [DriverProfileController::class, 'show'])->name('profile.show');
     });
 
 Route::prefix('app')

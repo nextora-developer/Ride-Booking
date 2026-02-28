@@ -3,86 +3,186 @@
 @section('title', 'Boss Dashboard')
 
 @section('header')
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+    <div class="relative px-2">
 
-            <h1 class="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
-                Control Center
-            </h1>
+        {{-- Mobile Header --}}
+        <div class="md:hidden flex items-center justify-between h-14">
 
-            <p class="mt-2 text-sm text-slate-500 font-medium">
-                Overview of orders, dispatch, drivers and payment types (Cash / Credit / Transfer).
-            </p>
+            <div>
+                <h1 class="text-lg font-black text-slate-900">
+                    Control Center
+                </h1>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    Admin Panel
+                </p>
+            </div>
+
+            <a href="{{ route('admin.dashboard') }}"
+                class="inline-flex items-center justify-center h-11 w-11 rounded-2xl bg-black text-white shadow active:scale-90 transition-transform">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16.023 9.348h4.992M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
+                </svg>
+            </a>
+
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
+        {{-- Desktop Header --}}
+        <div class="hidden md:flex items-end justify-between">
+
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">
+                    Control Center
+                </h1>
+
+                <p class="mt-2 text-sm text-slate-500 font-medium">
+                    Overview of orders, dispatch, drivers and payment types (Cash / Credit / Transfer).
+                </p>
+            </div>
+
             <a href="{{ route('admin.dashboard') }}"
                 class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-2xl bg-black text-white text-sm font-bold hover:bg-slate-900 transition">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3" />
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16.023 9.348h4.992M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
                 </svg>
                 Refresh
             </a>
 
-            <a href="#"
-                class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-2xl bg-white border border-gray-200 text-slate-900 text-sm font-bold hover:bg-gray-50 transition">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10M4 18h16" />
-                </svg>
-                Dispatch Queue
-            </a>
         </div>
+
     </div>
 @endsection
 
 @section('content')
 
-    {{-- Top Stats --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <div class="rounded-3xl bg-white border border-gray-100 p-6 shadow-sm">
-            <div class="text-xs font-black tracking-widest uppercase text-slate-400">Total Orders</div>
-            <div class="mt-2 text-3xl font-extrabold text-slate-900">{{ number_format($total30) }}</div>
-            <div class="mt-1 text-sm text-slate-500 font-medium">Last 30 days</div>
+    <div class="grid grid-cols-2 xl:grid-cols-4 gap-5">
+
+        {{-- 待处理订单：橙色警示色，提醒管理员需要排单 --}}
+        <div class="group rounded-[2rem] bg-amber-50 border border-amber-100 p-6 shadow-sm hover:shadow-md transition-all">
+            <div class="flex items-center justify-between">
+                <div class="text-[10px] font-black tracking-[0.15em] uppercase text-amber-600/80">Pending / 待派单</div>
+                <span class="text-xl">⏳</span>
+            </div>
+            <div class="mt-3 text-4xl font-black text-amber-900">{{ number_format($pending) }}</div>
+            <div class="mt-2 text-[11px] font-bold text-amber-600/70 uppercase">Immediate Action Required</div>
         </div>
 
-        <div class="rounded-3xl bg-white border border-gray-100 p-6 shadow-sm">
-            <div class="text-xs font-black tracking-widest uppercase text-slate-400">Pending</div>
-            <div class="mt-2 text-3xl font-extrabold text-slate-900">{{ number_format($pending) }}</div>
-            <div class="mt-1 text-sm text-slate-500 font-medium">Need dispatch</div>
+        {{-- 进行中订单：蓝色，代表当前正在运行的运力 --}}
+        <div
+            class="group rounded-[2rem] bg-indigo-50 border border-indigo-100 p-6 shadow-sm hover:shadow-md transition-all">
+            <div class="flex items-center justify-between">
+                <div class="text-[10px] font-black tracking-[0.15em] uppercase text-indigo-600/80">Active / 行程中</div>
+                <span class="text-xl">🚗</span>
+            </div>
+            <div class="mt-3 text-4xl font-black text-indigo-900">{{ number_format($active) }}</div>
+            <div class="mt-2 text-[11px] font-bold text-indigo-600/70 uppercase">Drivers on the road</div>
         </div>
 
-        <div class="rounded-3xl bg-white border border-gray-100 p-6 shadow-sm">
-            <div class="text-xs font-black tracking-widest uppercase text-slate-400">Active Trips</div>
-            <div class="mt-2 text-3xl font-extrabold text-slate-900">{{ number_format($active) }}</div>
-            <div class="mt-1 text-sm text-slate-500 font-medium">Assigned / On the way / In trip</div>
+        {{-- 今日完成：绿色，代表今日战果 --}}
+        <div
+            class="group rounded-[2rem] bg-emerald-50 border border-emerald-100 p-6 shadow-sm hover:shadow-md transition-all">
+            <div class="flex items-center justify-between">
+                <div class="text-[10px] font-black tracking-[0.15em] uppercase text-emerald-600/80">Completed Today</div>
+                <span class="text-xl">✅</span>
+            </div>
+            <div class="mt-3 text-4xl font-black text-emerald-900">{{ number_format($todayCompleted) }}</div>
+            <div class="mt-2 text-[11px] font-bold text-emerald-600/70 uppercase">Target Achieved</div>
         </div>
 
-        <div class="rounded-3xl bg-white border border-gray-100 p-6 shadow-sm">
-            <div class="text-xs font-black tracking-widest uppercase text-slate-400">Completed Today</div>
-            <div class="mt-2 text-3xl font-extrabold text-slate-900">{{ number_format($todayCompleted) }}</div>
-            <div class="mt-1 text-sm text-slate-500 font-medium">Count (no fare yet)</div>
+        {{-- 30天总量：深色/中性色，作为背景参考 --}}
+        <div class="group rounded-[2rem] bg-slate-900 p-6 shadow-lg shadow-slate-200 transition-all text-white">
+            <div class="flex items-center justify-between">
+                <div class="text-[10px] font-black tracking-[0.15em] uppercase text-slate-400">Total (30 Days)</div>
+                <span class="text-xl opacity-50">📊</span>
+            </div>
+            <div class="mt-3 text-4xl font-black">{{ number_format($total30) }}</div>
+            <div class="mt-2 text-[11px] font-bold text-slate-400 uppercase">Monthly Volume</div>
         </div>
     </div>
 
-    {{-- Operations Row --}}
-    <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div class="rounded-3xl bg-white border border-gray-100 p-6 shadow-sm">
-            <div class="text-xs font-black tracking-widest uppercase text-slate-400">Drivers (Total)</div>
-            <div class="mt-2 text-2xl font-extrabold text-slate-900">{{ $driversTotal }}</div>
-            <div class="mt-1 text-sm text-slate-500 font-medium">Registered drivers</div>
-        </div>
+    {{-- Mobile --}}
+    <div class="mt-8 md:hidden">
+        <div class="grid grid-cols-3 gap-4">
 
-        <div class="rounded-3xl bg-white border border-gray-100 p-6 shadow-sm">
-            <div class="text-xs font-black tracking-widest uppercase text-slate-400">Day Shift</div>
-            <div class="mt-2 text-2xl font-extrabold text-slate-900">{{ $driversDay }}</div>
-            <div class="mt-1 text-sm text-slate-500 font-medium">On duty</div>
-        </div>
+            <div class="rounded-2xl bg-white border border-slate-100 p-4 shadow-sm text-center">
+                <div class="h-10 w-10 mx-auto rounded-xl bg-slate-100 flex items-center justify-center text-lg">
+                    👥
+                </div>
+                <div class="mt-2 text-[9px] font-black text-slate-400 uppercase">
+                    Drivers
+                </div>
+                <div class="text-lg font-black text-slate-900">
+                    {{ $driversTotal }}
+                </div>
+            </div>
 
-        <div class="rounded-3xl bg-white border border-gray-100 p-6 shadow-sm">
-            <div class="text-xs font-black tracking-widest uppercase text-slate-400">Night Shift</div>
-            <div class="mt-2 text-2xl font-extrabold text-slate-900">{{ $driversNight }}</div>
-            <div class="mt-1 text-sm text-slate-500 font-medium">On duty</div>
+            <div class="rounded-2xl bg-white border border-slate-100 p-4 shadow-sm text-center">
+                <div
+                    class="h-10 w-10 mx-auto rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-lg">
+                    ☀️
+                </div>
+                <div class="mt-2 text-[9px] font-black text-slate-400 uppercase">
+                    Day
+                </div>
+                <div class="text-lg font-black text-slate-900">
+                    {{ $driversDay }}
+                </div>
+            </div>
+
+            <div class="rounded-2xl bg-white border border-slate-100 p-4 shadow-sm text-center">
+                <div class="h-10 w-10 mx-auto rounded-xl bg-indigo-900 text-white flex items-center justify-center text-lg">
+                    🌙
+                </div>
+                <div class="mt-2 text-[9px] font-black text-slate-400 uppercase">
+                    Night
+                </div>
+                <div class="text-lg font-black text-slate-900">
+                    {{ $driversNight }}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="mt-8 hidden md:block">
+        <div class="grid grid-cols-3 gap-5">
+            {{-- 总司机 --}}
+            <div class="flex items-center gap-5 p-6 bg-white border border-slate-100 rounded-[2rem] shadow-sm">
+                <div
+                    class="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center text-2xl shadow-inner shrink-0">
+                    👥</div>
+                <div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Registered Drivers</div>
+                    <div class="text-2xl font-black text-slate-900 mt-0.5">{{ $driversTotal }}</div>
+                </div>
+            </div>
+
+            {{-- 白班 --}}
+            <div
+                class="flex items-center gap-5 p-6 bg-white border border-slate-100 rounded-[2rem] shadow-sm relative overflow-hidden">
+                <div
+                    class="h-14 w-14 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center text-2xl shrink-0">
+                    ☀️</div>
+                <div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Day Shift</div>
+                    <div class="text-2xl font-black text-slate-900 mt-0.5">{{ $driversDay }} <span
+                            class="text-xs font-bold text-slate-400 ml-1 italic">On Duty</span></div>
+                </div>
+            </div>
+
+            {{-- 黑班 --}}
+            <div
+                class="flex items-center gap-5 p-6 bg-white border border-slate-100 rounded-[2rem] shadow-sm relative overflow-hidden">
+                <div
+                    class="h-14 w-14 rounded-2xl bg-indigo-900 text-indigo-100 flex items-center justify-center text-2xl shrink-0">
+                    🌙</div>
+                <div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Night Shift</div>
+                    <div class="text-2xl font-black text-slate-900 mt-0.5">{{ $driversNight }} <span
+                            class="text-xs font-bold text-slate-400 ml-1 italic">On Duty</span></div>
+                </div>
+            </div>
         </div>
     </div>
 

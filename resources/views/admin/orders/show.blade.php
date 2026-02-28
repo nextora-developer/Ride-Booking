@@ -68,67 +68,63 @@
         $managerName = optional($order->manager)->name ?? null;
     @endphp
 
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div class="min-w-0">
-            <div class="flex items-center gap-2 flex-wrap">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between border-b border-slate-50">
+
+        <div class="min-w-0 flex-1">
+            {{-- 1. 返回与标签组：分组显示，减少杂乱 --}}
+            <div class="flex items-center gap-3 flex-wrap">
+                {{-- 极简返回按钮 --}}
                 <a href="{{ route('admin.orders.index') }}"
-                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-gray-200 text-xs font-black hover:bg-gray-50">
-                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    class="group h-9 w-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-900 hover:border-slate-900 transition-all">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
                     </svg>
-                    Back
                 </a>
 
+                {{-- 核心状态：加粗突出 --}}
                 <span
-                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $statusBadge($status) }}">
-                    {{ strtoupper($status) }}
+                    class="inline-flex items-center px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm {{ $statusBadge($status) }}">
+                    {{ $status }}
                 </span>
 
-                @if ($paymentType)
-                    <span
-                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $payTypeBadge($paymentType) }}">
-                        {{ strtoupper($paymentType) }}
-                    </span>
-                @endif
+                {{-- 分割线 --}}
+                <div class="h-4 w-[1px] bg-slate-200 mx-1"></div>
 
-                @if ($paymentStatus)
-                    <span
-                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $payStatusBadge($paymentStatus) }}">
-                        {{ strtoupper($paymentStatus) }}
-                    </span>
-                @endif
+                {{-- 支付与排班信息：更轻量的展示 --}}
+                <div class="flex items-center gap-2">
+                    @if ($paymentType)
+                        <span
+                            class="inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-black border uppercase tracking-wider {{ $payTypeBadge($paymentType) }}">
+                            {{ $paymentType }}
+                        </span>
+                    @endif
 
-                @if ($shift)
-                    <span
-                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-gray-100 text-gray-700">
-                        {{ strtoupper($shift) }} SHIFT
-                    </span>
-                @endif
-
-                @if ($scheduleType === 'scheduled' && $scheduledAt)
-                    <span
-                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-700">
-                        SCHEDULED
-                    </span>
-                @endif
+                    @if ($scheduleType === 'scheduled')
+                        <span
+                            class="inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-black bg-indigo-600 text-white uppercase tracking-wider">
+                            📅 Scheduled
+                        </span>
+                    @endif
+                </div>
             </div>
 
-            <h1 class="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 truncate">
-                {{ $orderNo }}
-            </h1>
+            {{-- 2. 核心标题：大字号 + 紧凑字间距 --}}
+            <div class="mt-6 flex flex-col md:flex-row md:items-end gap-3 md:gap-6">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 uppercase">
+                    {{ $orderNo }}
+                </h1>
 
-            <p class="mt-2 text-sm text-slate-500 font-medium">
-                {{ $service }} • Created {{ $createdAt }}
-            </p>
-        </div>
-
-        <div class="flex items-center gap-2">
-            @if ($canAssign)
-                <a href="#assign"
-                    class="inline-flex items-center justify-center h-11 px-4 rounded-2xl bg-black text-white text-sm font-extrabold hover:bg-slate-900 transition">
-                    Assign / Change Driver
-                </a>
-            @endif
+                <div class="flex items-center gap-3 pb-1">
+                    <div class="h-5 w-[2px] bg-slate-100 hidden md:block"></div>
+                    <div class="flex flex-col md:flex-row md:items-center gap-2">
+                        <span
+                            class="text-sm font-black text-indigo-600 uppercase tracking-widest">{{ $service }}</span>
+                        <span class="hidden md:block text-slate-300">•</span>
+                        <span class="text-[11px] text-slate-400 font-bold uppercase tracking-tight">Created
+                            {{ $createdAt }}</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
@@ -138,16 +134,55 @@
         {{-- LEFT --}}
         <div class="xl:col-span-2 space-y-6">
 
+            {{-- Customer --}}
+            <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5 sm:p-6">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <div class="text-xs font-black tracking-widest uppercase text-slate-400">Customer</div>
+                        <div class="mt-2 text-lg font-extrabold text-slate-900">{{ $customerName }}</div>
+                        <div class="mt-1 text-sm text-slate-500 font-semibold">
+                            Phone: <span class="text-slate-900 font-extrabold">{{ $customerPhone }}</span>
+                        </div>
+                    </div>
+
+                    <div class="h-12 w-12 rounded-2xl bg-black text-white flex items-center justify-center">
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
             {{-- Route --}}
             <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5 sm:p-6">
                 <div class="flex items-start justify-between gap-4">
+
                     <div>
-                        <div class="text-xs font-black tracking-widest uppercase text-slate-400">Route</div>
+                        <div class="text-xs font-black tracking-widest uppercase text-slate-400">
+                            Route
+                        </div>
+
                         <div class="mt-2 text-lg sm:text-xl font-extrabold text-slate-900">
                             {{ $pickup }} → {{ $dropoff }}
                         </div>
-                        <div class="mt-1 text-sm text-slate-500 font-semibold">
-                            Service: <span class="text-slate-900 font-extrabold">{{ $service }}</span>
+
+                        <div class="mt-2 flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-600">
+
+                            <div>
+                                Service:
+                                <span class="text-slate-900 font-extrabold">
+                                    {{ $service }}
+                                </span>
+                            </div>
+
+                            {{-- Pax Badge --}}
+                            <div
+                                class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 border border-gray-200 text-slate-900 text-xs font-extrabold">
+                                👤 {{ $pax ?? 1 }} Pax
+                            </div>
+
                         </div>
 
                         <div class="mt-2 text-sm text-slate-600 font-semibold">
@@ -165,6 +200,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 11a2 2 0 100-4 2 2 0 000 4z" />
                         </svg>
                     </div>
+
                 </div>
 
                 @if ($note)
@@ -173,27 +209,6 @@
                         <div class="mt-1">{{ $note }}</div>
                     </div>
                 @endif
-            </div>
-
-            {{-- Customer --}}
-            <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5 sm:p-6">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <div class="text-xs font-black tracking-widest uppercase text-slate-400">Customer</div>
-                        <div class="mt-2 text-lg font-extrabold text-slate-900">{{ $customerName }}</div>
-                        <div class="mt-1 text-sm text-slate-500 font-semibold">
-                            Phone: <span class="text-slate-900 font-extrabold">{{ $customerPhone }}</span>
-                        </div>
-                    </div>
-
-                    <div class="h-12 w-12 rounded-2xl bg-black text-white flex items-center justify-center">
-                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" />
-                        </svg>
-                    </div>
-                </div>
             </div>
 
             {{-- Assign --}}
@@ -216,55 +231,70 @@
                             @csrf
                             @method('PATCH')
 
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
                                 {{-- Driver --}}
                                 <div class="rounded-2xl border border-gray-100 bg-white p-4">
-                                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">Driver</div>
+                                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">
+                                        Driver
+                                    </div>
+
                                     <div class="mt-2">
                                         <select name="driver_id" required
-                                            class="w-full h-11 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-extrabold
-                                                   focus:ring-4 focus:ring-black/5 focus:border-black outline-none">
+                                            class="w-full h-11 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-extrabold focus:ring-4 focus:ring-black/5 focus:border-black outline-none">
+
                                             <option value="">Select driver</option>
+
                                             @foreach ($drivers as $d)
                                                 <option value="{{ $d->id }}" @selected((int) $order->driver_id === (int) $d->id)>
                                                     {{ $d->name }}{{ $d->shift ? ' (' . $d->shift . ')' : '' }}
                                                 </option>
                                             @endforeach
+
                                         </select>
+
                                         @error('driver_id')
-                                            <p class="text-xs text-red-600 font-semibold mt-2">{{ $message }}</p>
+                                            <p class="text-xs text-red-600 font-semibold mt-2">
+                                                {{ $message }}
+                                            </p>
                                         @enderror
                                     </div>
 
                                     <div class="mt-3 text-xs text-slate-500 font-semibold">
-                                        Current: <span
-                                            class="text-slate-900 font-extrabold">{{ $driverName ?? 'Not assigned' }}</span>
+                                        Current:
+                                        <span class="text-slate-900 font-extrabold">
+                                            {{ $driverName ?? 'Not assigned' }}
+                                        </span>
                                     </div>
                                 </div>
 
+
                                 {{-- Payment --}}
                                 <div class="rounded-2xl border border-gray-100 bg-white p-4">
-                                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">Payment Type
+                                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">
+                                        Payment Type
                                     </div>
 
                                     @php $curPay = strtolower((string)($order->payment_type ?? '')); @endphp
 
                                     <div class="mt-3 flex flex-wrap gap-2">
+
                                         <label class="cursor-pointer">
                                             <input type="radio" name="payment_type" value="cash" class="sr-only peer"
                                                 @checked($curPay === 'cash') required>
                                             <span
                                                 class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
-                                                         peer-checked:bg-black peer-checked:text-white peer-checked:border-black transition">
+                           peer-checked:bg-black peer-checked:text-white peer-checked:border-black transition">
                                                 Cash
                                             </span>
                                         </label>
 
                                         <label class="cursor-pointer">
-                                            <input type="radio" name="payment_type" value="credit" class="sr-only peer"
-                                                @checked($curPay === 'credit') required>
+                                            <input type="radio" name="payment_type" value="credit"
+                                                class="sr-only peer" @checked($curPay === 'credit') required>
                                             <span
-                                                class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white peer-checked:bg-rose-50 peer-checked:text-rose-700 peer-checked:border-rose-200 transition">
+                                                class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
+                           peer-checked:bg-rose-50 peer-checked:text-rose-700 peer-checked:border-rose-200 transition">
                                                 Credit (挂单)
                                             </span>
                                         </label>
@@ -274,20 +304,55 @@
                                                 class="sr-only peer" @checked($curPay === 'transfer') required>
                                             <span
                                                 class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
-                                                         peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-checked:border-emerald-200 transition">
+                           peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-checked:border-emerald-200 transition">
                                                 Transfer
                                             </span>
                                         </label>
+
                                     </div>
 
                                     @error('payment_type')
-                                        <p class="text-xs text-red-600 font-semibold mt-2">{{ $message }}</p>
+                                        <p class="text-xs text-red-600 font-semibold mt-2">
+                                            {{ $message }}
+                                        </p>
                                     @enderror
 
                                     <div class="mt-2 text-xs text-slate-500 font-semibold">
-                                        Driver will see payment type (Cash/Credit/Transfer).
+                                        Driver will see payment type.
                                     </div>
                                 </div>
+
+
+                                {{-- Amount --}}
+                                <div class="rounded-2xl border border-gray-100 bg-white p-4">
+                                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">
+                                        Amount (RM)
+                                    </div>
+
+                                    <div class="mt-2 relative">
+                                        <span
+                                            class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400">
+                                            RM
+                                        </span>
+
+                                        <input type="number" name="amount" step="0.01" min="0"
+                                            value="{{ old('amount', $order->amount ?? '') }}" required
+                                            class="w-full h-11 rounded-2xl border border-gray-200 bg-white pl-12 pr-4 text-sm font-extrabold
+                          focus:ring-4 focus:ring-black/5 focus:border-black outline-none">
+
+                                    </div>
+
+                                    @error('amount')
+                                        <p class="text-xs text-red-600 font-semibold mt-2">
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+
+                                    <div class="mt-2 text-xs text-slate-500 font-semibold">
+                                        Final charge for this booking.
+                                    </div>
+                                </div>
+
                             </div>
 
                             <div class="flex items-center gap-2 pt-2">
@@ -329,29 +394,6 @@
                 <div class="mt-2 text-lg font-extrabold text-slate-900">{{ $managerName ?? '—' }}</div>
                 <div class="mt-1 text-sm text-slate-500 font-semibold">
                     (If order was assigned by manager)
-                </div>
-            </div>
-
-            {{-- Payment --}}
-            <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5 sm:p-6">
-                <div class="text-xs font-black tracking-widest uppercase text-slate-400">Payment</div>
-
-                <div class="mt-3 flex flex-wrap gap-2">
-                    <span
-                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $payTypeBadge($paymentType) }}">
-                        {{ strtoupper($paymentType ?? '—') }}
-                    </span>
-
-                    @if ($paymentStatus)
-                        <span
-                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $payStatusBadge($paymentStatus) }}">
-                            {{ strtoupper($paymentStatus) }}
-                        </span>
-                    @endif
-                </div>
-
-                <div class="mt-3 text-sm text-slate-600 font-semibold">
-                    Payment info for driver reference (cash/credit/transfer).
                 </div>
             </div>
         </div>

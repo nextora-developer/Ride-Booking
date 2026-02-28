@@ -49,7 +49,7 @@
                         $isHome = request()->routeIs('manager.dashboard');
                         $isOrders = request()->routeIs('manager.orders.*');
                         $isDrivers = request()->routeIs('manager.drivers.*');
-                        $isCredit = request()->routeIs('manager.credit-customers.*');
+                        $isCredit = request()->routeIs('manager.credits.*');
                         $isMore = request()->routeIs('manager.more*') || request()->routeIs('manager.profile*');
                     @endphp
 
@@ -73,7 +73,7 @@
                             司机
                         </a>
 
-                        <a href="{{ Route::has('manager.credit-customers.index') ? route('manager.credit-customers.index') : '#' }}"
+                        <a href="{{ Route::has('manager.credits.index') ? route('manager.credits.index') : '#' }}"
                             class="px-4 py-1.5 rounded-xl text-sm font-medium transition-all duration-200
                                     {{ $isCredit ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900' }}">
                             挂单顾客
@@ -196,7 +196,7 @@
                             $mHome = request()->routeIs('manager.dashboard');
                             $mOrders = request()->routeIs('manager.orders.*');
                             $mDrivers = request()->routeIs('manager.drivers.*');
-                            $mCredit = request()->routeIs('manager.credit-customers.*');
+                            $mCredit = request()->routeIs('manager.credits.*');
                             $mMore = false;
 
                             $activeClass = 'text-slate-900 scale-110';
@@ -249,7 +249,7 @@
                         </a>
 
                         {{-- Credit Customers --}}
-                        <a href="{{ Route::has('manager.credit-customers.index') ? route('manager.credit-customers.index') : '#' }}"
+                        <a href="{{ Route::has('manager.credits.index') ? route('manager.credits.index') : '#' }}"
                             class="flex flex-col items-center justify-center py-2 transition-all duration-300 {{ $mCredit ? $activeClass : $inactiveClass }}">
                             <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none"
                                 viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">

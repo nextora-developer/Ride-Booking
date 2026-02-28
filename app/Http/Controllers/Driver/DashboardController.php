@@ -49,13 +49,13 @@ class DashboardController extends Controller
             !isset($allowedTransitions[$order->status]) ||
             $allowedTransitions[$order->status] !== $request->status
         ) {
-            return back()->withErrors('Invalid status transition.');
+            return back()->withErrors('状态更新失败：流程不正确。');
         }
 
         $order->update([
             'status' => $request->status,
         ]);
 
-        return back()->with('status', 'Trip updated successfully.');
+        return back()->with('status', '行程状态已更新。');
     }
 }

@@ -58,27 +58,41 @@ class UserSeeder extends Seeder
         | Drivers
         |--------------------------------------------------------------------------
         */
-        // Approved Driver
+        // Driver Day
         User::updateOrCreate(
             ['email' => 'driver_day@driver.com'],
             [
-                'name' => 'Driver Day',
-                'password' => Hash::make('password'),
-                'role' => 'driver',
-                'shift' => 'day',
+                'name'          => 'Driver Day',
+                'full_name'     => 'Ahmad Faiz',
+                'phone'         => '0123456789',
+                'car_plate'     => 'VCD1234',
+                'car_model'     => 'Perodua Bezza 1.3',
+                'bank_name'     => 'Maybank',
+                'bank_account'  => '123456789012',
+                'password'      => Hash::make('password'),
+                'role'          => 'driver',
+                'shift'         => 'day',
                 'driver_status' => 'approved',
+                'is_online'     => 1,
             ]
         );
 
-        // Pending Driver
+        // Driver Night
         User::updateOrCreate(
             ['email' => 'driver_night@driver.com'],
             [
-                'name' => 'Driver Night',
-                'password' => Hash::make('password'),
-                'role' => 'driver',
-                'shift' => 'night',
-                'driver_status' => 'pending_approval',
+                'name'          => 'Driver Night',
+                'full_name'     => 'Siva Kumar',
+                'phone'         => '0198765432',
+                'car_plate'     => 'WXY5678',
+                'car_model'     => 'Toyota Vios 1.5',
+                'bank_name'     => 'CIMB Bank',
+                'bank_account'  => '987654321098',
+                'password'      => Hash::make('password'),
+                'role'          => 'driver',
+                'shift'         => 'night',
+                'driver_status' => 'approved',
+                'is_online'     => 1,
             ]
         );
 
@@ -91,6 +105,8 @@ class UserSeeder extends Seeder
             ['email' => 'user@user.com'],
             [
                 'name' => 'Test User',
+                'full_name' => 'Sia Kai Fong',
+                'phone' => '0167219945',
                 'password' => Hash::make('password'),
                 'role' => 'user',
                 'shift' => null,

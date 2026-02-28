@@ -50,7 +50,7 @@ class BookingController extends Controller
 
         return redirect()
             ->route('customer.home')
-            ->with('status', 'Booking submitted successfully. Waiting for dispatch.');
+            ->with('status', '已成功预约 🚗 正在为您安排司机...');
     }
 
     private function decideShift(Carbon $dt): string

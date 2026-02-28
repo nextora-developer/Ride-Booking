@@ -6,7 +6,7 @@
             <div
                 class="bg-white rounded-[3rem] shadow-[0_24px_70px_rgba(15,23,42,0.08)] border border-slate-200/60 overflow-hidden relative">
 
-                {{-- Decorative background element (Optional - subtle gradient) --}}
+                {{-- Decorative background element --}}
                 <div
                     class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50">
                 </div>
@@ -15,21 +15,19 @@
                     {{-- Logo & Welcome --}}
                     <div class="text-center mb-10">
                         <div class="inline-flex relative mb-6">
-                            {{-- Glow effect behind icon --}}
                             <div class="absolute inset-0 bg-indigo-500 blur-2xl opacity-20 rounded-full"></div>
                             <div
                                 class="relative h-20 w-20 rounded-[2rem] bg-slate-900 flex items-center justify-center shadow-xl shadow-slate-200">
-                                <svg class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                    stroke="currentColor">
+                                <svg class="h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 6.75V3m0 0a3 3 0 0 0-3 3v.75m3-3a3 3 0 0 1 3 3v.75M6 10.5h12M7.5 10.5l.9 9a2.25 2.25 0 0 0 2.24 2.05h2.72a2.25 2.25 0 0 0 2.24-2.05l.9-9" />
+                                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                                 </svg>
                             </div>
                         </div>
 
-                        <h1 class="text-2xl font-black text-slate-900 tracking-tight">Welcome Back</h1>
-                        <p class="text-[13px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Sign in to your
-                            account</p>
+                        <h1 class="text-2xl font-black text-slate-900 tracking-tight">欢迎回来</h1>
+                        <p class="text-[13px] font-bold text-slate-400 mt-1 uppercase tracking-wider">登录你的账号</p>
                     </div>
 
                     {{-- Session Status --}}
@@ -42,7 +40,7 @@
                         <div class="space-y-2">
                             <label for="email"
                                 class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
-                                Email Address
+                                电子邮箱
                             </label>
                             <div class="group relative">
                                 <div
@@ -65,12 +63,13 @@
                             <div class="flex items-center justify-between px-1">
                                 <label for="password"
                                     class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em]">
-                                    Password
+                                    密码
                                 </label>
-                                {{-- @if (Route::has('password.request'))
+                                {{-- 忘记密码按钮（如要开启就把注释拿掉）
+                                @if (Route::has('password.request'))
                                     <a href="{{ route('password.request') }}"
                                         class="text-[11px] font-black text-indigo-600 hover:text-indigo-800 transition uppercase tracking-tighter">
-                                        Forgot?
+                                        忘记密码？
                                     </a>
                                 @endif --}}
                             </div>
@@ -94,9 +93,9 @@
                             <label class="relative flex items-center cursor-pointer group">
                                 <input id="remember_me" type="checkbox" name="remember"
                                     class="peer h-5 w-5 rounded-lg border-2 border-slate-200 text-slate-900 focus:ring-0 transition-all cursor-pointer" />
-                                <span
-                                    class="ml-3 text-sm font-bold text-slate-500 group-hover:text-slate-700 transition-colors">Keep
-                                    me signed in</span>
+                                <span class="ml-3 text-sm font-bold text-slate-500 group-hover:text-slate-700 transition-colors">
+                                    记住我
+                                </span>
                             </label>
                         </div>
 
@@ -104,7 +103,7 @@
                         <button type="submit"
                             class="group w-full relative mt-4 bg-slate-900 text-white rounded-2xl p-1 shadow-[0_10px_30px_rgba(15,23,42,0.2)] hover:shadow-[0_15px_35px_rgba(15,23,42,0.3)] active:scale-[0.98] transition-all duration-200">
                             <div class="relative py-4 px-6 flex items-center justify-center gap-3">
-                                <span class="text-sm font-black uppercase tracking-widest">Sign In</span>
+                                <span class="text-sm font-black uppercase tracking-widest">登录</span>
                                 <svg class="h-5 w-5 transform group-hover:translate-x-1 transition-transform"
                                     fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -114,23 +113,13 @@
                         </button>
                     </form>
 
-                    {{-- Divider --}}
-                    {{-- <div class="relative my-10">
-                        <div class="absolute inset-0 flex items-center">
-                            <div class="w-full border-t border-slate-100"></div>
-                        </div>
-                        <div
-                            class="relative flex justify-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-300 bg-white px-4">
-                            Or continue with
-                        </div>
-                    </div> --}}
                     {{-- Footer Link --}}
                     <div class="mt-8 text-center space-y-4">
                         <p class="text-sm font-bold text-slate-500">
-                            Don't have an account?
-                            <a href="{{ route('register') }}"
-                                class="text-indigo-600 hover:text-indigo-800 transition">Create
-                                account</a>
+                            还没有账号？
+                            <a href="{{ route('register') }}" class="text-indigo-600 hover:text-indigo-800 transition">
+                                注册新账号
+                            </a>
                         </p>
                     </div>
                 </div>

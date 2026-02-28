@@ -3,26 +3,54 @@
 @section('title', 'Orders')
 
 @section('header')
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-            <h1 class="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
-                Orders
-            </h1>
-            <p class="mt-2 text-sm text-slate-500 font-medium">
-                Review bookings and assign drivers (Cash / Credit / Transfer).
-            </p>
+    <div class="relative px-2">
+
+        {{-- Mobile Header --}}
+        <div class="md:hidden flex items-center justify-between h-14">
+
+            <div>
+                <h1 class="text-lg font-black text-slate-900">
+                    Orders
+                </h1>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    Dispatch Panel
+                </p>
+            </div>
+
+            <a href="{{ route('admin.orders.index') }}"
+                class="inline-flex items-center justify-center h-11 w-11 rounded-2xl bg-black text-white shadow active:scale-90 transition-transform">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16.023 9.348h4.992M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
+                </svg>
+            </a>
+
         </div>
 
-        <div class="flex items-center gap-2">
+        {{-- Desktop Header --}}
+        <div class="hidden md:flex items-end justify-between">
+
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">
+                    Orders
+                </h1>
+
+                <p class="mt-2 text-sm text-slate-500 font-medium">
+                    Review bookings and assign drivers (Cash / Credit / Transfer).
+                </p>
+            </div>
+
             <a href="{{ route('admin.orders.index') }}"
                 class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-2xl bg-black text-white text-sm font-bold hover:bg-slate-900 transition">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3" />
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16.023 9.348h4.992M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
                 </svg>
                 Refresh
             </a>
+
         </div>
+
     </div>
 @endsection
 
@@ -231,19 +259,19 @@
 
                 {{-- Assign Panel --}}
                 @if ($canAssign)
-                    <div x-cloak x-show="openAssign" x-transition class="border-t border-gray-100 bg-gray-50/60 p-4 sm:p-6">
+                    <div x-cloak x-show="openAssign" x-transition
+                        class="border-t border-gray-100 bg-gray-50/60 p-4 sm:p-6">
                         <form method="POST" action="{{ route('admin.orders.assign', $order) }}">
                             @csrf
                             @method('PATCH')
 
-                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
                                 {{-- Driver --}}
                                 <div class="rounded-2xl bg-white border border-gray-100 p-4">
                                     <div class="text-xs font-black tracking-widest uppercase text-slate-400">Driver</div>
                                     <div class="mt-2">
                                         <select name="driver_id" required
-                                            class="w-full h-11 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-extrabold
-                                                   focus:ring-4 focus:ring-black/5 focus:border-black outline-none">
+                                            class="w-full h-11 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-extrabold focus:ring-4 focus:ring-black/5 focus:border-black outline-none">
                                             <option value="">Select driver</option>
                                             @foreach ($drivers as $d)
                                                 <option value="{{ $d->id }}">
@@ -251,9 +279,14 @@
                                                 </option>
                                             @endforeach
                                         </select>
+
                                         <div class="mt-2 text-xs text-slate-500 font-semibold">
                                             Choose the driver (matching shift if applicable).
                                         </div>
+
+                                        @error('driver_id')
+                                            <p class="text-xs text-red-600 font-semibold mt-2">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                 </div>
 
@@ -268,7 +301,7 @@
                                                 class="sr-only peer" required>
                                             <span
                                                 class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
-                                                       peer-checked:bg-black peer-checked:text-white peer-checked:border-black transition">
+                                                        peer-checked:bg-black peer-checked:text-white peer-checked:border-black transition">
                                                 Cash
                                             </span>
                                         </label>
@@ -278,7 +311,7 @@
                                                 class="sr-only peer" required>
                                             <span
                                                 class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
-                                                       peer-checked:bg-rose-50 peer-checked:text-rose-700 peer-checked:border-rose-200 transition">
+                                                        peer-checked:bg-rose-50 peer-checked:text-rose-700 peer-checked:border-rose-200 transition">
                                                 Credit (挂单)
                                             </span>
                                         </label>
@@ -288,7 +321,7 @@
                                                 class="sr-only peer" required>
                                             <span
                                                 class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
-                                                       peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-checked:border-emerald-200 transition">
+                                                        peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-checked:border-emerald-200 transition">
                                                 Transfer
                                             </span>
                                         </label>
@@ -297,9 +330,37 @@
                                     <div class="mt-2 text-xs text-slate-500 font-semibold">
                                         Driver will see this payment type.
                                     </div>
+
+                                    @error('payment_type')
+                                        <p class="text-xs text-red-600 font-semibold mt-2">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
-                                {{-- Confirm --}}
+                                {{-- Amount --}}
+                                <div class="rounded-2xl bg-white border border-gray-100 p-4">
+                                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">Amount (RM)
+                                    </div>
+
+                                    <div class="mt-2 relative">
+                                        <span
+                                            class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400">RM</span>
+                                        <input type="number" name="amount" step="0.01" min="0" required
+                                            value="{{ old('amount', $order->amount ?? '') }}"
+                                            class="w-full h-11 rounded-2xl border border-gray-200 bg-white pl-12 pr-4 text-sm font-extrabold
+                                                    focus:ring-4 focus:ring-black/5 focus:border-black outline-none"
+                                            placeholder="0.00">
+                                    </div>
+
+                                    <div class="mt-2 text-xs text-slate-500 font-semibold">
+                                        Final charge for this booking.
+                                    </div>
+
+                                    @error('amount')
+                                        <p class="text-xs text-red-600 font-semibold mt-2">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                {{-- Confirm (full width on desktop) --}}
                                 <div class="rounded-2xl bg-white border border-gray-100 p-4 flex flex-col justify-between">
                                     <div>
                                         <div class="text-xs font-black tracking-widest uppercase text-slate-400">Confirm
@@ -321,6 +382,7 @@
                                         </button>
                                     </div>
                                 </div>
+
                             </div>
                         </form>
                     </div>

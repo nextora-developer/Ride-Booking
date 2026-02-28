@@ -67,11 +67,11 @@
         };
 
         $statusConfig = fn($v) => match ($v) {
-            'completed' => 'bg-emerald-50 text-emerald-700 border-emerald-100',
-            'cancelled' => 'bg-rose-50 text-rose-700 border-rose-100',
-            'assigned' => 'bg-blue-50 text-blue-700 border-blue-100',
-            'on_the_way', 'arrived', 'in_trip' => 'bg-amber-50 text-amber-700 border-amber-100',
-            default => 'bg-slate-50 text-slate-600 border-slate-100',
+            'completed' => 'bg-emerald-100/50 text-emerald-800 border-emerald-200/60',
+            'cancelled' => 'bg-rose-100/50 text-rose-800 border-rose-200/60',
+            'assigned' => 'bg-blue-100/50 text-blue-800 border-blue-200/60',
+            'on_the_way', 'arrived', 'in_trip' => 'bg-amber-100/55 text-amber-900 border-amber-200/60',
+            default => 'bg-slate-100/70 text-slate-700 border-slate-200',
         };
 
         $statusText = fn($v) => match ($v) {
@@ -97,23 +97,24 @@
     <div class="md:hidden space-y-6">
 
         @if ($orders->count() === 0)
-            {{-- Empty State (Refined) --}}
-            <div class="bg-white rounded-[3rem] p-12 text-center shadow-sm border border-slate-50">
+            {{-- Empty State (Darker) --}}
+            <div
+                class="bg-white rounded-[3rem] p-12 text-center shadow-[0_14px_34px_rgba(15,23,42,0.08)] border border-slate-200">
                 <div class="relative mx-auto h-20 w-20 mb-6">
-                    <div class="absolute inset-0 bg-slate-100 rounded-full animate-pulse"></div>
-                    <div class="relative flex items-center justify-center h-full text-slate-300">
+                    <div class="absolute inset-0 bg-slate-200/70 rounded-full animate-pulse"></div>
+                    <div class="relative flex items-center justify-center h-full text-slate-400">
                         <svg class="h-10 w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
                         </svg>
-
                     </div>
                 </div>
-                <h3 class="text-lg font-bold text-slate-900">开始您的第一段旅程</h3>
-                <p class="text-sm text-slate-400 mt-2 px-4 leading-relaxed">目前没有任何订单记录，点击下方按钮开启预约。</p>
+                <h3 class="text-lg font-black text-slate-900">开始您的第一段旅程</h3>
+                <p class="text-sm font-bold text-slate-600 mt-2 px-4 leading-relaxed">目前没有任何订单记录，点击下方按钮开启预约。</p>
                 <a href="{{ route('customer.book') }}"
-                    class="mt-8 inline-block w-full py-4 rounded-2xl bg-slate-900 text-white font-bold shadow-xl shadow-slate-200 active:bg-slate-800">
+                    class="mt-8 inline-block w-full py-4 rounded-2xl bg-slate-900 text-white font-black
+                           shadow-[0_16px_40px_rgba(15,23,42,0.22)] active:bg-slate-800">
                     立即预约
                 </a>
             </div>
@@ -123,28 +124,33 @@
                     @php $meta = $serviceMeta($o->service_type); @endphp
 
                     <a href="{{ route('customer.orders.show', $o) }}"
-                        class="block bg-white rounded-[2.5rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-50 active:scale-[0.97] transition-all duration-300">
+                        class="block bg-white rounded-[2.5rem] p-6
+                               shadow-[0_14px_34px_rgba(15,23,42,0.08)]
+                               border border-slate-200
+                               active:scale-[0.97] transition-all duration-300">
 
                         {{-- Header: Icon + Info + Status --}}
                         <div class="flex items-center justify-between mb-6">
                             <div class="flex items-center gap-4">
                                 <div
-                                    class="h-14 w-14 rounded-3xl bg-slate-50 flex items-center justify-center text-slate-900 border border-slate-100 shadow-sm">
-                                    <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                    class="h-14 w-14 rounded-3xl bg-slate-100 border border-slate-200
+                                           flex items-center justify-center text-slate-900
+                                           shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+                                    <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
                                         stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="{{ $meta['icon'] }}" />
                                     </svg>
                                 </div>
                                 <div>
                                     <h4 class="text-base font-black text-slate-900 leading-none">{{ $meta['label'] }}</h4>
-                                    <p class="text-xs font-bold text-slate-400 uppercase mt-1.5 tracking-tighter">
+                                    <p class="text-xs font-black text-slate-600 uppercase mt-1.5 tracking-tight">
                                         {{ $o->schedule_type === 'scheduled' ? '📅 ' : '⚡ ' }}
                                         {{ $o->schedule_type === 'scheduled' && $o->scheduled_at ? $o->scheduled_at->format('M d, H:i') : $o->created_at->format('M d, H:i') }}
                                     </p>
                                 </div>
                             </div>
                             <span
-                                class="px-3 py-1.5 rounded-xl text-[10px] font-black border {{ $statusConfig($o->status) }} uppercase tracking-wider shadow-sm">
+                                class="px-3 py-1.5 rounded-xl text-[10px] font-black border-2 {{ $statusConfig($o->status) }} uppercase tracking-wider shadow-sm">
                                 {{ $statusText($o->status) }}
                             </span>
                         </div>
@@ -153,15 +159,15 @@
                         <div class="relative pl-8 space-y-6">
                             {{-- Dash Line Connector --}}
                             <div
-                                class="absolute left-[11px] top-2 bottom-2 w-[2px] border-l-2 border-dashed border-slate-100">
+                                class="absolute left-[11px] top-2 bottom-2 w-[2px] border-l-2 border-dashed border-slate-200">
                             </div>
 
                             {{-- Points --}}
                             <div class="relative">
                                 <div
-                                    class="absolute -left-[25px] top-1 h-4 w-4 rounded-full border-4 border-white bg-slate-300 shadow-sm">
+                                    class="absolute -left-[25px] top-1 h-4 w-4 rounded-full border-4 border-white bg-slate-400 shadow-sm">
                                 </div>
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">上车地点</p>
+                                <p class="text-xs font-black text-slate-500 uppercase tracking-wide">上车地点</p>
                                 <p class="text-sm font-bold text-slate-800 line-clamp-1 mt-0.5">{{ $o->pickup }}</p>
                             </div>
 
@@ -169,24 +175,24 @@
                                 <div
                                     class="absolute -left-[25px] top-1 h-4 w-4 rounded-full border-4 border-white bg-slate-900 shadow-sm">
                                 </div>
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">目的地</p>
-                                <p class="text-sm font-bold text-slate-900 line-clamp-1 mt-0.5">{{ $o->dropoff }}</p>
+                                <p class="text-xs font-black text-slate-500 uppercase tracking-wide">目的地</p>
+                                <p class="text-sm font-black text-slate-900 line-clamp-1 mt-0.5">{{ $o->dropoff }}</p>
                             </div>
                         </div>
 
                         {{-- Footer: Meta & Note --}}
                         @if ($o->note)
-                            <div class="mt-6 pt-5 border-t border-slate-50 flex items-center justify-between">
+                            <div class="mt-6 pt-5 border-t border-slate-200 flex items-center justify-between">
                                 <div class="flex items-center gap-2 overflow-hidden">
-                                    <div class="p-1.5 bg-amber-50 rounded-lg shrink-0">
-                                        <svg class="h-3.5 w-3.5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <div class="p-1.5 bg-amber-100/60 border border-amber-200/60 rounded-lg shrink-0">
+                                        <svg class="h-3.5 w-3.5 text-amber-700" fill="currentColor" viewBox="0 0 20 20">
                                             <path
                                                 d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7h10m-10 4h6" />
                                         </svg>
                                     </div>
-                                    <p class="text-xs font-semibold text-slate-500 truncate">“{{ $o->note }}”</p>
+                                    <p class="text-xs font-bold text-slate-700 truncate">“{{ $o->note }}”</p>
                                 </div>
-                                <div class="text-xs font-black uppercase shrink-0 ml-4">
+                                <div class="text-xs font-black uppercase shrink-0 ml-4 text-slate-700">
                                     {{ $paymentText($o->payment_type) }}
                                 </div>
                             </div>
@@ -204,12 +210,12 @@
 
     {{-- Desktop: keep your original layout --}}
     <div class="hidden md:block">
-        <div class="bg-white border border-gray-100 rounded-[2rem] overflow-hidden shadow-sm">
+        <div class="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-[0_14px_34px_rgba(15,23,42,0.06)]">
 
-            <div class="px-8 py-6 border-b border-gray-50 flex items-center justify-between bg-slate-50/50">
-                <h2 class="font-bold text-slate-900">最近预约</h2>
+            <div class="px-8 py-6 border-b border-slate-200 flex items-center justify-between bg-slate-100/60">
+                <h2 class="font-black text-slate-900">最近预约</h2>
                 <span
-                    class="px-3 py-1 bg-white border border-gray-100 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest shadow-sm">
+                    class="px-3 py-1 bg-white border border-slate-200 rounded-full text-[10px] font-black text-slate-600 uppercase tracking-widest shadow-sm">
                     共 {{ $orders->total() }} 笔
                 </span>
             </div>
@@ -217,45 +223,44 @@
             @if ($orders->count() === 0)
                 <div class="p-20 text-center">
                     <div
-                        class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 text-slate-300 mb-4">
+                        class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 border border-slate-200 text-slate-400 mb-4">
                         <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                                 d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-slate-900">暂无行程记录</h3>
-                    <p class="text-slate-400 text-sm mt-1 max-w-xs mx-auto">
+                    <h3 class="text-lg font-black text-slate-900">暂无行程记录</h3>
+                    <p class="text-slate-600 text-sm font-bold mt-1 max-w-xs mx-auto">
                         当您完成第一次预约后，您的订单记录将会显示在这里。
                     </p>
                     <a href="{{ route('customer.book') }}"
-                        class="mt-6 inline-flex items-center px-6 py-3 rounded-2xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-all">
+                        class="mt-6 inline-flex items-center px-6 py-3 rounded-2xl bg-slate-900 text-white font-black hover:bg-slate-800 transition-all">
                         立即预约第一趟
                     </a>
                 </div>
             @else
-                <div class="divide-y divide-gray-50">
+                <div class="divide-y divide-slate-200/60">
                     @foreach ($orders as $o)
                         @php $meta = $serviceMeta($o->service_type); @endphp
-                        <div class="group px-8 py-6 hover:bg-slate-50/50 transition-colors">
+                        <div class="group px-8 py-6 hover:bg-slate-100/50 transition-colors">
                             <div class="flex flex-col lg:flex-row lg:items-center gap-6">
 
                                 {{-- Icon & Status --}}
                                 <div class="flex items-center gap-4 min-w-[140px]">
                                     <div
-                                        class="h-12 w-12 shrink-0 flex items-center justify-center rounded-2xl bg-white border border-gray-100 text-slate-900 shadow-sm group-hover:border-slate-200 transition-all">
-                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                        class="h-12 w-12 shrink-0 flex items-center justify-center rounded-2xl bg-white border border-slate-200 text-slate-900
+                                               shadow-[0_10px_24px_rgba(15,23,42,0.06)] group-hover:border-slate-300 transition-all">
+                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
                                             stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="{{ $meta['icon'] }}" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="{{ $meta['icon'] }}" />
                                         </svg>
                                     </div>
                                     <div class="flex flex-col">
-                                        <span
-                                            class="text-xs font-black text-slate-400 uppercase tracking-tighter leading-none mb-1">
+                                        <span class="text-xs font-black text-slate-600 uppercase tracking-tight leading-none mb-1">
                                             {{ $meta['label'] }}
                                         </span>
                                         <span
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-bold border {{ $statusConfig($o->status) }} uppercase tracking-wider">
+                                            class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-black border-2 {{ $statusConfig($o->status) }} uppercase tracking-wider">
                                             {{ $statusText($o->status) }}
                                         </span>
                                     </div>
@@ -263,51 +268,42 @@
 
                                 {{-- Route --}}
                                 <div class="flex-1 min-w-0">
-                                    <div class="flex flex-col gap-1">
-                                        <div class="flex items-center gap-3">
-                                            <div class="flex flex-col items-center gap-1 shrink-0">
-                                                <div class="h-2 w-2 rounded-full bg-slate-300"></div>
-                                                <div class="h-3 w-px bg-slate-200"></div>
-                                                <div class="h-2 w-2 rounded-full bg-slate-900"></div>
-                                            </div>
-                                            <div class="min-w-0">
-                                                <div class="text-xs font-bold text-slate-400 truncate">{{ $o->pickup }}
-                                                </div>
-                                                <div class="text-sm mt-3 font-black text-slate-900 truncate">
-                                                    {{ $o->dropoff }}</div>
-                                            </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex flex-col items-center gap-1 shrink-0">
+                                            <div class="h-2 w-2 rounded-full bg-slate-400"></div>
+                                            <div class="h-3 w-px bg-slate-300"></div>
+                                            <div class="h-2 w-2 rounded-full bg-slate-900"></div>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="text-xs font-bold text-slate-600 truncate">{{ $o->pickup }}</div>
+                                            <div class="text-sm mt-3 font-black text-slate-900 truncate">{{ $o->dropoff }}</div>
                                         </div>
                                     </div>
                                 </div>
 
                                 {{-- Metadata --}}
-                                <div
-                                    class="grid grid-cols-2 md:grid-cols-3 lg:flex items-center gap-8 text-left lg:text-right shrink-0">
+                                <div class="grid grid-cols-2 md:grid-cols-3 lg:flex items-center gap-8 text-left lg:text-right shrink-0">
                                     <div class="flex flex-col">
-                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">日期 /
-                                            时间</span>
-                                        <span class="text-sm font-bold text-slate-700">
+                                        <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest">日期 / 时间</span>
+                                        <span class="text-sm font-bold text-slate-800">
                                             {{ $o->schedule_type === 'scheduled' && $o->scheduled_at ? $o->scheduled_at->format('d M, h:i A') : $o->created_at->format('d M, h:i A') }}
                                         </span>
                                     </div>
 
                                     <div class="flex flex-col">
-                                        <span
-                                            class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">班次</span>
-                                        <span
-                                            class="text-sm font-bold text-slate-700 capitalize">{{ $o->shift ?? 'Day' }}</span>
+                                        <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest">班次</span>
+                                        <span class="text-sm font-bold text-slate-800 capitalize">{{ $o->shift ?? 'Day' }}</span>
                                     </div>
 
                                     <div class="hidden md:flex flex-col">
-                                        <span
-                                            class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">付款方式</span>
-                                        <span
-                                            class="text-sm font-bold text-slate-700">{{ strtoupper($paymentText($o->payment_type)) }}</span>
+                                        <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest">付款方式</span>
+                                        <span class="text-sm font-bold text-slate-800">{{ strtoupper($paymentText($o->payment_type)) }}</span>
                                     </div>
 
                                     <div class="col-span-2 md:col-span-1 lg:ml-4">
                                         <a href="{{ route('customer.orders.show', $o) }}"
-                                            class="inline-flex items-center justify-center h-10 px-5 rounded-xl border border-gray-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all">
+                                            class="inline-flex items-center justify-center h-10 px-5 rounded-xl border border-slate-200 bg-white text-sm font-black text-slate-700
+                                                   hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all">
                                             查看详情
                                         </a>
                                     </div>
@@ -316,21 +312,20 @@
                             </div>
 
                             @if ($o->note)
-                                <div
-                                    class="mt-4 flex items-start gap-2 px-4 py-3 rounded-xl bg-slate-50/50 border border-slate-100/50">
-                                    <svg class="h-4 w-4 text-slate-400 shrink-0 mt-0.5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                <div class="mt-4 flex items-start gap-2 px-4 py-3 rounded-xl bg-slate-100/60 border border-slate-200">
+                                    <svg class="h-4 w-4 text-slate-500 shrink-0 mt-0.5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                                     </svg>
-                                    <p class="text-xs text-slate-500 italic leading-snug">备注：{{ $o->note }}</p>
+                                    <p class="text-xs font-bold text-slate-700 italic leading-snug">备注：{{ $o->note }}</p>
                                 </div>
                             @endif
                         </div>
                     @endforeach
                 </div>
 
-                <div class="px-8 py-6 bg-slate-50/30 border-t border-gray-50">
+                <div class="px-8 py-6 bg-slate-100/40 border-t border-slate-200">
                     {{ $orders->links() }}
                 </div>
             @endif

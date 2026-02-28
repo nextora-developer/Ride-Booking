@@ -75,14 +75,16 @@ class OrderController extends Controller
         }
 
         $data = $request->validate([
-            'driver_id' => ['required', 'exists:users,id'],
-            'payment_type' => ['required', 'in:cash,credit,transfer'],
+            'driver_id'     => ['required', 'exists:users,id'],
+            'payment_type'  => ['required', 'in:cash,credit,transfer'],
+            'amount'        => ['required', 'numeric', 'min:0'],
         ]);
 
-        $order->driver_id = (int) $data['driver_id'];
-        $order->payment_type = $data['payment_type'];
-        $order->status = 'assigned';
-        $order->assigned_at = now();
+        $order->driver_id     = (int) $data['driver_id'];
+        $order->payment_type  = $data['payment_type'];
+        $order->amount        = (float) $data['amount']; // ✅ 存金额（RM）
+        $order->status        = 'assigned';
+        $order->assigned_at   = now();
 
         // ✅ payment_status 默认逻辑
         if ($data['payment_type'] === 'transfer') {

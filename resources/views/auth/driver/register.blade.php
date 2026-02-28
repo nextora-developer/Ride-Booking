@@ -15,17 +15,17 @@
                             <div class="absolute inset-0 bg-indigo-500 blur-2xl opacity-20 rounded-full"></div>
                             <div
                                 class="relative h-20 w-20 rounded-[2rem] bg-slate-900 flex items-center justify-center shadow-xl shadow-slate-200">
-                                <svg class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                    stroke="currentColor">
+                                <svg class="h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M8.25 18.75a1.5 1.5 0 0 1-1.5-1.5V6.75a1.5 1.5 0 0 1 1.5-1.5h7.5a1.5 1.5 0 0 1 1.5 1.5v10.5a1.5 1.5 0 0 1-1.5 1.5h-7.5Z" />
+                                        d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
                                 </svg>
                             </div>
                         </div>
 
-                        <h1 class="text-2xl font-black text-slate-900 tracking-tight">Driver Registration</h1>
+                        <h1 class="text-2xl font-black text-slate-900 tracking-tight">司机注册</h1>
                         <p class="text-[13px] font-bold text-slate-400 mt-1 uppercase tracking-wider">
-                            Create your driver account
+                            创建你的司机账号
                         </p>
                     </div>
 
@@ -33,7 +33,7 @@
                     @if ($errors->any())
                         <div class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3">
                             <div class="text-xs font-black text-rose-700 uppercase tracking-widest mb-1">
-                                Please fix the errors
+                                请修正以下错误
                             </div>
                             <ul class="text-sm font-semibold text-rose-700 list-disc pl-5 space-y-1">
                                 @foreach ($errors->all() as $error)
@@ -49,7 +49,7 @@
                         {{-- Name (login/display name) --}}
                         <div class="space-y-2">
                             <label class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
-                                Username
+                                用户名
                             </label>
                             <div class="group relative">
                                 <div
@@ -61,7 +61,7 @@
                                     </svg>
                                 </div>
                                 <input name="name" type="text" required value="{{ old('name') }}"
-                                    placeholder="Driver display name"
+                                    placeholder="司机显示名称"
                                     class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white focus:ring-4 focus:ring-indigo-50/50 transition-all outline-none text-sm font-bold text-slate-900 placeholder:text-slate-300" />
                             </div>
                             @error('name')
@@ -72,7 +72,7 @@
                         {{-- Full Name (IC name) --}}
                         <div class="space-y-2">
                             <label class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
-                                Full Name (IC)
+                                姓名（与身份证一致）
                             </label>
                             <div class="group relative">
                                 <div
@@ -84,7 +84,7 @@
                                     </svg>
                                 </div>
                                 <input name="full_name" type="text" required value="{{ old('full_name') }}"
-                                    placeholder="Full legal name"
+                                    placeholder="身份证姓名"
                                     class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white focus:ring-4 focus:ring-indigo-50/50 transition-all outline-none text-sm font-bold text-slate-900 placeholder:text-slate-300" />
                             </div>
                             @error('full_name')
@@ -95,7 +95,7 @@
                         {{-- IC Number --}}
                         <div class="space-y-2">
                             <label class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
-                                IC Number
+                                身份证号码（IC/NRIC）
                             </label>
                             <div class="group relative">
                                 <div
@@ -107,7 +107,7 @@
                                     </svg>
                                 </div>
                                 <input name="ic_number" type="text" required value="{{ old('ic_number') }}"
-                                    placeholder="IC / NRIC Number"
+                                    placeholder="IC / NRIC 号码"
                                     class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white focus:ring-4 focus:ring-indigo-50/50 transition-all outline-none text-sm font-bold text-slate-900 placeholder:text-slate-300" />
                             </div>
                             @error('ic_number')
@@ -118,7 +118,7 @@
                         {{-- Phone --}}
                         <div class="space-y-2">
                             <label class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
-                                Phone Number
+                                手机号码
                             </label>
                             <div class="group relative">
                                 <div
@@ -141,7 +141,7 @@
                         {{-- Email --}}
                         <div class="space-y-2">
                             <label class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
-                                Email Address
+                                电子邮箱
                             </label>
                             <div class="group relative">
                                 <div
@@ -163,9 +163,8 @@
 
                         {{-- Car Plate --}}
                         <div class="space-y-2">
-                            <label
-                                class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
-                                Car Plate
+                            <label class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
+                                车牌号码
                             </label>
                             <div class="group relative">
                                 <div
@@ -187,9 +186,8 @@
 
                         {{-- Car Model --}}
                         <div class="space-y-2">
-                            <label
-                                class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
-                                Car Model
+                            <label class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
+                                车辆型号
                             </label>
                             <div class="group relative">
                                 <div
@@ -211,9 +209,8 @@
 
                         {{-- Bank Name --}}
                         <div class="space-y-2">
-                            <label
-                                class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
-                                Bank Name
+                            <label class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
+                                银行名称
                             </label>
                             <div class="group relative">
                                 <div
@@ -235,9 +232,8 @@
 
                         {{-- Bank Account --}}
                         <div class="space-y-2">
-                            <label
-                                class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
-                                Bank Account Number
+                            <label class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
+                                银行账号
                             </label>
                             <div class="group relative">
                                 <div
@@ -249,7 +245,7 @@
                                     </svg>
                                 </div>
                                 <input name="bank_account" type="text" required value="{{ old('bank_account') }}"
-                                    placeholder="Account Number"
+                                    placeholder="银行账号"
                                     class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white focus:ring-4 focus:ring-indigo-50/50 transition-all outline-none text-sm font-bold text-slate-900 placeholder:text-slate-300" />
                             </div>
                             @error('bank_account')
@@ -259,20 +255,17 @@
 
                         {{-- Shift --}}
                         <div class="space-y-2">
-                            <label
-                                class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
-                                Select Shift
+                            <label class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
+                                选择班次
                             </label>
 
                             <select name="shift" required
                                 class="w-full px-4 py-4 rounded-2xl bg-slate-50 border-2 border-transparent
                                        focus:border-indigo-100 focus:bg-white focus:ring-4 focus:ring-indigo-50/50
                                        transition-all outline-none text-sm font-bold text-slate-900">
-                                <option value="">Choose Shift</option>
-                                <option value="day" {{ old('shift') === 'day' ? 'selected' : '' }}>Day Shift
-                                </option>
-                                <option value="night" {{ old('shift') === 'night' ? 'selected' : '' }}>Night Shift
-                                </option>
+                                <option value="">请选择班次</option>
+                                <option value="day" {{ old('shift') === 'day' ? 'selected' : '' }}>早班</option>
+                                <option value="night" {{ old('shift') === 'night' ? 'selected' : '' }}>晚班</option>
                             </select>
                             @error('shift')
                                 <p class="mt-1 ml-1 text-sm font-semibold text-rose-600">{{ $message }}</p>
@@ -281,9 +274,8 @@
 
                         {{-- Password --}}
                         <div class="space-y-2">
-                            <label
-                                class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
-                                Password
+                            <label class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
+                                密码
                             </label>
                             <div class="group relative">
                                 <div
@@ -304,9 +296,8 @@
 
                         {{-- Confirm Password --}}
                         <div class="space-y-2">
-                            <label
-                                class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
-                                Confirm Password
+                            <label class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] ml-1">
+                                确认密码
                             </label>
                             <div class="group relative">
                                 <div
@@ -329,7 +320,7 @@
                                    active:scale-[0.98] transition-all duration-200">
                             <div class="relative py-4 px-6 flex items-center justify-center gap-3">
                                 <span class="text-sm font-black uppercase tracking-widest">
-                                    Register as Driver
+                                    注册成为司机
                                 </span>
                                 <svg class="h-5 w-5 transform group-hover:translate-x-1 transition-transform"
                                     fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
@@ -342,10 +333,10 @@
 
                     <div class="mt-8 text-center space-y-3">
                         <p class="text-sm font-bold text-slate-500">
-                            Already registered?
+                            已经注册？
                             <a href="{{ route('driver.login') }}"
                                 class="text-indigo-600 hover:text-indigo-800 transition">
-                                Login
+                                登录
                             </a>
                         </p>
                     </div>

@@ -52,8 +52,7 @@
         <div class="flex h-full">
 
             {{-- Overlay (mobile) --}}
-            <div x-cloak x-show="sidebarOpen" x-transition.opacity
-                class="fixed inset-0 z-40 bg-black/40 lg:hidden"
+            <div x-cloak x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-40 bg-black/40 lg:hidden"
                 @click="sidebarOpen = false"></div>
 
             {{-- Sidebar --}}
@@ -67,7 +66,8 @@
                 {{-- Sidebar Header --}}
                 <div class="h-16 px-5 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div class="flex items-center gap-3">
-                        <div class="h-9 w-9 rounded-xl bg-black text-white flex items-center justify-center font-extrabold">
+                        <div
+                            class="h-9 w-9 rounded-xl bg-black text-white flex items-center justify-center font-extrabold">
                             A
                         </div>
                         <div>
@@ -125,7 +125,7 @@
                         class="{{ $navLink }}
                                {{ request()->routeIs('admin.customers.*') ? $navActive : $navIdle }}
                                {{ $has('admin.customers.index') ? '' : 'opacity-50 cursor-not-allowed' }}"
-                        @if(!$has('admin.customers.index')) @click.prevent @endif>
+                        @if (!$has('admin.customers.index')) @click.prevent @endif>
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -140,9 +140,8 @@
                         class="{{ $navLink }}
                                {{ request()->routeIs('admin.drivers.*') ? $navActive : $navIdle }}
                                {{ $has('admin.drivers.index') ? '' : 'opacity-50 cursor-not-allowed' }}"
-                        @if(!$has('admin.drivers.index')) @click.prevent @endif>
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
+                        @if (!$has('admin.drivers.index')) @click.prevent @endif>
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8 7a4 4 0 1 1 0 .001z" />
@@ -156,7 +155,7 @@
                         class="{{ $navLink }}
                                {{ request()->routeIs('admin.reports.*') ? $navActive : $navIdle }}
                                {{ $has('admin.reports.index') ? '' : 'opacity-50 cursor-not-allowed' }}"
-                        @if(!$has('admin.reports.index')) @click.prevent @endif>
+                        @if (!$has('admin.reports.index')) @click.prevent @endif>
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 19h16" />
@@ -211,7 +210,7 @@
                     </header>
                 @endif
 
-                <main class="px-4 sm:px-6 lg:px-8 pb-10">
+                <main class="px-4 sm:px-6 lg:px-8 pb-24 lg:pb-10">
                     @if (session('status'))
                         <div class="mb-6 p-4 rounded-2xl bg-green-50 text-green-800 text-sm">
                             {{ session('status') }}
