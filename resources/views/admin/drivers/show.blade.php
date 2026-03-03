@@ -3,115 +3,219 @@
 @section('title', 'Driver Details')
 
 @section('header')
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+
+        {{-- LEFT: Driver Info --}}
         <div class="min-w-0">
+            <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 truncate">
+                {{ $driver->name }}
+            </h1>
+
+            <p class="mt-2 text-sm text-slate-500 font-semibold">
+                Driver ID: {{ $driver->id }}
+                • Joined {{ optional($driver->created_at)->format('d M Y, h:i A') }}
+            </p>
+        </div>
+
+        {{-- RIGHT: Back Button --}}
+        <div class="shrink-0">
             <a href="{{ route('admin.drivers.index') }}"
-               class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-gray-200 text-xs font-black hover:bg-gray-50">
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl
+                       bg-white border border-gray-200
+                       text-xs font-black uppercase tracking-widest
+                       hover:bg-gray-50 transition">
                 <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
                 </svg>
                 Back
             </a>
-
-            <h1 class="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 truncate">
-                {{ $driver->name }}
-            </h1>
-            <p class="mt-2 text-sm text-slate-500 font-semibold">
-                Driver ID: {{ $driver->id }} • Joined {{ optional($driver->created_at)->format('d M Y, h:i A') }}
-            </p>
         </div>
+
     </div>
 @endsection
 
 @section('content')
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 xl:grid-cols-4 gap-8 items-start">
 
-        {{-- LEFT --}}
-        <div class="xl:col-span-2 space-y-6">
+        {{-- LEFT: 业务数据与订单 --}}
+        <div class="xl:col-span-2 space-y-8">
 
-            {{-- Stats --}}
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5">
-                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">Total Orders</div>
-                    <div class="mt-2 text-3xl font-extrabold text-slate-900">{{ $stats['total'] }}</div>
-                </div>
-
-                <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5">
-                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">Active</div>
-                    <div class="mt-2 text-3xl font-extrabold text-slate-900">{{ $stats['active'] }}</div>
-                </div>
-
-                <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5">
-                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">Completed</div>
-                    <div class="mt-2 text-3xl font-extrabold text-slate-900">{{ $stats['completed'] }}</div>
-                </div>
+            {{-- Stats Dashboard --}}
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                @foreach ([['Total Orders', $stats['total'], 'bg-slate-900', 'text-white'], ['Active Now', $stats['active'], 'bg-emerald-500', 'text-white'], ['Completed', $stats['completed'], 'bg-white', 'text-slate-900']] as [$label, $value, $bg, $text])
+                    <div
+                        class="rounded-[2rem] {{ $bg }} {{ $text }} border border-slate-100 shadow-sm p-6 relative overflow-hidden group transition-transform hover:scale-[1.02]">
+                        <div class="relative z-10">
+                            <div class="text-[10px] font-black tracking-[0.2em] uppercase opacity-70">{{ $label }}
+                            </div>
+                            <div class="mt-2 text-4xl font-black tracking-tighter">{{ $value }}</div>
+                        </div>
+                        {{-- 装饰性背景小图标 --}}
+                        <div class="absolute -right-2 -bottom-2 opacity-10 group-hover:scale-110 transition-transform">
+                            <svg class="h-20 w-20" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                            </svg>
+                        </div>
+                    </div>
+                @endforeach
             </div>
 
-            {{-- Recent Orders --}}
-            <div class="rounded-3xl bg-white border border-gray-100 shadow-sm overflow-hidden">
-                <div class="px-5 sm:px-6 py-5 border-b border-gray-100">
-                    <div class="text-sm font-extrabold text-slate-900">Recent Orders</div>
-                    <div class="text-xs text-slate-500 font-semibold mt-1">Latest 10 orders handled by this driver.</div>
+            {{-- Recent Orders Activity --}}
+            <div class="rounded-[2.5rem] bg-white border border-slate-100 shadow-sm overflow-hidden">
+                <div class="px-8 py-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                    <div>
+                        <h3 class="text-sm font-black text-slate-900 uppercase tracking-widest">Recent Activity</h3>
+                        <p class="text-[11px] text-slate-400 font-bold mt-1 uppercase">Last 10 logistical tasks handled</p>
+                    </div>
+                    <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 </div>
 
-                <div class="divide-y divide-gray-100">
+                <div class="divide-y divide-slate-50">
                     @forelse($orders as $o)
-                        <a href="{{ route('admin.orders.show', $o) }}" class="block px-5 sm:px-6 py-4 hover:bg-gray-50/60">
-                            <div class="flex items-center justify-between gap-3">
-                                <div class="min-w-0">
-                                    <div class="text-sm font-extrabold text-slate-900 truncate">
-                                        ORD-{{ str_pad((string)$o->id, 6, '0', STR_PAD_LEFT) }}
+                        <a href="{{ route('admin.orders.show', $o) }}"
+                            class="group block px-8 py-5 hover:bg-slate-50 transition-all">
+                            <div class="flex items-center justify-between gap-6">
+                                <div class="flex items-center gap-4 min-w-0">
+                                    <div
+                                        class="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400 group-hover:bg-white transition-colors">
+                                        #{{ substr($o->id, -3) }}
                                     </div>
-                                    <div class="text-xs text-slate-500 font-semibold truncate">
-                                        {{ $o->pickup }} → {{ $o->dropoff }}
+                                    <div class="min-w-0">
+                                        <div
+                                            class="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors">
+                                            ORD-{{ str_pad((string) $o->id, 6, '0', STR_PAD_LEFT) }}
+                                        </div>
+                                        <div class="mt-1 flex items-center gap-2 text-[11px] font-bold text-slate-400">
+                                            <span class="truncate max-w-[120px]">{{ $o->pickup }}</span>
+                                            <svg class="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" stroke-width="3">
+                                                <path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                            </svg>
+                                            <span class="truncate max-w-[120px]">{{ $o->dropoff }}</span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="text-xs font-black rounded-full px-2.5 py-1 bg-gray-100 text-gray-700">
-                                    {{ strtoupper($o->status ?? '-') }}
+                                <div class="shrink-0">
+                                    <span
+                                        class="inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest 
+                                        {{ $o->status === 'completed' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500' }}">
+                                        {{ $o->status ?? 'Pending' }}
+                                    </span>
                                 </div>
                             </div>
                         </a>
                     @empty
-                        <div class="px-5 sm:px-6 py-10 text-center text-sm text-slate-500 font-semibold">
-                            No orders yet.
+                        <div class="py-20 text-center">
+                            <div class="text-slate-300 mb-2 font-black uppercase text-[10px] tracking-widest">No Active
+                                Records</div>
+                            <p class="text-slate-400 text-xs font-semibold">This driver hasn't accepted any orders yet.</p>
                         </div>
                     @endforelse
                 </div>
             </div>
         </div>
 
-        {{-- RIGHT --}}
-        <div class="space-y-6">
-            <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5 sm:p-6">
-                <div class="text-xs font-black tracking-widest uppercase text-slate-400">Profile</div>
+        {{-- RIGHT: 司机个人档案 --}}
+        <div class="xl:col-span-2">
+            <div class="rounded-3xl bg-white border border-slate-100 shadow-sm p-6">
 
-                <div class="mt-4 flex items-center gap-3">
-                    <div class="h-12 w-12 rounded-2xl bg-black text-white flex items-center justify-center font-extrabold text-lg">
-                        {{ strtoupper(mb_substr($driver->name ?? 'D', 0, 1)) }}
+                {{-- Header --}}
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <div
+                            class="h-16 w-16 rounded-2xl bg-slate-900 text-white flex items-center justify-center text-xl font-black shadow-md">
+                            {{ strtoupper(mb_substr($driver->name ?? 'D', 0, 1)) }}
+                        </div>
+                        <div
+                            class="absolute -bottom-1 -right-1 h-4 w-4 rounded-full {{ $driver->is_online ? 'bg-emerald-500' : 'bg-slate-300' }} border-2 border-white">
+                        </div>
                     </div>
+
                     <div class="min-w-0">
-                        <div class="text-sm font-extrabold text-slate-900 truncate">{{ $driver->name }}</div>
-                        <div class="text-xs text-slate-500 font-semibold truncate">{{ $driver->email ?? '—' }}</div>
+                        <div class="text-lg font-black text-slate-900 truncate">
+                            {{ $driver->name }}
+                        </div>
+                        <div class="text-xs font-semibold text-slate-500 truncate">
+                            {{ $driver->email ?? 'no-email@system.com' }}
+                        </div>
                     </div>
                 </div>
 
-                <div class="mt-4 grid grid-cols-1 gap-3">
-                    <div class="rounded-2xl bg-gray-50 border border-gray-100 p-4 text-sm">
-                        <div class="font-extrabold text-slate-900">Phone</div>
-                        <div class="mt-1 text-slate-700 font-semibold">{{ $driver->phone ?? '—' }}</div>
+                {{-- Info Sections --}}
+                <div class="mt-6 space-y-6 text-sm">
+
+                    {{-- PERSONAL --}}
+                    <div>
+                        <div class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">
+                            Personal
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            @foreach ([['Full Name', $driver->full_name], ['IC Number', $driver->ic_number], ['Phone', $driver->phone], ['Shift', strtoupper($driver->shift)]] as [$label, $val])
+                                <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                    <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                        {{ $label }}
+                                    </div>
+                                    <div class="mt-1 font-bold text-slate-900">
+                                        {{ $val ?? '—' }}
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
 
-                    <div class="rounded-2xl bg-gray-50 border border-gray-100 p-4 text-sm">
-                        <div class="font-extrabold text-slate-900">Shift</div>
-                        <div class="mt-1 text-slate-700 font-semibold">{{ strtoupper($driver->shift ?? '—') }}</div>
+                    {{-- VEHICLE --}}
+                    <div>
+                        <div class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">
+                            Vehicle
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            @foreach ([['Car Plate', $driver->car_plate], ['Car Model', $driver->car_model]] as [$label, $val])
+                                <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                    <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                        {{ $label }}
+                                    </div>
+                                    <div class="mt-1 font-bold text-slate-900 tracking-wider">
+                                        {{ $val ?? '—' }}
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
 
-                    <div class="rounded-2xl bg-gray-50 border border-gray-100 p-4 text-sm">
-                        <div class="font-extrabold text-slate-900">Role</div>
-                        <div class="mt-1 text-slate-700 font-semibold">{{ strtoupper($driver->role ?? 'DRIVER') }}</div>
+                    {{-- BANK --}}
+                    <div>
+                        <div class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">
+                            Bank
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            @foreach ([['Bank Name', $driver->bank_name], ['Bank Account', $driver->bank_account]] as [$label, $val])
+                                <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                    <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                        {{ $label }}
+                                    </div>
+                                    <div class="mt-1 font-bold text-slate-900">
+                                        {{ $val ?? '—' }}
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
+
                 </div>
+
+                {{-- Edit Button --}}
+
+                <div class="mt-6">
+                    <a href="{{ route('admin.drivers.edit', $driver) }}"
+                        class="block w-full py-3 rounded-xl bg-slate-900 text-center text-white text-xs font-black uppercase tracking-widest hover:bg-black transition-all duration-200">
+                        Edit Profile
+                    </a>
+                </div>
+
             </div>
         </div>
 

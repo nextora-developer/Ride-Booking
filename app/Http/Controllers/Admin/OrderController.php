@@ -16,6 +16,10 @@ class OrderController extends Controller
         $payment_type = $request->string('payment_type')->toString();
         $shift = $request->string('shift')->toString();
 
+        // ✅ NEW: date range
+        $from = $request->string('from')->toString(); // YYYY-MM-DD
+        $to   = $request->string('to')->toString();   // YYYY-MM-DD
+
         $ordersQuery = Order::with(['customer', 'driver', 'manager'])->latest();
 
         if (!empty($status)) {
@@ -28,6 +32,15 @@ class OrderController extends Controller
 
         if (!empty($shift)) {
             $ordersQuery->where('shift', $shift);
+        }
+
+        // ✅ NEW: date filter (created_at)
+        if (!empty($from)) {
+            $ordersQuery->whereDate('created_at', '>=', $from);
+        }
+
+        if (!empty($to)) {
+            $ordersQuery->whereDate('created_at', '<=', $to);
         }
 
         if (!empty($q)) {
@@ -52,7 +65,9 @@ class OrderController extends Controller
             'status',
             'q',
             'payment_type',
-            'shift'
+            'shift',
+            'from',   // ✅ NEW
+            'to'      // ✅ NEW
         ));
     }
 

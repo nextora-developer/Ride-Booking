@@ -57,14 +57,19 @@
                 <thead class="bg-gray-50">
                     <tr class="text-left text-xs font-black uppercase tracking-widest text-slate-400">
                         <th class="px-5 sm:px-6 py-3">Customer</th>
+                        <th class="px-5 sm:px-6 py-3">Full Name</th>
                         <th class="px-5 sm:px-6 py-3">Contact</th>
+                        <th class="px-5 sm:px-6 py-3">Credit</th>
+                        <th class="px-5 sm:px-6 py-3">Status</th>
                         <th class="px-5 sm:px-6 py-3">Joined</th>
                         <th class="px-5 sm:px-6 py-3 text-right">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($customers as $c)
-                        <tr class="hover:bg-gray-50/60">
+                        <tr class="hover:bg-gray-50/60 {{ !$c->is_active ? 'opacity-60' : '' }}">
+
+                            {{-- Customer --}}
                             <td class="px-5 sm:px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div
@@ -72,16 +77,68 @@
                                         {{ strtoupper(mb_substr($c->name ?? 'C', 0, 1)) }}
                                     </div>
                                     <div class="min-w-0">
-                                        <div class="font-extrabold text-slate-900 truncate">{{ $c->name }}</div>
-                                        <div class="text-xs text-slate-500 font-semibold truncate">ID: {{ $c->id }}
+                                        <div class="font-extrabold text-slate-900 truncate">
+                                            {{ $c->name }}
+                                        </div>
+                                        <div class="text-xs text-slate-500 font-semibold truncate">
+                                            ID: {{ $c->id }}
                                         </div>
                                     </div>
                                 </div>
                             </td>
+
+                            {{-- Full Name --}}
                             <td class="px-5 sm:px-6 py-4">
-                                <div class="text-sm font-semibold text-slate-900">{{ $c->phone ?? '—' }}</div>
-                                <div class="text-xs text-slate-500 font-semibold">{{ $c->email ?? '—' }}</div>
+                                <div class="text-sm font-semibold text-slate-900">
+                                    {{ $c->full_name ?? '—' }}
+                                </div>
                             </td>
+
+                            {{-- Contact --}}
+                            <td class="px-5 sm:px-6 py-4">
+                                <div class="text-sm font-semibold text-slate-900">
+                                    {{ $c->phone ?? '—' }}
+                                </div>
+                                <div class="text-xs text-slate-500 font-semibold">
+                                    {{ $c->email ?? '—' }}
+                                </div>
+                            </td>
+
+                            {{-- Credit Balance --}}
+                            <td class="px-5 sm:px-6 py-4">
+                                <span
+                                    class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-extrabold">
+                                    RM {{ number_format($c->credit_balance ?? 0, 2) }}
+                                </span>
+                            </td>
+
+                            {{-- Account Status Toggle --}}
+                            <td class="px-5 sm:px-6 py-4">
+                                <div class="flex flex-col items-start gap-1">
+                                    <form action="{{ route('admin.customers.toggle', $c) }}" method="POST">
+                                        @csrf
+                                        @method('PATCH')
+
+                                        <button type="submit"
+                                            class="group relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none
+                    {{ $c->is_active ? 'bg-emerald-500' : 'bg-rose-500' }}
+                    hover:ring-4 {{ $c->is_active ? 'hover:ring-emerald-500/10' : 'hover:ring-rose-500/10' }}">
+
+                                            <span
+                                                class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 ease-in-out
+                        {{ $c->is_active ? 'translate-x-5' : 'translate-x-0' }}">
+                                            </span>
+                                        </button>
+                                    </form>
+
+                                    <span
+                                        class="text-[9px] font-black uppercase tracking-widest {{ $c->is_active ? 'text-emerald-600' : 'text-rose-600' }}">
+                                        {{ $c->is_active ? 'Active' : 'Suspended' }}
+                                    </span>
+                                </div>
+                            </td>
+
+                            {{-- Joined --}}
                             <td class="px-5 sm:px-6 py-4">
                                 <div class="text-sm font-semibold text-slate-900">
                                     {{ optional($c->created_at)->format('d M Y') }}
@@ -90,16 +147,41 @@
                                     {{ optional($c->created_at)->format('h:i A') }}
                                 </div>
                             </td>
+
+                            {{-- Action --}}
                             <td class="px-5 sm:px-6 py-4 text-right">
-                                <a href="{{ route('admin.customers.show', $c) }}"
-                                    class="inline-flex items-center justify-center h-10 px-4 rounded-2xl bg-white border border-gray-200 text-sm font-extrabold hover:bg-gray-50 transition">
-                                    View
-                                </a>
+                                <div class="flex items-center justify-end gap-2">
+
+                                    {{-- View --}}
+                                    <a href="{{ route('admin.customers.show', $c) }}"
+                                        class="h-9 w-9 flex items-center justify-center rounded-xl
+                                                bg-white border border-gray-200 text-slate-600
+                                                hover:bg-gray-50 hover:text-black transition"
+                                        title="View">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M2.25 12s3.75-7.5 9.75-7.5S21.75 12 21.75 12s-3.75 7.5-9.75 7.5S2.25 12 2.25 12z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                    </a>
+
+                                    {{-- Edit --}}
+                                    <a href="{{ route('admin.customers.edit', $c) }}"
+                                        class="h-9 w-9 flex items-center justify-center rounded-xl bg-black text-white hover:bg-slate-900 transition"
+                                        title="Edit">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M16.862 3.487a2.25 2.25 0 113.182 3.182L7.5 19.213 3 21l1.787-4.5L16.862 3.487z" />
+                                        </svg>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-5 sm:px-6 py-10 text-center text-sm text-slate-500 font-semibold">
+                            <td colspan="7" class="px-5 sm:px-6 py-10 text-center text-sm text-slate-500 font-semibold">
                                 No customers found.
                             </td>
                         </tr>

@@ -68,64 +68,70 @@
         $managerName = optional($order->manager)->name ?? null;
     @endphp
 
-    <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between border-b border-slate-50">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 
+        {{-- LEFT --}}
         <div class="min-w-0 flex-1">
-            {{-- 1. 返回与标签组：分组显示，减少杂乱 --}}
-            <div class="flex items-center gap-3 flex-wrap">
-                {{-- 极简返回按钮 --}}
-                <a href="{{ route('admin.orders.index') }}"
-                    class="group h-9 w-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-900 hover:border-slate-900 transition-all">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
-                    </svg>
-                </a>
 
-                {{-- 核心状态：加粗突出 --}}
-                <span
-                    class="inline-flex items-center px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm {{ $statusBadge($status) }}">
-                    {{ $status }}
-                </span>
-
-                {{-- 分割线 --}}
-                <div class="h-4 w-[1px] bg-slate-200 mx-1"></div>
-
-                {{-- 支付与排班信息：更轻量的展示 --}}
-                <div class="flex items-center gap-2">
-                    @if ($paymentType)
-                        <span
-                            class="inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-black border uppercase tracking-wider {{ $payTypeBadge($paymentType) }}">
-                            {{ $paymentType }}
-                        </span>
-                    @endif
-
-                    @if ($scheduleType === 'scheduled')
-                        <span
-                            class="inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-black bg-indigo-600 text-white uppercase tracking-wider">
-                            📅 Scheduled
-                        </span>
-                    @endif
-                </div>
-            </div>
-
-            {{-- 2. 核心标题：大字号 + 紧凑字间距 --}}
-            <div class="mt-6 flex flex-col md:flex-row md:items-end gap-3 md:gap-6">
-                <h1 class="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 uppercase">
+            {{-- Row 1: Title --}}
+            <div class="flex items-start justify-between gap-4">
+                <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 truncate">
                     {{ $orderNo }}
                 </h1>
 
-                <div class="flex items-center gap-3 pb-1">
-                    <div class="h-5 w-[2px] bg-slate-100 hidden md:block"></div>
-                    <div class="flex flex-col md:flex-row md:items-center gap-2">
-                        <span
-                            class="text-sm font-black text-indigo-600 uppercase tracking-widest">{{ $service }}</span>
-                        <span class="hidden md:block text-slate-300">•</span>
-                        <span class="text-[11px] text-slate-400 font-bold uppercase tracking-tight">Created
-                            {{ $createdAt }}</span>
-                    </div>
-                </div>
+                {{-- Right: Back --}}
+                <a href="{{ route('admin.orders.index') }}"
+                    class="shrink-0 h-10 px-4 inline-flex items-center gap-2 rounded-2xl
+                       bg-white border border-gray-200 text-sm font-extrabold hover:bg-gray-50 transition">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
+                    </svg>
+                    Back
+                </a>
             </div>
+
+            {{-- Row 2: Badges --}}
+            <div class="mt-3 flex items-center gap-2 flex-wrap">
+                <span
+                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $statusBadge($status) }}">
+                    {{ strtoupper($status) }}
+                </span>
+
+                @if ($paymentType)
+                    <span
+                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $payTypeBadge($paymentType) }}">
+                        {{ strtoupper($paymentType) }}
+                    </span>
+                @endif
+
+                @if ($paymentStatus)
+                    <span
+                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $payStatusBadge($paymentStatus) }}">
+                        {{ strtoupper($paymentStatus) }}
+                    </span>
+                @endif
+
+                @if ($shift)
+                    <span
+                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-gray-100 text-gray-700">
+                        {{ strtoupper($shift) }} SHIFT
+                    </span>
+                @endif
+
+                @if ($scheduleType === 'scheduled' && $scheduledAt)
+                    <span
+                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-700">
+                        SCHEDULED
+                    </span>
+                @endif
+            </div>
+
+            {{-- Row 3: Meta --}}
+            <p class="mt-3 text-sm text-slate-500 font-medium">
+                {{ $service }} • Created {{ $createdAt }}
+            </p>
         </div>
+
     </div>
 @endsection
 
@@ -290,8 +296,8 @@
                                         </label>
 
                                         <label class="cursor-pointer">
-                                            <input type="radio" name="payment_type" value="credit"
-                                                class="sr-only peer" @checked($curPay === 'credit') required>
+                                            <input type="radio" name="payment_type" value="credit" class="sr-only peer"
+                                                @checked($curPay === 'credit') required>
                                             <span
                                                 class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
                            peer-checked:bg-rose-50 peer-checked:text-rose-700 peer-checked:border-rose-200 transition">
@@ -300,8 +306,8 @@
                                         </label>
 
                                         <label class="cursor-pointer">
-                                            <input type="radio" name="payment_type" value="transfer"
-                                                class="sr-only peer" @checked($curPay === 'transfer') required>
+                                            <input type="radio" name="payment_type" value="transfer" class="sr-only peer"
+                                                @checked($curPay === 'transfer') required>
                                             <span
                                                 class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
                            peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-checked:border-emerald-200 transition">
@@ -396,6 +402,7 @@
                     (If order was assigned by manager)
                 </div>
             </div>
+
         </div>
     </div>
 @endsection

@@ -37,6 +37,7 @@ class User extends Authenticatable
 
         'is_online',
         'last_active_at',
+        'is_active',
 
         'credit_balance',
     ];

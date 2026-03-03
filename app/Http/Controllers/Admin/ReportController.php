@@ -4,46 +4,205 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
     public function index(Request $request)
     {
-        $from = $request->date('from') ?? now()->startOfMonth();
-        $to   = $request->date('to') ?? now();
+        // ===== Date Range =====
+        $from = $request->filled('from')
+            ? Carbon::parse($request->from)->startOfDay()
+            : now()->startOfMonth();
 
-        $query = Order::whereBetween('created_at', [$from, $to]);
+        $to = $request->filled('to')
+            ? Carbon::parse($request->to)->endOfDay()
+            : now()->endOfDay();
 
-        $totalOrders = (clone $query)->count();
-        $completed   = (clone $query)->where('status', 'completed')->count();
-        $pending     = (clone $query)->where('status', 'pending')->count();
+        // Optional filters
+        $shift = $request->input('shift'); // day|night|null
+        $paymentType = $request->input('payment_type'); // cash|credit|transfer|null
 
-        // Payment breakdown
-        $cash     = (clone $query)->where('payment_type', 'cash')->count();
-        $credit   = (clone $query)->where('payment_type', 'credit')->count();
-        $transfer = (clone $query)->where('payment_type', 'transfer')->count();
+        // ===== Base Query =====
+        $base = Order::query()
+            ->whereBetween('created_at', [$from, $to]);
 
-        // Driver performance (completed only)
-        $driverStats = Order::selectRaw('driver_id, COUNT(*) as total')
-            ->whereBetween('created_at', [$from, $to])
-            ->where('status', 'completed')
-            ->groupBy('driver_id')
-            ->with('driver')
+        if (!empty($shift)) {
+            $base->where('shift', $shift);
+        }
+        if (!empty($paymentType)) {
+            $base->where('payment_type', $paymentType);
+        }
+
+        // ===== KPI Counts =====
+        $totalOrders = (clone $base)->count();
+
+        $completed = (clone $base)->where('status', 'completed')->count();
+        $pending   = (clone $base)->where('status', 'pending')->count();
+        $assigned  = (clone $base)->where('status', 'assigned')->count();
+        $onTheWay  = (clone $base)->where('status', 'on_the_way')->count();
+        $inTrip    = (clone $base)->where('status', 'in_trip')->count();
+        $cancelled = (clone $base)->whereIn('status', ['cancelled', 'canceled'])->count();
+
+        // ===== Revenue / AOV (amount) =====
+        $revenue = (float) (clone $base)->sum('amount');
+        $aov = $totalOrders > 0 ? $revenue / $totalOrders : 0;
+
+        // ===== Status Breakdown =====
+        $statusCounts = [
+            'pending'    => $pending,
+            'assigned'   => $assigned,
+            'on_the_way' => $onTheWay,
+            'in_trip'    => $inTrip,
+            'completed'  => $completed,
+            'cancelled'  => $cancelled,
+        ];
+
+        // ===== Payment Breakdown (count + sum amount) =====
+        $paymentStats = (clone $base)
+            ->select(
+                'payment_type',
+                DB::raw('COUNT(*) as total'),
+                DB::raw('SUM(amount) as amount')
+            )
+            ->groupBy('payment_type')
+            ->get()
+            ->keyBy(fn($r) => $r->payment_type ?? 'unknown');
+
+        // ===== Shift Breakdown (count + sum amount) =====
+        $shiftStats = (clone $base)
+            ->select(
+                'shift',
+                DB::raw('COUNT(*) as total'),
+                DB::raw('SUM(amount) as amount')
+            )
+            ->groupBy('shift')
+            ->get()
+            ->keyBy(fn($r) => $r->shift ?? 'unknown');
+
+        // ===== Service Breakdown =====
+        $serviceStats = (clone $base)
+            ->select(
+                'service_type',
+                DB::raw('COUNT(*) as total'),
+                DB::raw('SUM(amount) as amount')
+            )
+            ->groupBy('service_type')
             ->orderByDesc('total')
+            ->limit(8)
+            ->get();
+
+        // ===== Daily Trend =====
+        $daily = (clone $base)
+            ->selectRaw("DATE(created_at) as d, COUNT(*) as orders, SUM(amount) as amount")
+            ->groupBy('d')
+            ->orderBy('d')
+            ->get();
+
+        $maxDailyOrders = (int) ($daily->max('orders') ?? 0);
+        $maxDailyAmount = (float) ($daily->max('amount') ?? 0);
+
+        // ===== Driver KPI (Completed) =====
+        $driverStats = (clone $base)
+            ->where('status', 'completed')
+            ->select(
+                'driver_id',
+                DB::raw('COUNT(*) as trips'),
+                DB::raw('SUM(amount) as amount')
+            )
+            ->groupBy('driver_id')
+            ->with(['driver:id,name'])
+            ->orderByDesc('trips')
+            ->limit(30)
             ->get();
 
         return view('admin.reports.index', compact(
             'from',
             'to',
+            'shift',
+            'paymentType',
             'totalOrders',
             'completed',
             'pending',
-            'cash',
-            'credit',
-            'transfer',
+            'assigned',
+            'onTheWay',
+            'inTrip',
+            'cancelled',
+            'revenue',
+            'aov',
+            'statusCounts',
+            'paymentStats',
+            'shiftStats',
+            'serviceStats',
+            'daily',
+            'maxDailyOrders',
+            'maxDailyAmount',
             'driverStats'
         ));
+    }
+
+    public function export(Request $request)
+    {
+        $from = $request->filled('from')
+            ? \Carbon\Carbon::parse($request->from)->startOfDay()
+            : now()->startOfMonth();
+
+        $to = $request->filled('to')
+            ? \Carbon\Carbon::parse($request->to)->endOfDay()
+            : now()->endOfDay();
+
+        $shift = $request->input('shift');
+        $paymentType = $request->input('payment_type');
+
+        $query = \App\Models\Order::query()
+            ->whereBetween('created_at', [$from, $to]);
+
+        if ($shift) {
+            $query->where('shift', $shift);
+        }
+
+        if ($paymentType) {
+            $query->where('payment_type', $paymentType);
+        }
+
+        $orders = $query->with(['driver:id,name'])->get();
+
+        $filename = 'orders_report_' . now()->format('Ymd_His') . '.csv';
+
+        return response()->streamDownload(function () use ($orders) {
+
+            $handle = fopen('php://output', 'w');
+
+            // CSV Header
+            fputcsv($handle, [
+                'Order ID',
+                'Date',
+                'Customer',
+                'Driver',
+                'Status',
+                'Payment Type',
+                'Shift',
+                'Service Type',
+                'Amount'
+            ]);
+
+            foreach ($orders as $order) {
+                fputcsv($handle, [
+                    $order->id,
+                    $order->created_at->format('Y-m-d H:i'),
+                    $order->customer_name ?? '',
+                    optional($order->driver)->name ?? '',
+                    $order->status,
+                    $order->payment_type,
+                    $order->shift,
+                    $order->service_type,
+                    $order->amount,
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename);
     }
 }

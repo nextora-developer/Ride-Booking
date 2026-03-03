@@ -26,6 +26,8 @@ use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DriverController as AdminDriverController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\CreditLogController as AdminCreditLogController;
+
 
 
 
@@ -111,11 +113,23 @@ Route::prefix('admin')
 
         Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
         Route::get('/customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
+        Route::get('/customers/{customer}/edit', [AdminCustomerController::class, 'edit'])->name('customers.edit');
+        Route::patch('/customers/{customer}', [AdminCustomerController::class, 'update'])->name('customers.update');
+        Route::patch('/customers/{customer}/credit', [AdminCustomerController::class, 'adjustCredit'])->name('customers.credit.adjust');
+        Route::patch('/customers/{customer}/credit/clear', [AdminCustomerController::class, 'clearCredit'])->name('customers.credit.clear');
+        Route::patch('/customers/{customer}/toggle', [AdminCustomerController::class, 'toggle'])->name('customers.toggle');
 
         Route::get('/drivers', [AdminDriverController::class, 'index'])->name('drivers.index');
         Route::get('/drivers/{driver}', [AdminDriverController::class, 'show'])->name('drivers.show');
+        Route::get('/drivers/{driver}/edit', [AdminDriverController::class, 'edit'])->name('drivers.edit');
+        Route::patch('/drivers/{driver}', [AdminDriverController::class, 'update'])->name('drivers.update');
+        Route::patch('/drivers/{driver}/toggle-online', [AdminDriverController::class, 'toggleOnline'])->name('drivers.toggle-online');
+        Route::patch('/drivers/{driver}/toggle-account', [AdminDriverController::class, 'toggleAccount'])->name('drivers.toggle-account');
 
         Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/export', [AdminReportController::class, 'export'])->name('reports.export');
+
+        Route::get('/credit-logs', [AdminCreditLogController::class, 'index'])->name('credit.logs.index');
     });
 
 Route::prefix('manager')
@@ -135,6 +149,8 @@ Route::prefix('manager')
         Route::get('/credits', [ManagerCreditController::class, 'index'])->name('credits.index');
         Route::patch('/credits/{customer}', [ManagerCreditController::class, 'update'])->name('credits.update');
         Route::post('/credits/{customer}/clear', [ManagerCreditController::class, 'clear'])->name('credits.clear');
+
+        Route::get('/credit-logs', [ManagerCreditLogController::class, 'index'])->name('credit.logs.index');
     });
 
 Route::prefix('driver')

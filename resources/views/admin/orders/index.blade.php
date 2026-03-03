@@ -90,57 +90,52 @@
             'q' => $q ?? null,
             'payment_type' => $payment_type ?? null,
             'shift' => $shift ?? null,
+            'from' => $from ?? null,
+            'to' => $to ?? null,
         ];
     @endphp
 
+    @php
+        $label = 'text-[10px] font-black tracking-widest uppercase text-slate-400 ml-1';
+        $ctrl = 'w-full h-11 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold
+              focus:ring-4 focus:ring-black/5 focus:border-black outline-none';
+    @endphp
+
     <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-4 sm:p-6 mb-6">
-        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <form method="GET" action="{{ route('admin.orders.index') }}">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
 
-            <div class="flex flex-wrap items-center gap-2">
-                <span class="text-xs font-black tracking-widest uppercase text-slate-400">Quick filter</span>
+                {{-- 🔍 Search --}}
+                <div class="sm:col-span-2 lg:col-span-5">
+                    <div class="{{ $label }}">Search</div>
+                    <div class="relative">
+                        <input name="q" value="{{ $q ?? '' }}" type="text"
+                            placeholder="Order / customer / route..." class="{{ $ctrl }} pr-10">
+                        <svg class="h-5 w-5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35" />
+                            <circle cx="11" cy="11" r="7" />
+                        </svg>
+                    </div>
+                </div>
 
-                <a href="{{ route('admin.orders.index', array_filter(array_merge($qs, ['status' => 'pending']))) }}"
-                    class="{{ $pill }} {{ $active('pending') ? 'bg-amber-100 text-amber-800' : 'bg-amber-50 text-amber-700 hover:bg-amber-100' }}">
-                    Pending
-                </a>
+                {{-- Status --}}
+                <div class="lg:col-span-2">
+                    <div class="{{ $label }}">Status</div>
+                    <select name="status" class="{{ $ctrl }}">
+                        <option value="">All</option>
+                        <option value="pending" @selected(($status ?? '') === 'pending')>Pending</option>
+                        <option value="assigned" @selected(($status ?? '') === 'assigned')>Assigned</option>
+                        <option value="on_the_way" @selected(($status ?? '') === 'on_the_way')>On The Way</option>
+                        <option value="in_trip" @selected(($status ?? '') === 'in_trip')>In Trip</option>
+                        <option value="completed" @selected(($status ?? '') === 'completed')>Completed</option>
+                    </select>
+                </div>
 
-                <a href="{{ route('admin.orders.index', array_filter(array_merge($qs, ['status' => 'assigned']))) }}"
-                    class="{{ $pill }} {{ $active('assigned') ? 'bg-yellow-100 text-yellow-800' : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100' }}">
-                    Assigned
-                </a>
-
-                <a href="{{ route('admin.orders.index', array_filter(array_merge($qs, ['status' => 'on_the_way']))) }}"
-                    class="{{ $pill }} {{ $active('on_the_way') ? 'bg-blue-100 text-blue-800' : 'bg-blue-50 text-blue-700 hover:bg-blue-100' }}">
-                    On The Way
-                </a>
-
-                <a href="{{ route('admin.orders.index', array_filter(array_merge($qs, ['status' => 'in_trip']))) }}"
-                    class="{{ $pill }} {{ $active('in_trip') ? 'bg-violet-100 text-violet-800' : 'bg-violet-50 text-violet-700 hover:bg-violet-100' }}">
-                    In Trip
-                </a>
-
-                <a href="{{ route('admin.orders.index', array_filter(array_merge($qs, ['status' => 'completed']))) }}"
-                    class="{{ $pill }} {{ $active('completed') ? 'bg-green-100 text-green-800' : 'bg-green-50 text-green-700 hover:bg-green-100' }}">
-                    Completed
-                </a>
-
-                <a href="{{ route('admin.orders.index', array_filter($qs)) }}"
-                    class="{{ $pill }} {{ empty($status) ? 'bg-gray-200 text-gray-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                    All
-                </a>
-            </div>
-
-            <form method="GET" action="{{ route('admin.orders.index') }}"
-                class="flex items-center gap-2 w-full lg:w-auto">
-                @if (!empty($status))
-                    <input type="hidden" name="status" value="{{ $status }}">
-                @endif
-
-                {{-- Payment Type --}}
-                <div class="w-full sm:w-44">
-                    <select name="payment_type"
-                        class="w-full h-11 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold
-               focus:ring-4 focus:ring-black/5 focus:border-black outline-none">
+                {{-- Payment --}}
+                <div class="lg:col-span-2">
+                    <div class="{{ $label }}">Payment</div>
+                    <select name="payment_type" class="{{ $ctrl }}">
                         <option value="">All Payment</option>
                         <option value="cash" @selected(($payment_type ?? '') === 'cash')>Cash</option>
                         <option value="credit" @selected(($payment_type ?? '') === 'credit')>Credit</option>
@@ -148,44 +143,47 @@
                     </select>
                 </div>
 
-                {{-- Shift --}}
-                <div class="w-full sm:w-44">
-                    <select name="shift"
-                        class="w-full h-11 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold
-               focus:ring-4 focus:ring-black/5 focus:border-black outline-none">
+                {{-- Shift (给它更舒服一点的宽度) --}}
+                <div class="lg:col-span-3">
+                    <div class="{{ $label }}">Shift</div>
+                    <select name="shift" class="{{ $ctrl }}">
                         <option value="">All Shift</option>
                         <option value="day" @selected(($shift ?? '') === 'day')>Day</option>
                         <option value="night" @selected(($shift ?? '') === 'night')>Night</option>
                     </select>
                 </div>
 
-                <div class="relative w-full sm:w-80">
-                    <input name="q" value="{{ $q ?? '' }}" type="text"
-                        placeholder="Search order no / customer / route..."
-                        class="w-full h-11 rounded-2xl border border-gray-200 bg-white px-4 pr-10 text-sm font-semibold
-                           focus:ring-4 focus:ring-black/5 focus:border-black outline-none">
-                    <svg class="h-5 w-5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35" />
-                        <circle cx="11" cy="11" r="7" />
-                    </svg>
+                {{-- From (第二排开始) --}}
+                <div class="lg:col-span-3">
+                    <div class="{{ $label }}">From</div>
+                    <input type="date" name="from" value="{{ $from ?? '' }}" class="{{ $ctrl }}">
                 </div>
 
-                <button
-                    class="h-11 px-5 rounded-2xl bg-black text-white text-sm font-extrabold hover:bg-slate-900 transition">
-                    Filter
-                </button>
+                {{-- To --}}
+                <div class="lg:col-span-3">
+                    <div class="{{ $label }}">To</div>
+                    <input type="date" name="to" value="{{ $to ?? '' }}" class="{{ $ctrl }}">
+                </div>
 
-                @if (!empty($q) || !empty($status) || !empty($payment_type) || !empty($shift))
-                    <a href="{{ route('admin.orders.index') }}"
-                        class="py-3 px-4 rounded-2xl border border-gray-200 bg-white text-sm font-extrabold hover:bg-gray-50 transition">
-                        Reset
-                    </a>
-                @endif
-            </form>
-        </div>
+                {{-- Buttons (同一排靠右 + 底部对齐) --}}
+                <div class="sm:col-span-2 lg:col-span-6 flex items-end justify-end gap-2">
+                    <button
+                        class="h-11 px-6 rounded-2xl bg-black text-white text-sm font-extrabold hover:bg-slate-900 transition">
+                        Filter
+                    </button>
+
+                    @if (!empty($q) || !empty($status) || !empty($payment_type) || !empty($shift) || !empty($from) || !empty($to))
+                        <a href="{{ route('admin.orders.index') }}"
+                            class="h-11 inline-flex items-center justify-center px-6 rounded-2xl border border-gray-200 bg-white text-sm font-extrabold hover:bg-gray-50 transition">
+                            Reset
+                        </a>
+                    @endif
+                </div>
+
+            </div>
+        </form>
     </div>
-
+    
     {{-- Orders list --}}
     <div class="mt-6 space-y-4">
         @forelse($orders as $order)
