@@ -63,7 +63,7 @@ class CreditController extends Controller
                 'change'      => $change,
                 'after'       => $after,
                 'action'      => 'update',
-                'note'        => $data['note'] ?? null,
+                'note'        => 'Manager credit adjustment',
             ]);
         });
 

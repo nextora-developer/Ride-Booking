@@ -1,6 +1,6 @@
 @extends('layouts.admin-app')
 
-@section('title', 'Order Details')
+@section('title', '订单详情')
 
 @section('header')
     @php
@@ -41,6 +41,39 @@
                 'paid' => 'bg-green-50 text-green-700',
                 'pending' => 'bg-yellow-50 text-yellow-700',
                 default => 'bg-gray-100 text-gray-700',
+            };
+        };
+
+        // ✅ 文案映射（状态 / 付款方式 / 付款状态）
+        $statusText = function ($s) {
+            return match (strtolower((string) $s)) {
+                'pending' => '待派单',
+                'assigned' => '已指派',
+                'on_the_way' => '前往接送',
+                'arrived' => '已到起点',
+                'in_trip' => '行程中',
+                'completed' => '已完成',
+                'cancelled', 'canceled' => '已取消',
+                'unassigned', 'pending_assign' => '未指派',
+                default => strtoupper((string) $s ?: '—'),
+            };
+        };
+
+        $payTypeText = function ($p) {
+            return match (strtolower((string) $p)) {
+                'cash' => '现金',
+                'credit' => '挂单',
+                'transfer' => '转账',
+                default => strtoupper((string) $p ?: '—'),
+            };
+        };
+
+        $payStatusText = function ($p) {
+            return match (strtolower((string) $p)) {
+                'unpaid' => '未付款',
+                'paid' => '已付款',
+                'pending' => '处理中',
+                default => strtoupper((string) $p ?: '—'),
             };
         };
 
@@ -86,7 +119,7 @@
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
                     </svg>
-                    Back
+                    返回
                 </a>
             </div>
 
@@ -94,41 +127,55 @@
             <div class="mt-3 flex items-center gap-2 flex-wrap">
                 <span
                     class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $statusBadge($status) }}">
-                    {{ strtoupper($status) }}
+                    {{ $statusText($status) }}
                 </span>
 
                 @if ($paymentType)
                     <span
                         class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $payTypeBadge($paymentType) }}">
-                        {{ strtoupper($paymentType) }}
+                        {{ $payTypeText($paymentType) }}
                     </span>
                 @endif
 
                 @if ($paymentStatus)
                     <span
                         class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $payStatusBadge($paymentStatus) }}">
-                        {{ strtoupper($paymentStatus) }}
+                        {{ $payStatusText($paymentStatus) }}
                     </span>
                 @endif
 
                 @if ($shift)
                     <span
                         class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-gray-100 text-gray-700">
-                        {{ strtoupper($shift) }} SHIFT
+                        {{ strtoupper($shift) }} 班
                     </span>
                 @endif
 
                 @if ($scheduleType === 'scheduled' && $scheduledAt)
                     <span
                         class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-700">
-                        SCHEDULED
+                        预约单
                     </span>
                 @endif
             </div>
 
             {{-- Row 3: Meta --}}
+            @php
+                $serviceKey = strtolower(trim((string) $service));
+
+                $serviceLabel = match ($serviceKey) {
+                    'pickup_dropoff' => '接送',
+                    'charter' => '包车',
+                    'designated_driver' => '代驾',
+                    'purchase' => '代购',
+                    'big_car' => '大车',
+                    'driver_only' => '司机',
+                    default => $service,
+                };
+            @endphp
+
             <p class="mt-3 text-sm text-slate-500 font-medium">
-                {{ $service }} • Created {{ $createdAt }}
+                {{ $serviceLabel }} • 创建于 {{ $createdAt }}
             </p>
         </div>
 
@@ -144,10 +191,10 @@
             <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5 sm:p-6">
                 <div class="flex items-start justify-between">
                     <div>
-                        <div class="text-xs font-black tracking-widest uppercase text-slate-400">Customer</div>
+                        <div class="text-xs font-black tracking-widest uppercase text-slate-400">顾客</div>
                         <div class="mt-2 text-lg font-extrabold text-slate-900">{{ $customerName }}</div>
                         <div class="mt-1 text-sm text-slate-500 font-semibold">
-                            Phone: <span class="text-slate-900 font-extrabold">{{ $customerPhone }}</span>
+                            电话：<span class="text-slate-900 font-extrabold">{{ $customerPhone }}</span>
                         </div>
                     </div>
 
@@ -167,7 +214,7 @@
 
                     <div>
                         <div class="text-xs font-black tracking-widest uppercase text-slate-400">
-                            Route
+                            路线
                         </div>
 
                         <div class="mt-2 text-lg sm:text-xl font-extrabold text-slate-900">
@@ -177,7 +224,7 @@
                         <div class="mt-2 flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-600">
 
                             <div>
-                                Service:
+                                服务：
                                 <span class="text-slate-900 font-extrabold">
                                     {{ $service }}
                                 </span>
@@ -186,15 +233,15 @@
                             {{-- Pax Badge --}}
                             <div
                                 class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 border border-gray-200 text-slate-900 text-xs font-extrabold">
-                                👤 {{ $pax ?? 1 }} Pax
+                                👤 {{ $pax ?? 1 }} 人
                             </div>
 
                         </div>
 
                         <div class="mt-2 text-sm text-slate-600 font-semibold">
-                            Schedule:
+                            时间：
                             <span class="text-slate-900 font-extrabold">
-                                {{ $scheduleType === 'scheduled' && $scheduledAt ? $scheduledAt->format('d M Y, h:i A') : 'Now' }}
+                                {{ $scheduleType === 'scheduled' && $scheduledAt ? $scheduledAt->format('d M Y, h:i A') : '立即' }}
                             </span>
                         </div>
                     </div>
@@ -211,7 +258,7 @@
 
                 @if ($note)
                     <div class="mt-5 rounded-2xl bg-gray-50 border border-gray-100 p-4 text-sm text-slate-700">
-                        <div class="font-extrabold text-slate-900">Note</div>
+                        <div class="font-extrabold text-slate-900">备注</div>
                         <div class="mt-1">{{ $note }}</div>
                     </div>
                 @endif
@@ -220,17 +267,16 @@
             {{-- Assign --}}
             <div id="assign" class="rounded-3xl bg-white border border-gray-100 shadow-sm overflow-hidden">
                 <div class="px-5 sm:px-6 py-5 border-b border-gray-100">
-                    <div class="text-sm font-extrabold text-slate-900">Dispatch (Assign Driver)</div>
+                    <div class="text-sm font-extrabold text-slate-900">派单（指派司机）</div>
                     <div class="text-xs text-slate-500 font-semibold mt-1">
-                        Assign driver + set payment type for this order.
+                        为此订单指派司机并设置付款方式。
                     </div>
                 </div>
 
                 <div class="p-5 sm:p-6">
                     @if (!$canAssign)
                         <div class="rounded-2xl bg-gray-50 border border-gray-100 p-4 text-sm text-slate-700">
-                            Dispatch locked because status is <span
-                                class="font-extrabold">{{ strtoupper($status) }}</span>.
+                            目前状态为 <span class="font-extrabold">{{ $statusText($status) }}</span>，派单已锁定，无法更改。
                         </div>
                     @else
                         <form method="POST" action="{{ route('admin.orders.assign', $order) }}" class="space-y-4">
@@ -242,21 +288,19 @@
                                 {{-- Driver --}}
                                 <div class="rounded-2xl border border-gray-100 bg-white p-4">
                                     <div class="text-xs font-black tracking-widest uppercase text-slate-400">
-                                        Driver
+                                        司机
                                     </div>
 
                                     <div class="mt-2">
                                         <select name="driver_id" required
                                             class="w-full h-11 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-extrabold focus:ring-4 focus:ring-black/5 focus:border-black outline-none">
-
-                                            <option value="">Select driver</option>
+                                            <option value="">选择司机</option>
 
                                             @foreach ($drivers as $d)
                                                 <option value="{{ $d->id }}" @selected((int) $order->driver_id === (int) $d->id)>
-                                                    {{ $d->name }}{{ $d->shift ? ' (' . $d->shift . ')' : '' }}
+                                                    {{ $d->name }}{{ $d->shift ? '（' . ($d->shift === 'day' ? '白班' : '夜班') . '）' : '' }}
                                                 </option>
                                             @endforeach
-
                                         </select>
 
                                         @error('driver_id')
@@ -267,31 +311,29 @@
                                     </div>
 
                                     <div class="mt-3 text-xs text-slate-500 font-semibold">
-                                        Current:
+                                        当前司机：
                                         <span class="text-slate-900 font-extrabold">
-                                            {{ $driverName ?? 'Not assigned' }}
+                                            {{ $driverName ?? '未指派' }}
                                         </span>
                                     </div>
                                 </div>
 
-
                                 {{-- Payment --}}
                                 <div class="rounded-2xl border border-gray-100 bg-white p-4">
                                     <div class="text-xs font-black tracking-widest uppercase text-slate-400">
-                                        Payment Type
+                                        付款方式
                                     </div>
 
                                     @php $curPay = strtolower((string)($order->payment_type ?? '')); @endphp
 
                                     <div class="mt-3 flex flex-wrap gap-2">
-
                                         <label class="cursor-pointer">
                                             <input type="radio" name="payment_type" value="cash" class="sr-only peer"
                                                 @checked($curPay === 'cash') required>
                                             <span
                                                 class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
                            peer-checked:bg-black peer-checked:text-white peer-checked:border-black transition">
-                                                Cash
+                                                现金
                                             </span>
                                         </label>
 
@@ -301,7 +343,7 @@
                                             <span
                                                 class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
                            peer-checked:bg-rose-50 peer-checked:text-rose-700 peer-checked:border-rose-200 transition">
-                                                Credit (挂单)
+                                                挂单
                                             </span>
                                         </label>
 
@@ -311,10 +353,9 @@
                                             <span
                                                 class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
                            peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-checked:border-emerald-200 transition">
-                                                Transfer
+                                                转账
                                             </span>
                                         </label>
-
                                     </div>
 
                                     @error('payment_type')
@@ -324,15 +365,14 @@
                                     @enderror
 
                                     <div class="mt-2 text-xs text-slate-500 font-semibold">
-                                        Driver will see payment type.
+                                        司机端会看到此付款方式。
                                     </div>
                                 </div>
-
 
                                 {{-- Amount --}}
                                 <div class="rounded-2xl border border-gray-100 bg-white p-4">
                                     <div class="text-xs font-black tracking-widest uppercase text-slate-400">
-                                        Amount (RM)
+                                        金额（RM）
                                     </div>
 
                                     <div class="mt-2 relative">
@@ -345,7 +385,6 @@
                                             value="{{ old('amount', $order->amount ?? '') }}" required
                                             class="w-full h-11 rounded-2xl border border-gray-200 bg-white pl-12 pr-4 text-sm font-extrabold
                           focus:ring-4 focus:ring-black/5 focus:border-black outline-none">
-
                                     </div>
 
                                     @error('amount')
@@ -355,7 +394,7 @@
                                     @enderror
 
                                     <div class="mt-2 text-xs text-slate-500 font-semibold">
-                                        Final charge for this booking.
+                                        本次订单最终收费金额。
                                     </div>
                                 </div>
 
@@ -364,12 +403,12 @@
                             <div class="flex items-center gap-2 pt-2">
                                 <button type="submit"
                                     class="inline-flex items-center justify-center h-11 px-5 rounded-2xl bg-black text-white text-sm font-extrabold hover:bg-slate-900 transition">
-                                    Confirm Assign
+                                    确认指派
                                 </button>
 
                                 <a href="{{ route('admin.orders.index') }}"
                                     class="inline-flex items-center justify-center h-11 px-5 rounded-2xl bg-white border border-gray-200 text-slate-900 text-sm font-extrabold hover:bg-gray-50 transition">
-                                    Back to list
+                                    返回列表
                                 </a>
                             </div>
                         </form>
@@ -382,24 +421,25 @@
         <div class="space-y-6">
             {{-- Driver --}}
             <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5 sm:p-6">
-                <div class="text-xs font-black tracking-widest uppercase text-slate-400">Driver</div>
-                <div class="mt-2 text-lg font-extrabold text-slate-900">{{ $driverName ?? 'Not assigned' }}</div>
+                <div class="text-xs font-black tracking-widest uppercase text-slate-400">司机</div>
+                <div class="mt-2 text-lg font-extrabold text-slate-900">{{ $driverName ?? '未指派' }}</div>
                 <div class="mt-1 text-sm text-slate-500 font-semibold">
-                    Shift: <span class="text-slate-900 font-extrabold">{{ $driverShift ?? '—' }}</span>
+                    班次：<span
+                        class="text-slate-900 font-extrabold">{{ $driverShift ? ($driverShift === 'day' ? '白班' : '夜班') : '—' }}</span>
                 </div>
 
                 <div class="mt-4 rounded-2xl bg-gray-50 border border-gray-100 p-4 text-sm text-slate-700">
-                    <div class="font-extrabold text-slate-900">Assigned At</div>
+                    <div class="font-extrabold text-slate-900">指派时间</div>
                     <div class="mt-1">{{ $assignedAt ?? '—' }}</div>
                 </div>
             </div>
 
             {{-- Manager --}}
             <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5 sm:p-6">
-                <div class="text-xs font-black tracking-widest uppercase text-slate-400">Manager</div>
+                <div class="text-xs font-black tracking-widest uppercase text-slate-400">调度员</div>
                 <div class="mt-2 text-lg font-extrabold text-slate-900">{{ $managerName ?? '—' }}</div>
                 <div class="mt-1 text-sm text-slate-500 font-semibold">
-                    (If order was assigned by manager)
+                    （若订单由调度员派单则会显示）
                 </div>
             </div>
 

@@ -1,13 +1,13 @@
 @extends('layouts.admin-app')
 
-@section('title', 'Credit Logs')
+@section('title', '信用记录')
 
 @section('header')
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">Credit Logs</h1>
+            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">信用记录</h1>
             <p class="mt-1 text-sm text-slate-500 font-semibold">
-                Track all credit adjustments and balance history.
+                追踪所有信用额调整与余额变动记录。
             </p>
         </div>
     </div>
@@ -24,7 +24,7 @@
 
                 {{-- Search --}}
                 <div class="relative w-full sm:w-96">
-                    <input name="q" value="{{ $q ?? '' }}" type="text" placeholder="Search customer name..."
+                    <input name="q" value="{{ $q ?? '' }}" type="text" placeholder="搜索客户姓名..."
                         class="w-full h-11 rounded-2xl border border-gray-200 bg-white px-4 pr-10 text-sm font-semibold
                                focus:ring-4 focus:ring-black/5 focus:border-black outline-none">
 
@@ -38,23 +38,23 @@
                 {{-- Type Filter --}}
                 <select name="type"
                     class="w-full sm:w-44 h-11 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-extrabold focus:ring-4 focus:ring-black/5 focus:border-black outline-none">
-                    <option value="">All Types</option>
-                    <option value="add" @selected(($type ?? '') === 'add')>Add</option>
-                    <option value="deduct" @selected(($type ?? '') === 'deduct')>Deduct</option>
-                    <option value="clear" @selected(($type ?? '') === 'clear')>Clear</option>
+                    <option value="">全部类型</option>
+                    <option value="add" @selected(($type ?? '') === 'add')>增加</option>
+                    <option value="deduct" @selected(($type ?? '') === 'deduct')>扣除</option>
+                    <option value="clear" @selected(($type ?? '') === 'clear')>清零</option>
                 </select>
             </div>
 
             <div class="flex items-center gap-2">
                 <button
                     class="h-11 px-5 rounded-2xl bg-black text-white text-sm font-extrabold hover:bg-slate-900 transition">
-                    Apply
+                    应用筛选
                 </button>
 
-                @if (!empty($q) || !empty($action))
+                @if (!empty($q) || !empty($type))
                     <a href="{{ route('admin.credit.logs.index') }}"
                         class="py-3 px-5 rounded-2xl bg-white border border-gray-200 text-slate-900 text-sm font-extrabold hover:bg-gray-50 transition">
-                        Clear
+                        清除
                     </a>
                 @endif
             </div>
@@ -66,9 +66,9 @@
 
         <div class="px-5 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <div class="text-sm font-extrabold text-slate-900">
-                Credit History
+                信用记录明细
                 <span class="ml-2 text-xs font-black text-slate-500">
-                    {{ $logs->total() }} total
+                    共 {{ $logs->total() }} 条
                 </span>
             </div>
         </div>
@@ -77,13 +77,13 @@
             <table class="min-w-full">
                 <thead class="bg-gray-50">
                     <tr class="text-left text-xs font-black uppercase tracking-widest text-slate-400">
-                        <th class="px-5 sm:px-6 py-3">Customer</th>
-                        <th class="px-5 sm:px-6 py-3">Before</th>
-                        <th class="px-5 sm:px-6 py-3">Change</th>
-                        <th class="px-5 sm:px-6 py-3">After</th>
-                        <th class="px-5 sm:px-6 py-3">Action</th>
-                        <th class="px-5 sm:px-6 py-3">By</th>
-                        <th class="px-5 sm:px-6 py-3">Date</th>
+                        <th class="px-5 sm:px-6 py-3">客户</th>
+                        <th class="px-5 sm:px-6 py-3">调整前</th>
+                        <th class="px-5 sm:px-6 py-3">变动</th>
+                        <th class="px-5 sm:px-6 py-3">调整后</th>
+                        <th class="px-5 sm:px-6 py-3">操作</th>
+                        <th class="px-5 sm:px-6 py-3">操作者</th>
+                        <th class="px-5 sm:px-6 py-3">日期</th>
                     </tr>
                 </thead>
 
@@ -94,7 +94,7 @@
                             {{-- Customer --}}
                             <td class="px-5 sm:px-6 py-4">
                                 <div class="font-extrabold text-slate-900">
-                                    {{ $log->customer?->name }}
+                                    {{ $log->customer?->full_name }}
                                 </div>
                                 <div class="text-xs text-slate-500 font-semibold">
                                     ID: {{ $log->customer_id }}
@@ -121,20 +121,41 @@
 
                             {{-- Action Badge --}}
                             <td class="px-5 sm:px-6 py-4">
+                                @php
+                                    $change = (float) $log->change;
+                                @endphp
+
                                 <span
                                     class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black
-                                    {{ $log->action === 'add'
-                                        ? 'bg-emerald-100 text-emerald-800'
-                                        : ($log->action === 'deduct'
-                                            ? 'bg-rose-100 text-rose-700'
-                                            : 'bg-gray-100 text-gray-700') }}">
-                                    {{ strtoupper($log->action) }}
+        @if ($log->action === 'clear') bg-gray-100 text-gray-700
+        @elseif ($log->action === 'order_completed')
+            bg-indigo-100 text-indigo-700
+        @elseif ($change > 0)
+            bg-emerald-100 text-emerald-800
+        @elseif ($change < 0)
+            bg-rose-100 text-rose-700
+        @else
+            bg-slate-100 text-slate-700 @endif
+        ">
+
+                                    @if ($log->action === 'clear')
+                                        清零
+                                    @elseif ($log->action === 'order_completed')
+                                        行程完成
+                                    @elseif ($change > 0)
+                                        增加
+                                    @elseif ($change < 0)
+                                        扣除
+                                    @else
+                                        更新
+                                    @endif
                                 </span>
+                            </td>pan>
                             </td>
 
-                            {{-- Manager --}}
+                            {{-- By --}}
                             <td class="px-5 sm:px-6 py-4 text-sm font-semibold text-slate-900">
-                                {{ $log->manager?->name ?? 'System' }}
+                                {{ $log->manager?->name ?? '系统' }}
                             </td>
 
                             {{-- Date --}}
@@ -151,7 +172,7 @@
                     @empty
                         <tr>
                             <td colspan="7" class="px-5 sm:px-6 py-10 text-center text-sm text-slate-500 font-semibold">
-                                No credit logs found.
+                                没有找到信用记录。
                             </td>
                         </tr>
                     @endforelse

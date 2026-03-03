@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 
 class CustomerController extends Controller
 {
@@ -114,34 +116,80 @@ class CustomerController extends Controller
 
     public function adjustCredit(Request $request, User $customer)
     {
+        abort_unless($customer->role === 'user', 404);
+
         $data = $request->validate([
             'amount' => ['required', 'numeric', 'min:0.01'],
-            'type'   => ['required', 'in:add,deduct'],
+            'action' => ['required', 'in:add,deduct'],
         ]);
 
-        $amount = (float) $data['amount'];
+        $amount = round((float) $data['amount'], 2);
 
-        if ($data['type'] === 'add') {
-            $customer->credit_balance += $amount;
-        }
+        DB::transaction(function () use ($customer, $data, $amount) {
 
-        if ($data['type'] === 'deduct') {
-            $customer->credit_balance -= $amount;
+            $u = User::whereKey($customer->id)->lockForUpdate()->first();
 
-            // 防止变负数（可选）
-            if ($customer->credit_balance < 0) {
-                $customer->credit_balance = 0;
-            }
-        }
+            $before = (float) ($u->credit_balance ?? 0);
 
-        $customer->save();
+            $after = $data['action'] === 'add'
+                ? $before + $amount
+                : max(0, $before - $amount);
+
+            $change = $data['action'] === 'add'
+                ? $amount
+                : -$amount;
+
+            $u->update(['credit_balance' => $after]);
+
+            DB::table('credit_logs')->insert([
+                'customer_id' => $u->id,
+                'manager_id'  => auth()->id(),
+                'before'      => $before,
+                'change'      => $change,
+                'after'       => $after,
+                'action'      => 'update', // 你表里有 order_completed / update / clear
+                'note'        => 'Admin credit adjustment',
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ]);
+        });
 
         return back()->with('success', 'Credit updated.');
     }
 
     public function clearCredit(User $customer)
     {
-        $customer->update(['credit_balance' => 0]);
+        abort_unless($customer->role === 'user', 404);
+
+        DB::transaction(function () use ($customer) {
+
+            $u = User::whereKey($customer->id)
+                ->lockForUpdate()
+                ->first();
+
+            $before = (float) ($u->credit_balance ?? 0);
+
+            // 如果本来就是 0，不记录也可以（可选）
+            if ($before == 0) {
+                return;
+            }
+
+            $u->update([
+                'credit_balance' => 0,
+            ]);
+
+            DB::table('credit_logs')->insert([
+                'customer_id' => $u->id,
+                'manager_id'  => auth()->id(),
+                'before'      => $before,
+                'change'      => -$before, // 清零 = 扣掉全部
+                'after'       => 0,
+                'action'      => 'clear',
+                'note'        => 'Admin cleared credit',
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ]);
+        });
 
         return back()->with('success', 'Credit cleared.');
     }

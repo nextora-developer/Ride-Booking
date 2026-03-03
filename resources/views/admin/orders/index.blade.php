@@ -1,6 +1,6 @@
 @extends('layouts.admin-app')
 
-@section('title', 'Orders')
+@section('title', '订单')
 
 @section('header')
     <div class="relative px-2">
@@ -10,15 +10,16 @@
 
             <div>
                 <h1 class="text-lg font-black text-slate-900">
-                    Orders
+                    订单
                 </h1>
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    Dispatch Panel
+                    派单面板
                 </p>
             </div>
 
             <a href="{{ route('admin.orders.index') }}"
-                class="inline-flex items-center justify-center h-11 w-11 rounded-2xl bg-black text-white shadow active:scale-90 transition-transform">
+                class="inline-flex items-center justify-center h-11 w-11 rounded-2xl bg-black text-white shadow active:scale-90 transition-transform"
+                title="刷新">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M16.023 9.348h4.992M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
@@ -32,11 +33,11 @@
 
             <div>
                 <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">
-                    Orders
+                    订单
                 </h1>
 
                 <p class="mt-2 text-sm text-slate-500 font-medium">
-                    Review bookings and assign drivers (Cash / Credit / Transfer).
+                    查看订单并指派司机（现金 / 挂单 / 转账）。
                 </p>
             </div>
 
@@ -46,7 +47,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M16.023 9.348h4.992M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
                 </svg>
-                Refresh
+                刷新
             </a>
 
         </div>
@@ -78,6 +79,30 @@
                 default => 'bg-gray-100 text-gray-700',
             };
         };
+
+        // ✅ 文案映射（状态/付款/按钮）
+        $statusText = function ($s) {
+            return match (strtolower((string) $s)) {
+                'unassigned', 'pending_assign', 'pending' => '待派单',
+                'assigned' => '已指派',
+                'on_the_way' => '前往接送',
+                'arrived' => '已到起点',
+                'in_trip' => '行程中',
+                'ongoing', 'in_progress' => '进行中',
+                'completed', 'done' => '已完成',
+                'cancelled', 'canceled' => '已取消',
+                default => strtoupper((string) $s ?: '—'),
+            };
+        };
+
+        $payText = function ($p) {
+            return match (strtolower((string) $p)) {
+                'cash' => '现金',
+                'credit' => '挂单',
+                'transfer' => '转账',
+                default => strtoupper((string) $p ?: '—'),
+            };
+        };
     @endphp
 
     @php
@@ -107,10 +132,10 @@
 
                 {{-- 🔍 Search --}}
                 <div class="sm:col-span-2 lg:col-span-5">
-                    <div class="{{ $label }}">Search</div>
+                    <div class="{{ $label }}">搜索</div>
                     <div class="relative">
-                        <input name="q" value="{{ $q ?? '' }}" type="text"
-                            placeholder="Order / customer / route..." class="{{ $ctrl }} pr-10">
+                        <input name="q" value="{{ $q ?? '' }}" type="text" placeholder="订单 / 顾客 / 路线..."
+                            class="{{ $ctrl }} pr-10">
                         <svg class="h-5 w-5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35" />
@@ -121,61 +146,61 @@
 
                 {{-- Status --}}
                 <div class="lg:col-span-2">
-                    <div class="{{ $label }}">Status</div>
+                    <div class="{{ $label }}">状态</div>
                     <select name="status" class="{{ $ctrl }}">
-                        <option value="">All</option>
-                        <option value="pending" @selected(($status ?? '') === 'pending')>Pending</option>
-                        <option value="assigned" @selected(($status ?? '') === 'assigned')>Assigned</option>
-                        <option value="on_the_way" @selected(($status ?? '') === 'on_the_way')>On The Way</option>
-                        <option value="in_trip" @selected(($status ?? '') === 'in_trip')>In Trip</option>
-                        <option value="completed" @selected(($status ?? '') === 'completed')>Completed</option>
+                        <option value="">全部</option>
+                        <option value="pending" @selected(($status ?? '') === 'pending')>待派单</option>
+                        <option value="assigned" @selected(($status ?? '') === 'assigned')>已指派</option>
+                        <option value="on_the_way" @selected(($status ?? '') === 'on_the_way')>前往接送</option>
+                        <option value="in_trip" @selected(($status ?? '') === 'in_trip')>行程中</option>
+                        <option value="completed" @selected(($status ?? '') === 'completed')>已完成</option>
                     </select>
                 </div>
 
                 {{-- Payment --}}
                 <div class="lg:col-span-2">
-                    <div class="{{ $label }}">Payment</div>
+                    <div class="{{ $label }}">付款</div>
                     <select name="payment_type" class="{{ $ctrl }}">
-                        <option value="">All Payment</option>
-                        <option value="cash" @selected(($payment_type ?? '') === 'cash')>Cash</option>
-                        <option value="credit" @selected(($payment_type ?? '') === 'credit')>Credit</option>
-                        <option value="transfer" @selected(($payment_type ?? '') === 'transfer')>Transfer</option>
+                        <option value="">全部付款</option>
+                        <option value="cash" @selected(($payment_type ?? '') === 'cash')>现金</option>
+                        <option value="credit" @selected(($payment_type ?? '') === 'credit')>挂单</option>
+                        <option value="transfer" @selected(($payment_type ?? '') === 'transfer')>转账</option>
                     </select>
                 </div>
 
-                {{-- Shift (给它更舒服一点的宽度) --}}
+                {{-- Shift --}}
                 <div class="lg:col-span-3">
-                    <div class="{{ $label }}">Shift</div>
+                    <div class="{{ $label }}">班次</div>
                     <select name="shift" class="{{ $ctrl }}">
-                        <option value="">All Shift</option>
-                        <option value="day" @selected(($shift ?? '') === 'day')>Day</option>
-                        <option value="night" @selected(($shift ?? '') === 'night')>Night</option>
+                        <option value="">全部班次</option>
+                        <option value="day" @selected(($shift ?? '') === 'day')>白班</option>
+                        <option value="night" @selected(($shift ?? '') === 'night')>夜班</option>
                     </select>
                 </div>
 
-                {{-- From (第二排开始) --}}
+                {{-- From --}}
                 <div class="lg:col-span-3">
-                    <div class="{{ $label }}">From</div>
+                    <div class="{{ $label }}">开始日期</div>
                     <input type="date" name="from" value="{{ $from ?? '' }}" class="{{ $ctrl }}">
                 </div>
 
                 {{-- To --}}
                 <div class="lg:col-span-3">
-                    <div class="{{ $label }}">To</div>
+                    <div class="{{ $label }}">结束日期</div>
                     <input type="date" name="to" value="{{ $to ?? '' }}" class="{{ $ctrl }}">
                 </div>
 
-                {{-- Buttons (同一排靠右 + 底部对齐) --}}
+                {{-- Buttons --}}
                 <div class="sm:col-span-2 lg:col-span-6 flex items-end justify-end gap-2">
                     <button
                         class="h-11 px-6 rounded-2xl bg-black text-white text-sm font-extrabold hover:bg-slate-900 transition">
-                        Filter
+                        筛选
                     </button>
 
                     @if (!empty($q) || !empty($status) || !empty($payment_type) || !empty($shift) || !empty($from) || !empty($to))
                         <a href="{{ route('admin.orders.index') }}"
                             class="h-11 inline-flex items-center justify-center px-6 rounded-2xl border border-gray-200 bg-white text-sm font-extrabold hover:bg-gray-50 transition">
-                            Reset
+                            重置
                         </a>
                     @endif
                 </div>
@@ -183,22 +208,25 @@
             </div>
         </form>
     </div>
-    
+
     {{-- Orders list --}}
     <div class="mt-6 space-y-4">
         @forelse($orders as $order)
             @php
-                // 你按你的字段改：
                 $orderNo = $order->order_no ?? ($order->booking_no ?? '#' . $order->id);
-                $status = $order->status ?? 'unassigned';
+                $s = $order->status ?? 'unassigned';
                 $payment = $order->payment_type ?? null;
-                $service = $order->service_type ?? ($order->type ?? 'Service');
-                $from = $order->pickup ?? ($order->from ?? '-');
-                $to = $order->dropoff ?? ($order->to ?? '-');
+                $service = $order->service_type ?? ($order->type ?? '服务');
+                $fromLoc = $order->pickup ?? ($order->from ?? '-');
+                $toLoc = $order->dropoff ?? ($order->to ?? '-');
                 $when = optional($order->created_at)->format('d M Y, h:i A');
 
                 $driverName = optional($order->driver)->name ?? ($order->driver_name ?? null);
-                $canAssign = in_array(strtolower((string) $status), ['unassigned', 'pending_assign', 'assigned'], true);
+                $canAssign = in_array(
+                    strtolower((string) $s),
+                    ['unassigned', 'pending_assign', 'assigned', 'pending'],
+                    true,
+                );
             @endphp
 
             <div class="rounded-3xl bg-white border border-gray-100 shadow-sm overflow-hidden" x-data="{ openAssign: false }">
@@ -210,29 +238,42 @@
                                 <div class="text-lg font-extrabold text-slate-900">{{ $orderNo }}</div>
 
                                 <span
-                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $statusBadge($status) }}">
-                                    {{ ucfirst(str_replace('_', ' ', (string) $status)) }}
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $statusBadge($s) }}">
+                                    {{ $statusText($s) }}
                                 </span>
 
                                 @if ($payment)
                                     <span
                                         class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $payBadge($payment) }}">
-                                        {{ strtoupper($payment) }}
+                                        {{ $payText($payment) }}
                                     </span>
                                 @endif
                             </div>
 
                             <div class="mt-2 text-sm text-slate-600 font-semibold">
-                                <span class="font-extrabold text-slate-900">{{ $service }}</span>
+
+                                @php
+                                    $serviceLabel = match ($service) {
+                                        'pickup_dropoff' => '接送',
+                                        'charter' => '包车',
+                                        'designated_driver' => '代驾',
+                                        'purchase' => '代购',
+                                        'big_car' => '大车',
+                                        'driver_only' => '司机',
+                                        default => $service,
+                                    };
+                                @endphp
+
+                                <span class="font-extrabold text-slate-900">{{ $serviceLabel }}</span>
                                 <span class="text-slate-400">•</span>
-                                {{ $from }} → {{ $to }}
+                                {{ $fromLoc }} → {{ $toLoc }}
                             </div>
 
                             <div class="mt-2 text-xs text-slate-500 font-semibold">
                                 {{ $when }}
                                 @if ($driverName)
                                     <span class="mx-2 text-slate-300">•</span>
-                                    Driver: <span class="text-slate-900 font-extrabold">{{ $driverName }}</span>
+                                    司机：<span class="text-slate-900 font-extrabold">{{ $driverName }}</span>
                                 @endif
                             </div>
                         </div>
@@ -241,14 +282,14 @@
                             @if ($canAssign)
                                 <button @click="openAssign = !openAssign"
                                     class="inline-flex items-center justify-center h-11 px-4 rounded-2xl bg-black text-white text-sm font-extrabold hover:bg-slate-900 transition">
-                                    {{ strtolower((string) $status) === 'assigned' ? 'Change Driver' : 'Assign' }}
+                                    {{ strtolower((string) $s) === 'assigned' ? '更换司机' : '指派司机' }}
                                 </button>
                             @endif
 
                             @if (Route::has('admin.orders.show'))
                                 <a href="{{ route('admin.orders.show', $order) }}"
                                     class="inline-flex items-center justify-center h-11 px-4 rounded-2xl bg-white border border-gray-200 text-slate-900 text-sm font-extrabold hover:bg-gray-50 transition">
-                                    View
+                                    查看详情
                                 </a>
                             @endif
                         </div>
@@ -266,20 +307,20 @@
                             <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
                                 {{-- Driver --}}
                                 <div class="rounded-2xl bg-white border border-gray-100 p-4">
-                                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">Driver</div>
+                                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">选择司机</div>
                                     <div class="mt-2">
                                         <select name="driver_id" required
                                             class="w-full h-11 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-extrabold focus:ring-4 focus:ring-black/5 focus:border-black outline-none">
-                                            <option value="">Select driver</option>
+                                            <option value="">请选择司机</option>
                                             @foreach ($drivers as $d)
                                                 <option value="{{ $d->id }}">
-                                                    {{ $d->name }}{{ $d->shift ? ' (' . $d->shift . ')' : '' }}
+                                                    {{ $d->name }}{{ $d->shift ? '（' . ($d->shift === 'day' ? '白班' : '夜班') . '）' : '' }}
                                                 </option>
                                             @endforeach
                                         </select>
 
                                         <div class="mt-2 text-xs text-slate-500 font-semibold">
-                                            Choose the driver (matching shift if applicable).
+                                            建议选择对应班次的司机（如有）。
                                         </div>
 
                                         @error('driver_id')
@@ -290,8 +331,7 @@
 
                                 {{-- Payment type --}}
                                 <div class="rounded-2xl bg-white border border-gray-100 p-4">
-                                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">Payment Type
-                                    </div>
+                                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">付款方式</div>
 
                                     <div class="mt-3 flex flex-wrap gap-2">
                                         <label class="cursor-pointer">
@@ -299,8 +339,8 @@
                                                 class="sr-only peer" required>
                                             <span
                                                 class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
-                                                        peer-checked:bg-black peer-checked:text-white peer-checked:border-black transition">
-                                                Cash
+                                                       peer-checked:bg-black peer-checked:text-white peer-checked:border-black transition">
+                                                现金
                                             </span>
                                         </label>
 
@@ -309,8 +349,8 @@
                                                 class="sr-only peer" required>
                                             <span
                                                 class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
-                                                        peer-checked:bg-rose-50 peer-checked:text-rose-700 peer-checked:border-rose-200 transition">
-                                                Credit (挂单)
+                                                       peer-checked:bg-rose-50 peer-checked:text-rose-700 peer-checked:border-rose-200 transition">
+                                                挂单
                                             </span>
                                         </label>
 
@@ -319,14 +359,14 @@
                                                 class="sr-only peer" required>
                                             <span
                                                 class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
-                                                        peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-checked:border-emerald-200 transition">
-                                                Transfer
+                                                       peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-checked:border-emerald-200 transition">
+                                                转账
                                             </span>
                                         </label>
                                     </div>
 
                                     <div class="mt-2 text-xs text-slate-500 font-semibold">
-                                        Driver will see this payment type.
+                                        司机端会看到此付款方式。
                                     </div>
 
                                     @error('payment_type')
@@ -336,8 +376,7 @@
 
                                 {{-- Amount --}}
                                 <div class="rounded-2xl bg-white border border-gray-100 p-4">
-                                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">Amount (RM)
-                                    </div>
+                                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">金额（RM）</div>
 
                                     <div class="mt-2 relative">
                                         <span
@@ -345,12 +384,12 @@
                                         <input type="number" name="amount" step="0.01" min="0" required
                                             value="{{ old('amount', $order->amount ?? '') }}"
                                             class="w-full h-11 rounded-2xl border border-gray-200 bg-white pl-12 pr-4 text-sm font-extrabold
-                                                    focus:ring-4 focus:ring-black/5 focus:border-black outline-none"
+                                                   focus:ring-4 focus:ring-black/5 focus:border-black outline-none"
                                             placeholder="0.00">
                                     </div>
 
                                     <div class="mt-2 text-xs text-slate-500 font-semibold">
-                                        Final charge for this booking.
+                                        本次订单最终收费金额。
                                     </div>
 
                                     @error('amount')
@@ -358,25 +397,24 @@
                                     @enderror
                                 </div>
 
-                                {{-- Confirm (full width on desktop) --}}
+                                {{-- Confirm --}}
                                 <div class="rounded-2xl bg-white border border-gray-100 p-4 flex flex-col justify-between">
                                     <div>
-                                        <div class="text-xs font-black tracking-widest uppercase text-slate-400">Confirm
-                                        </div>
+                                        <div class="text-xs font-black tracking-widest uppercase text-slate-400">确认</div>
                                         <div class="mt-2 text-sm text-slate-600 font-semibold">
-                                            Assign driver and lock payment type for this order.
+                                            指派司机并锁定付款方式。
                                         </div>
                                     </div>
 
                                     <div class="mt-4 flex items-center gap-2">
                                         <button type="submit"
                                             class="inline-flex items-center justify-center h-11 px-4 rounded-2xl bg-black text-white text-sm font-extrabold hover:bg-slate-900 transition">
-                                            Confirm Assign
+                                            确认指派
                                         </button>
 
                                         <button type="button" @click="openAssign=false"
                                             class="inline-flex items-center justify-center h-11 px-4 rounded-2xl bg-white border border-gray-200 text-slate-900 text-sm font-extrabold hover:bg-gray-50 transition">
-                                            Cancel
+                                            取消
                                         </button>
                                     </div>
                                 </div>
@@ -388,8 +426,8 @@
             </div>
         @empty
             <div class="rounded-3xl bg-white border border-gray-100 p-10 text-center">
-                <div class="text-2xl font-extrabold text-slate-900">No orders yet</div>
-                <div class="mt-2 text-sm text-slate-500 font-medium">When customer books, orders will appear here.</div>
+                <div class="text-2xl font-extrabold text-slate-900">暂无订单</div>
+                <div class="mt-2 text-sm text-slate-500 font-medium">当顾客下单后，订单会显示在这里。</div>
             </div>
         @endforelse
     </div>
