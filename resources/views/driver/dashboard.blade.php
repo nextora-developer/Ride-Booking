@@ -68,6 +68,9 @@
         $navPickupUrl = '#';
         $navDropoffUrl = '#';
 
+        $scheduledAt = null;
+        $scheduleText = '现在';
+
         if ($currentOrder) {
             $customerName = $currentOrder->customer_name ?? (optional($currentOrder->user)->name ?? '顾客');
 
@@ -77,6 +80,12 @@
             if ($phoneDigits && str_starts_with($phoneDigits, '0')) {
                 $phoneDigits = '60' . ltrim($phoneDigits, '0');
             }
+
+            $scheduledAt = $currentOrder->scheduled_at ?? ($currentOrder->scheduledAt ?? null); // 你实际字段用哪个就留哪个
+            $scheduleText =
+                ($currentOrder->schedule_type ?? '') === 'scheduled' && $scheduledAt
+                    ? \Carbon\Carbon::parse($scheduledAt)->format('d M Y, h:i A')
+                    : '现在';
 
             $amount = (float) ($currentOrder->amount ?? ($currentOrder->total ?? 0));
             $pax = (int) ($currentOrder->pax ?? 1);
@@ -235,10 +244,16 @@
                         </div>
 
                         <div class="rounded-2xl bg-white border border-slate-200 px-4 py-4 text-center shadow-sm">
-                            <div class="text-xs font-black text-slate-500 uppercase tracking-widest">类型</div>
+                            {{-- <div class="text-xs font-black text-slate-500 uppercase tracking-widest">类型</div> --}}
                             <div class="text-sm font-black text-slate-900 mt-1 leading-none">
-                                {{ ($currentOrder->schedule_type ?? '') === 'scheduled' ? '预约单' : '即时单' }}
+                                {{ ($currentOrder->schedule_type ?? '') === 'scheduled' ? '预约' : '即时单' }}
                             </div>
+
+                            @if (($currentOrder->schedule_type ?? '') === 'scheduled')
+                                <div class="text-xs font-bold text-slate-500 mt-2 leading-none">
+                                    <span class="font-black text-slate-900">{{ $scheduleText }}</span>
+                                </div>
+                            @endif
                         </div>
 
                     </div>
@@ -411,4 +426,12 @@
             }
         }
     </script>
+
+    @if (!$currentOrder)
+        <script>
+            setInterval(function() {
+                window.location.reload();
+            }, 10000);
+        </script>
+    @endif
 @endsection

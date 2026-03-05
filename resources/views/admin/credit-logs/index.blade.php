@@ -150,7 +150,6 @@
                                         更新
                                     @endif
                                 </span>
-                            </td>pan>
                             </td>
 
                             {{-- By --}}

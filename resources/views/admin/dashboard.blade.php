@@ -222,7 +222,6 @@
                             <th class="px-6 py-4">服务</th>
                             <th class="px-6 py-4">路线</th>
                             <th class="px-6 py-4">付款</th>
-                            <th class="px-6 py-4">状态</th>
                             <th class="px-6 py-4 text-right">操作</th>
                         </tr>
                     </thead>
@@ -315,12 +314,6 @@
                                     <span
                                         class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $payBadge($o->payment_type) }}">
                                         {{ $payText($o->payment_type) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $badge($o->status) }}">
-                                        {{ $statusText($o->status) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-right">

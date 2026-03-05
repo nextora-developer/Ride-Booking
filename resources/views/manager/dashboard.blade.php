@@ -76,7 +76,6 @@
             ->where('shift', $shiftValue)
             ->where('driver_status', 'approved') // ✅ 你的字段是 driver_status
             ->where('is_online', 1)
-            ->where('last_active_at', '>=', now()->subMinutes(5)) // 5分钟内有心跳才算在线
             ->count();
 
         // ✅ 全部司机（本班次）

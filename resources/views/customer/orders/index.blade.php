@@ -145,7 +145,7 @@
                                     <h4 class="text-base font-black text-slate-900 leading-none">{{ $meta['label'] }}</h4>
                                     <p class="text-xs font-black text-slate-600 uppercase mt-1.5 tracking-tight">
                                         {{ $o->schedule_type === 'scheduled' ? '📅 ' : '⚡ ' }}
-                                        {{ $o->schedule_type === 'scheduled' && $o->scheduled_at ? $o->scheduled_at->format('M d, H:i') : $o->created_at->format('M d, H:i') }}
+                                        {{ $o->schedule_type === 'scheduled' && $o->scheduled_at ? $o->scheduled_at->format('d M, H:i') : $o->created_at->format('M d, H:i') }}
                                     </p>
                                 </div>
                             </div>
@@ -180,23 +180,47 @@
                             </div>
                         </div>
 
-                        {{-- Footer: Meta & Note --}}
-                        @if ($o->note)
-                            <div class="mt-6 pt-5 border-t border-slate-200 flex items-center justify-between">
-                                <div class="flex items-center gap-2 overflow-hidden">
+                        {{-- Footer: Meta --}}
+                        <div class="mt-6 pt-5 border-t border-slate-200 flex items-center justify-between">
+
+                            {{-- 左边 Note --}}
+                            <div class="flex items-center gap-2 overflow-hidden">
+
+                                @if ($o->note)
                                     <div class="p-1.5 bg-amber-100/60 border border-amber-200/60 rounded-lg shrink-0">
                                         <svg class="h-3.5 w-3.5 text-amber-700" fill="currentColor" viewBox="0 0 20 20">
                                             <path
                                                 d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7h10m-10 4h6" />
                                         </svg>
                                     </div>
-                                    <p class="text-xs font-bold text-slate-700 truncate">“{{ $o->note }}”</p>
+
+                                    <p class="text-xs font-bold text-slate-700 truncate">
+                                        “{{ $o->note }}”
+                                    </p>
+                                @else
+                                    <p class="text-xs font-bold text-slate-400 italic">
+                                        No note
+                                    </p>
+                                @endif
+
+                            </div>
+
+                            {{-- 右边 Payment + Amount --}}
+                            <div class="flex items-center gap-3 shrink-0 ml-4">
+
+                                {{-- Amount --}}
+                                <div class="text-xs font-extrabold text-emerald-600">
+                                    RM {{ number_format($o->amount ?? ($o->price ?? 0), 2) }}
                                 </div>
-                                <div class="text-xs font-black uppercase shrink-0 ml-4 text-slate-700">
+
+                                {{-- Payment --}}
+                                <div class="text-xs font-black uppercase text-slate-700">
                                     {{ $paymentText($o->payment_type) }}
                                 </div>
+
                             </div>
-                        @endif
+
+                        </div>
                     </a>
                 @endforeach
             </div>
@@ -210,7 +234,8 @@
 
     {{-- Desktop: keep your original layout --}}
     <div class="hidden md:block">
-        <div class="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-[0_14px_34px_rgba(15,23,42,0.06)]">
+        <div
+            class="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-[0_14px_34px_rgba(15,23,42,0.06)]">
 
             <div class="px-8 py-6 border-b border-slate-200 flex items-center justify-between bg-slate-100/60">
                 <h2 class="font-black text-slate-900">最近预约</h2>
@@ -252,11 +277,13 @@
                                                shadow-[0_10px_24px_rgba(15,23,42,0.06)] group-hover:border-slate-300 transition-all">
                                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
                                             stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="{{ $meta['icon'] }}" />
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="{{ $meta['icon'] }}" />
                                         </svg>
                                     </div>
                                     <div class="flex flex-col">
-                                        <span class="text-xs font-black text-slate-600 uppercase tracking-tight leading-none mb-1">
+                                        <span
+                                            class="text-xs font-black text-slate-600 uppercase tracking-tight leading-none mb-1">
                                             {{ $meta['label'] }}
                                         </span>
                                         <span
@@ -275,29 +302,37 @@
                                             <div class="h-2 w-2 rounded-full bg-slate-900"></div>
                                         </div>
                                         <div class="min-w-0">
-                                            <div class="text-xs font-bold text-slate-600 truncate">{{ $o->pickup }}</div>
-                                            <div class="text-sm mt-3 font-black text-slate-900 truncate">{{ $o->dropoff }}</div>
+                                            <div class="text-xs font-bold text-slate-600 truncate">{{ $o->pickup }}
+                                            </div>
+                                            <div class="text-sm mt-3 font-black text-slate-900 truncate">
+                                                {{ $o->dropoff }}</div>
                                         </div>
                                     </div>
                                 </div>
 
                                 {{-- Metadata --}}
-                                <div class="grid grid-cols-2 md:grid-cols-3 lg:flex items-center gap-8 text-left lg:text-right shrink-0">
+                                <div
+                                    class="grid grid-cols-2 md:grid-cols-3 lg:flex items-center gap-8 text-left lg:text-right shrink-0">
                                     <div class="flex flex-col">
-                                        <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest">日期 / 时间</span>
+                                        <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest">日期 /
+                                            时间</span>
                                         <span class="text-sm font-bold text-slate-800">
                                             {{ $o->schedule_type === 'scheduled' && $o->scheduled_at ? $o->scheduled_at->format('d M, h:i A') : $o->created_at->format('d M, h:i A') }}
                                         </span>
                                     </div>
 
                                     <div class="flex flex-col">
-                                        <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest">班次</span>
-                                        <span class="text-sm font-bold text-slate-800 capitalize">{{ $o->shift ?? 'Day' }}</span>
+                                        <span
+                                            class="text-[10px] font-black text-slate-600 uppercase tracking-widest">班次</span>
+                                        <span
+                                            class="text-sm font-bold text-slate-800 capitalize">{{ $o->shift ?? 'Day' }}</span>
                                     </div>
 
                                     <div class="hidden md:flex flex-col">
-                                        <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest">付款方式</span>
-                                        <span class="text-sm font-bold text-slate-800">{{ strtoupper($paymentText($o->payment_type)) }}</span>
+                                        <span
+                                            class="text-[10px] font-black text-slate-600 uppercase tracking-widest">付款方式</span>
+                                        <span
+                                            class="text-sm font-bold text-slate-800">{{ strtoupper($paymentText($o->payment_type)) }}</span>
                                     </div>
 
                                     <div class="col-span-2 md:col-span-1 lg:ml-4">
@@ -312,13 +347,15 @@
                             </div>
 
                             @if ($o->note)
-                                <div class="mt-4 flex items-start gap-2 px-4 py-3 rounded-xl bg-slate-100/60 border border-slate-200">
+                                <div
+                                    class="mt-4 flex items-start gap-2 px-4 py-3 rounded-xl bg-slate-100/60 border border-slate-200">
                                     <svg class="h-4 w-4 text-slate-500 shrink-0 mt-0.5" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                                     </svg>
-                                    <p class="text-xs font-bold text-slate-700 italic leading-snug">备注：{{ $o->note }}</p>
+                                    <p class="text-xs font-bold text-slate-700 italic leading-snug">备注：{{ $o->note }}
+                                    </p>
                                 </div>
                             @endif
                         </div>

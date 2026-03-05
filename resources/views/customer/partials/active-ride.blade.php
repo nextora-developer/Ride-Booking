@@ -42,24 +42,61 @@
                 </div>
 
                 @if ($activeBooking->driver)
-                    <div class="flex items-center justify-between bg-white/5 rounded-2xl p-4">
-                        <div class="flex items-center gap-4">
-                            <div
-                                class="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center font-black text-lg">
-                                {{ strtoupper(substr($activeBooking->driver->name, 0, 1)) }}
+                    @php
+                        $phoneRaw = (string) ($activeBooking->driver->phone ?? '');
+                        $phone = trim($phoneRaw);
+                        $tel = preg_replace('/[^0-9+]/', '', $phone);
+                    @endphp
+
+                    <div class="bg-white/5 rounded-2xl p-4">
+                        <div class="flex items-center justify-between gap-4">
+
+                            {{-- Driver info --}}
+                            <div class="flex items-center gap-4 min-w-0">
+                                <div
+                                    class="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center font-black text-lg text-white shrink-0">
+                                    {{ strtoupper(substr($activeBooking->driver->name, 0, 1)) }}
+                                </div>
+
+                                <div class="min-w-0">
+                                    <div class="font-bold text-white truncate">
+                                        {{ $activeBooking->driver->full_name }}
+                                    </div>
+
+                                    {{-- Phone number --}}
+                                    <div class="mt-1 text-sm font-bold text-white/60 truncate tabular-nums">
+                                        {{ $phone ?: '—' }}
+                                    </div>
+                                </div>
                             </div>
 
-                            <div>
-                                <div class="font-bold text-white">{{ $activeBooking->driver->name }}</div>
-                                <div class="text-xs text-white/60 font-semibold">专属司机</div>
-                            </div>
-                        </div>
+                            {{-- Call button --}}
+                            @if ($phone)
+                                <a href="tel:{{ $tel }}" aria-label="Call driver"
+                                    class="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-emerald-500 text-white
+                          shadow-lg shadow-emerald-500/30 hover:bg-emerald-400 active:scale-95 transition">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.11 5.18
+                            2 2 0 0 1 5.1 3h3a2 2 0 0 1 2 1.72c.12.86.3 1.7.54 2.5
+                            a2 2 0 0 1-.45 2.11L9.1 10.9a16 16 0 0 0 4 4l1.57-1.09
+                            a2 2 0 0 1 2.11-.45c.8.24 1.64.42 2.5.54A2 2 0 0 1 22 16.92z" />
+                                    </svg>
+                                </a>
+                            @else
+                                {{-- no phone -> disabled icon (optional) --}}
+                                <div
+                                    class="h-12 w-12 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-white/40">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path
+                                            d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3.11 5.18 2 2 0 0 1 5.1 3h3" />
+                                        <path d="M10 7a14 14 0 0 0 7 7" />
+                                        <path d="M2 2l20 20" />
+                                    </svg>
+                                </div>
+                            @endif
 
-                        <div class="text-right">
-                            <div class="text-xs text-white/50">联系电话</div>
-                            <div class="font-bold text-white">
-                                {{ $activeBooking->driver->phone ?? '—' }}
-                            </div>
                         </div>
                     </div>
                 @endif

@@ -10,6 +10,7 @@ use App\Http\Controllers\Customer\HomeController;
 use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\ActiveRideController;
 use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
+use App\Http\Controllers\Customer\CreditLogController as CustomerCreditLogController;
 
 use App\Http\Controllers\Manager\OrderController as ManagerOrderController;
 use App\Http\Controllers\Manager\DriverController as ManagerDriverController;
@@ -189,6 +190,7 @@ Route::prefix('app')
 
         Route::get('/password', [CustomerProfileController::class, 'editPassword'])->name('password.edit');
         Route::patch('/password', [CustomerProfileController::class, 'updatePassword'])->name('password.update');
+        Route::get('/credit-logs', [CustomerCreditLogController::class, 'index']) ->name('credit.logs');
     });
 
 /*

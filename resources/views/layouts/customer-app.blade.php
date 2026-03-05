@@ -57,7 +57,7 @@
                         $isBook = request()->routeIs('customer.book');
                         $isOrder = request()->routeIs('customer.orders.*');
                         $isProfile =
-                            request()->routeIs('customer.profile*') || request()->routeIs('customer.password*');
+                            request()->routeIs('customer.profile*') || request()->routeIs('customer.password*') || request()->routeIs('customer.credit.logs*');
                     @endphp
 
                     <nav class="hidden md:flex items-center bg-gray-100/50 p-1 rounded-2xl border border-gray-100">
