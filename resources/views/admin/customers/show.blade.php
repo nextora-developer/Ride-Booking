@@ -172,25 +172,42 @@
                     </div>
 
                     <div class="mt-10 space-y-4">
-                        {{-- 余额显示 --}}
+                        @php
+                            $credit = $customer->credit_balance ?? 0;
+                            $isDebt = $credit > 0;
+                        @endphp
+
+                        {{-- 挂单显示 --}}
                         <div class="bg-white/10 rounded-2xl p-5 border border-white/5">
-                            <p class="text-[9px] font-black text-indigo-200 uppercase tracking-[0.2em]">可用信用额</p>
+                            <p
+                                class="text-xs font-black uppercase tracking-[0.2em] {{ $isDebt ? 'text-red-200' : 'text-emerald-200' }}">
+                                挂单额度
+                            </p>
+
                             <div class="mt-1 flex items-baseline gap-1">
-                                <span class="text-xs font-bold text-indigo-300">RM</span>
+
                                 <span
-                                    class="text-3xl font-black tracking-tighter">{{ number_format($customer->credit_balance ?? 0, 2) }}</span>
+                                    class="text-xl font-bold {{ $isDebt ? 'text-red-300' : 'text-emerald-300' }}">
+                                    RM
+                                </span>
+
+                                <span
+                                    class="text-3xl font-black tracking-tighter {{ $isDebt ? 'text-red-400' : 'text-emerald-400' }}">
+                                    {{ $isDebt ? '-' : '' }}{{ number_format($credit, 2) }}
+                                </span>
+
                             </div>
                         </div>
 
                         {{-- 详细资料 --}}
                         <div class="pt-2 space-y-4">
                             <div class="flex justify-between items-center px-1">
-                                <span class="text-[10px] font-bold text-slate-400 uppercase">账号状态</span>
+                                <span class="text-xs font-bold text-slate-400 uppercase">账号状态</span>
                                 <span
                                     class="inline-flex h-2 w-2 rounded-full {{ $customer->is_active ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]' : 'bg-rose-500' }}"></span>
                             </div>
                             <div class="flex justify-between items-center px-1">
-                                <span class="text-[10px] font-bold text-slate-400 uppercase">全名</span>
+                                <span class="text-xs font-bold text-slate-400 uppercase">全名</span>
                                 <span class="text-xs font-black">{{ $customer->full_name ?? '—' }}</span>
                             </div>
                         </div>
@@ -199,7 +216,7 @@
                     {{-- 操作按钮 --}}
                     <div class="mt-8 grid grid-cols-2 gap-3">
                         <a href="{{ route('admin.customers.edit', $customer) }}"
-                            class="h-12 flex items-center justify-center rounded-xl bg-white text-slate-900 text-[10px] font-black uppercase tracking-widest hover:bg-indigo-50 transition-all active:scale-95">
+                            class="h-12 flex items-center justify-center rounded-xl bg-white text-slate-900 text-xs font-black uppercase tracking-widest hover:bg-indigo-50 transition-all active:scale-95">
                             编辑资料
                         </a>
                         <form action="{{ route('admin.customers.toggle', $customer) }}" method="POST" class="w-full">
@@ -207,7 +224,7 @@
                             @method('PATCH')
 
                             <button type="submit"
-                                class="w-full h-12 flex items-center justify-center rounded-xl text-[10px] font-black uppercase tracking-widest transition-all
+                                class="w-full h-12 flex items-center justify-center rounded-xl text-xs font-black uppercase tracking-widest transition-all
                                         {{ $customer->is_active
                                             ? 'bg-rose-600 text-white hover:bg-rose-700'
                                             : 'bg-emerald-600 text-white hover:bg-emerald-700' }}">
@@ -221,15 +238,15 @@
 
             {{-- Insight Card --}}
             <div class="rounded-[2rem] bg-white border border-slate-100 p-8 shadow-sm">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">顾客数据概览</p>
+                <p class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">顾客数据概览</p>
                 <div class="mt-6 grid grid-cols-2 gap-4">
                     <div>
                         <p class="text-2xl font-black text-slate-900">{{ count($orders) }}</p>
-                        <p class="text-[9px] font-bold text-slate-400 uppercase">总预约次数</p>
+                        <p class="text-xs font-bold text-slate-400 uppercase">总预约次数</p>
                     </div>
                     <div>
                         <p class="text-2xl font-black text-slate-900">100%</p>
-                        <p class="text-[9px] font-bold text-slate-400 uppercase">完成率</p>
+                        <p class="text-xs font-bold text-slate-400 uppercase">完成率</p>
                     </div>
                 </div>
             </div>

@@ -81,6 +81,18 @@
         $canAssign = !in_array(strtolower((string) $status), $lockedStatuses, true);
 
         $service = $order->service_type ?? '-';
+
+        $serviceKey = strtolower(trim((string) $service));
+
+        $serviceLabel = match ($serviceKey) {
+            'pickup_dropoff' => '接送',
+            'charter' => '包车',
+            'designated_driver' => '代驾',
+            'purchase' => '代购',
+            'big_car' => '大车',
+            'driver_only' => '司机',
+            default => $service,
+        };
         $pickup = $order->pickup ?? '-';
         $dropoff = $order->dropoff ?? '-';
         $note = $order->note;
@@ -95,7 +107,7 @@
         $customerName = optional($order->customer)->name ?? '—';
         $customerPhone = optional($order->customer)->phone ?? '—';
 
-        $driverName = optional($order->driver)->name;
+        $driverName = optional($order->driver)->full_name;
         $driverShift = optional($order->driver)->shift ?? null;
 
         $managerName = optional($order->manager)->name ?? null;
@@ -108,28 +120,42 @@
 
             {{-- Row 1: Title --}}
             <div class="flex items-start justify-between gap-4">
-                <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 truncate">
-                    {{ $orderNo }}
-                </h1>
+
+                {{-- Left --}}
+                <div class="flex items-center gap-3">
+
+                    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 truncate">
+                        {{ $orderNo }}
+                    </h1>
+
+                    <span
+                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $statusBadge($status) }}">
+                        {{ $statusText($status) }}
+                    </span>
+
+                </div>
 
                 {{-- Right: Back --}}
                 <a href="{{ route('admin.orders.index') }}"
-                    class="shrink-0 h-10 px-4 inline-flex items-center gap-2 rounded-2xl
-                       bg-white border border-gray-200 text-sm font-extrabold hover:bg-gray-50 transition">
+                    class="shrink-0 h-10 px-4 inline-flex items-center gap-2 rounded-2xl bg-white border border-gray-200 text-sm font-extrabold hover:bg-gray-50 transition">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
                     </svg>
                     返回
                 </a>
+
             </div>
 
             {{-- Row 2: Badges --}}
             <div class="mt-3 flex items-center gap-2 flex-wrap">
+
+                {{-- Service Type --}}
                 <span
-                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $statusBadge($status) }}">
-                    {{ $statusText($status) }}
+                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-indigo-50 text-indigo-700">
+                    {{ $serviceLabel }}
                 </span>
 
+                {{-- Payment Type --}}
                 @if ($paymentType)
                     <span
                         class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $payTypeBadge($paymentType) }}">
@@ -137,278 +163,213 @@
                     </span>
                 @endif
 
-                @if ($paymentStatus)
-                    <span
-                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $payStatusBadge($paymentStatus) }}">
-                        {{ $payStatusText($paymentStatus) }}
-                    </span>
-                @endif
-
-                @if ($shift)
-                    <span
-                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-gray-100 text-gray-700">
-                        {{ strtoupper($shift) }} 班
-                    </span>
-                @endif
-
-                @if ($scheduleType === 'scheduled' && $scheduledAt)
+                {{-- Schedule Type --}}
+                @if ($scheduleType === 'scheduled')
                     <span
                         class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-700">
                         预约单
                     </span>
+                @else
+                    <span
+                        class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-700">
+                        即时单
+                    </span>
                 @endif
+
             </div>
 
-            {{-- Row 3: Meta --}}
-            @php
-                $serviceKey = strtolower(trim((string) $service));
-
-                $serviceLabel = match ($serviceKey) {
-                    'pickup_dropoff' => '接送',
-                    'charter' => '包车',
-                    'designated_driver' => '代驾',
-                    'purchase' => '代购',
-                    'big_car' => '大车',
-                    'driver_only' => '司机',
-                    default => $service,
-                };
-            @endphp
-
-            <p class="mt-3 text-sm text-slate-500 font-medium">
-                {{ $serviceLabel }} • 创建于 {{ $createdAt }}
-            </p>
         </div>
-
     </div>
 @endsection
 
 @section('content')
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {{-- LEFT --}}
-        <div class="xl:col-span-2 space-y-6">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        {{-- LEFT: 核心信息与操作区 --}}
+        <div class="xl:col-span-2 space-y-8">
 
-            {{-- Customer --}}
-            <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5 sm:p-6">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <div class="text-xs font-black tracking-widest uppercase text-slate-400">顾客</div>
-                        <div class="mt-2 text-lg font-extrabold text-slate-900">{{ $customerName }}</div>
-                        <div class="mt-1 text-sm text-slate-500 font-semibold">
-                            电话：<span class="text-slate-900 font-extrabold">{{ $customerPhone }}</span>
-                        </div>
-                    </div>
-
-                    <div class="h-12 w-12 rounded-2xl bg-black text-white flex items-center justify-center">
-                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Route --}}
-            <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5 sm:p-6">
-                <div class="flex items-start justify-between gap-4">
-
-                    <div>
-                        <div class="text-xs font-black tracking-widest uppercase text-slate-400">
-                            路线
-                        </div>
-
-                        <div class="mt-2 text-lg sm:text-xl font-extrabold text-slate-900">
-                            {{ $pickup }} → {{ $dropoff }}
-                        </div>
-
-                        <div class="mt-2 flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-600">
-
-                            <div>
-                                服务：
-                                <span class="text-slate-900 font-extrabold">
-                                    {{ $service }}
+            {{-- Customer & Route: 组合卡片展示 --}}
+            <div class="rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
+                <div class="p-8 sm:p-10">
+                    <div class="flex flex-col md:flex-row justify-between gap-8">
+                        {{-- 顾客信息 --}}
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span
+                                    class="h-8 w-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
                                 </span>
+                                <span class="text-xs font-black tracking-[0.2em] uppercase text-slate-400">客户信息</span>
                             </div>
-
-                            {{-- Pax Badge --}}
-                            <div
-                                class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 border border-gray-200 text-slate-900 text-xs font-extrabold">
-                                👤 {{ $pax ?? 1 }} 人
-                            </div>
-
+                            <h2 class="text-2xl font-black text-slate-900 leading-tight">{{ $customerName }}</h2>
+                            <p class="mt-2 text-slate-500 font-bold flex items-center gap-2">
+                                <span class="text-xs uppercase tracking-wider text-slate-400">联系电话:</span>
+                                <span class="text-slate-900">{{ $customerPhone }}</span>
+                            </p>
                         </div>
 
-                        <div class="mt-2 text-sm text-slate-600 font-semibold">
-                            时间：
-                            <span class="text-slate-900 font-extrabold">
-                                {{ $scheduleType === 'scheduled' && $scheduledAt ? $scheduledAt->format('d M Y, h:i A') : '立即' }}
-                            </span>
+                        {{-- 行程时间标签 --}}
+                        <div class="text-left md:text-right">
+                            <div class="inline-block px-4 py-2 rounded-2xl bg-indigo-50 border border-indigo-100">
+                                <div class="text-xs font-black text-indigo-500 uppercase tracking-widest mb-1">
+                                    {{ $scheduleType === 'scheduled' ? '预约用车时间' : '即时用车' }}
+                                </div>
+                                <div class="text-sm font-black text-indigo-900">
+                                    {{ $scheduleType === 'scheduled' && $scheduledAt ? $scheduledAt->format('d M Y, h:i A') : '现在 / AS SOON AS POSSIBLE' }}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="h-12 w-12 rounded-2xl bg-gray-100 flex items-center justify-center text-slate-900">
-                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 21s7-4.5 7-10a7 7 0 10-14 0c0 5.5 7 10 7 10z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 11a2 2 0 100-4 2 2 0 000 4z" />
-                        </svg>
+                    <div class="my-8 h-px bg-slate-100"></div>
+
+                    {{-- 路线展示 --}}
+                    <div class="relative">
+                        <div class="text-xs font-black tracking-[0.2em] uppercase text-slate-400 mb-6">行程路线</div>
+                        <div class="flex flex-col space-y-4">
+                            <div class="flex items-start gap-4">
+                                <div class="mt-1.5 flex flex-col items-center">
+                                    <div
+                                        class="h-3 w-3 rounded-full border-2 border-indigo-500 bg-white shadow-[0_0_0_4px_rgba(99,102,241,0.1)]">
+                                    </div>
+                                    <div class="w-0.5 h-10 bg-slate-100"></div>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-black text-slate-400 uppercase">起点 Pickup</p>
+                                    <p class="text-lg font-black text-slate-900">{{ $pickup }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <div class="mt-1.5 h-3 w-3 rounded-full bg-slate-900 shadow-lg shadow-slate-200"></div>
+                                <div>
+                                    <p class="text-xs font-black text-slate-400 uppercase">终点 Dropoff</p>
+                                    <p class="text-lg font-black text-slate-900">{{ $dropoff }}</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
+                    {{-- 服务标签 --}}
+                    <div class="mt-8 flex flex-wrap gap-3">
+                        <span
+                            class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-black uppercase tracking-wider">
+                            ✨ {{ $serviceLabel }}
+                        </span>
+                        <span
+                            class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-black uppercase tracking-wider">
+                            👤 {{ $pax ?? 1 }} 人乘坐
+                        </span>
+                    </div>
+
+                    @if ($note)
+                        <div class="mt-8 p-5 rounded-2xl bg-amber-50/50 border border-amber-100/50 relative">
+                            <span
+                                class="absolute -top-3 left-4 px-2 bg-white text-xs font-black text-amber-600 uppercase">客户备注</span>
+                            <p class="text-sm font-bold text-amber-900">"{{ $note }}"</p>
+                        </div>
+                    @endif
                 </div>
-
-                @if ($note)
-                    <div class="mt-5 rounded-2xl bg-gray-50 border border-gray-100 p-4 text-sm text-slate-700">
-                        <div class="font-extrabold text-slate-900">备注</div>
-                        <div class="mt-1">{{ $note }}</div>
-                    </div>
-                @endif
             </div>
 
-            {{-- Assign --}}
-            <div id="assign" class="rounded-3xl bg-white border border-gray-100 shadow-sm overflow-hidden">
-                <div class="px-5 sm:px-6 py-5 border-b border-gray-100">
-                    <div class="text-sm font-extrabold text-slate-900">派单（指派司机）</div>
-                    <div class="text-xs text-slate-500 font-semibold mt-1">
-                        为此订单指派司机并设置付款方式。
+            {{-- Assign: 派单操作 --}}
+            <div id="assign"
+                class="rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
+                <div class="px-8 py-6 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-black text-slate-900 uppercase tracking-widest">指派司机与计费</h3>
+                        <p class="text-[11px] text-slate-400 font-bold mt-1">请核对司机空档及金额后再确认</p>
                     </div>
+                    @if (!$canAssign)
+                        <span
+                            class="px-3 py-1 rounded-lg bg-rose-100 text-rose-600 text-[10px] font-black uppercase">订单已锁定</span>
+                    @endif
                 </div>
 
-                <div class="p-5 sm:p-6">
+                <div class="p-8">
                     @if (!$canAssign)
-                        <div class="rounded-2xl bg-gray-50 border border-gray-100 p-4 text-sm text-slate-700">
-                            目前状态为 <span class="font-extrabold">{{ $statusText($status) }}</span>，派单已锁定，无法更改。
+                        <div
+                            class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 text-sm font-bold text-slate-500">
+                            <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            当前状态为 {{ $statusText($status) }}，派单信息已归档，无法修改。
                         </div>
                     @else
-                        <form method="POST" action="{{ route('admin.orders.assign', $order) }}" class="space-y-4">
+                        <form method="POST" action="{{ route('admin.orders.assign', $order) }}" class="space-y-8">
                             @csrf
                             @method('PATCH')
 
-                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-                                {{-- Driver --}}
-                                <div class="rounded-2xl border border-gray-100 bg-white p-4">
-                                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">
-                                        司机
-                                    </div>
-
-                                    <div class="mt-2">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {{-- Driver Select --}}
+                                <div class="space-y-2">
+                                    <label
+                                        class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1">选择承运司机</label>
+                                    <div class="relative group">
                                         <select name="driver_id" required
-                                            class="w-full h-11 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-extrabold focus:ring-4 focus:ring-black/5 focus:border-black outline-none">
-                                            <option value="">选择司机</option>
-
+                                            class="appearance-none w-full h-14 rounded-2xl border border-slate-200 bg-slate-50/30 px-5 text-sm font-black text-slate-900 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all outline-none cursor-pointer">
+                                            <option value="">点击选择司机...</option>
                                             @foreach ($drivers as $d)
                                                 <option value="{{ $d->id }}" @selected((int) $order->driver_id === (int) $d->id)>
-                                                    {{ $d->name }}{{ $d->shift ? '（' . ($d->shift === 'day' ? '白班' : '夜班') . '）' : '' }}
+                                                    {{ $d->name }}
+                                                    {{ $d->shift ? '(' . ($d->shift === 'day' ? '白班' : '夜班') . ')' : '' }}
                                                 </option>
                                             @endforeach
                                         </select>
-
-                                        @error('driver_id')
-                                            <p class="text-xs text-red-600 font-semibold mt-2">
-                                                {{ $message }}
-                                            </p>
-                                        @enderror
+                                        <div
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                        </div>
                                     </div>
+                                    <p class="text-[10px] font-bold text-slate-400 ml-1 italic">当前指派: <span
+                                            class="text-indigo-600">{{ $driverName ?? '未指派' }}</span></p>
+                                </div>
 
-                                    <div class="mt-3 text-xs text-slate-500 font-semibold">
-                                        当前司机：
-                                        <span class="text-slate-900 font-extrabold">
-                                            {{ $driverName ?? '未指派' }}
-                                        </span>
+                                {{-- Payment Type --}}
+                                <div class="space-y-2 lg:col-span-1">
+                                    <label
+                                        class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1">结算方式</label>
+                                    <div class="flex p-1 bg-slate-100 rounded-[1.25rem] h-14 items-center">
+                                        @php $curPay = strtolower((string)($order->payment_type ?? 'cash')); @endphp
+                                        @foreach (['cash' => '现金', 'credit' => '挂单', 'transfer' => '转账'] as $val => $label)
+                                            <label class="flex-1 cursor-pointer">
+                                                <input type="radio" name="payment_type" value="{{ $val }}"
+                                                    class="sr-only peer" @checked($curPay === $val)>
+                                                <span
+                                                    class="flex items-center justify-center h-11 text-xs font-black rounded-xl transition-all
+                                                    peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-indigo-600 text-slate-500">
+                                                    {{ $label }}
+                                                </span>
+                                            </label>
+                                        @endforeach
                                     </div>
                                 </div>
 
-                                {{-- Payment --}}
-                                <div class="rounded-2xl border border-gray-100 bg-white p-4">
-                                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">
-                                        付款方式
-                                    </div>
-
-                                    @php $curPay = strtolower((string)($order->payment_type ?? '')); @endphp
-
-                                    <div class="mt-3 flex flex-wrap gap-2">
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="payment_type" value="cash" class="sr-only peer"
-                                                @checked($curPay === 'cash') required>
-                                            <span
-                                                class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
-                           peer-checked:bg-black peer-checked:text-white peer-checked:border-black transition">
-                                                现金
-                                            </span>
-                                        </label>
-
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="payment_type" value="credit" class="sr-only peer"
-                                                @checked($curPay === 'credit') required>
-                                            <span
-                                                class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
-                           peer-checked:bg-rose-50 peer-checked:text-rose-700 peer-checked:border-rose-200 transition">
-                                                挂单
-                                            </span>
-                                        </label>
-
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="payment_type" value="transfer" class="sr-only peer"
-                                                @checked($curPay === 'transfer') required>
-                                            <span
-                                                class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
-                           peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-checked:border-emerald-200 transition">
-                                                转账
-                                            </span>
-                                        </label>
-                                    </div>
-
-                                    @error('payment_type')
-                                        <p class="text-xs text-red-600 font-semibold mt-2">
-                                            {{ $message }}
-                                        </p>
-                                    @enderror
-
-                                    <div class="mt-2 text-xs text-slate-500 font-semibold">
-                                        司机端会看到此付款方式。
-                                    </div>
-                                </div>
-
-                                {{-- Amount --}}
-                                <div class="rounded-2xl border border-gray-100 bg-white p-4">
-                                    <div class="text-xs font-black tracking-widest uppercase text-slate-400">
-                                        金额（RM）
-                                    </div>
-
-                                    <div class="mt-2 relative">
-                                        <span
-                                            class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400">
-                                            RM
-                                        </span>
-
+                                {{-- Amount Input --}}
+                                <div class="space-y-2">
+                                    <label
+                                        class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1">订单金额
+                                        (RM)</label>
+                                    <div class="relative">
+                                        <div
+                                            class="absolute left-5 top-1/2 -translate-y-1/2 text-sm font-black text-slate-300 pointer-events-none">
+                                            RM</div>
                                         <input type="number" name="amount" step="0.01" min="0"
                                             value="{{ old('amount', $order->amount ?? '') }}" required
-                                            class="w-full h-11 rounded-2xl border border-gray-200 bg-white pl-12 pr-4 text-sm font-extrabold
-                          focus:ring-4 focus:ring-black/5 focus:border-black outline-none">
-                                    </div>
-
-                                    @error('amount')
-                                        <p class="text-xs text-red-600 font-semibold mt-2">
-                                            {{ $message }}
-                                        </p>
-                                    @enderror
-
-                                    <div class="mt-2 text-xs text-slate-500 font-semibold">
-                                        本次订单最终收费金额。
+                                            class="w-full h-14 rounded-2xl border border-slate-200 bg-slate-50/30 pl-14 pr-5 text-lg font-black text-slate-900 focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all outline-none">
                                     </div>
                                 </div>
-
                             </div>
 
-                            <div class="flex items-center gap-2 pt-2">
+                            <div class="flex flex-col sm:flex-row items-center gap-4 pt-4 border-t border-slate-50">
                                 <button type="submit"
-                                    class="inline-flex items-center justify-center h-11 px-5 rounded-2xl bg-black text-white text-sm font-extrabold hover:bg-slate-900 transition">
-                                    确认指派
+                                    class="w-full sm:w-auto inline-flex items-center justify-center h-14 px-10 rounded-2xl bg-slate-900 text-white text-sm font-black uppercase tracking-widest hover:bg-black hover:shadow-xl hover:shadow-slate-200 transition-all active:scale-95">
+                                    确认指派此订单
                                 </button>
-
                                 <a href="{{ route('admin.orders.index') }}"
-                                    class="inline-flex items-center justify-center h-11 px-5 rounded-2xl bg-white border border-gray-200 text-slate-900 text-sm font-extrabold hover:bg-gray-50 transition">
-                                    返回列表
+                                    class="w-full sm:w-auto inline-flex items-center justify-center h-14 px-8 rounded-2xl bg-white border border-slate-200 text-slate-400 text-sm font-black uppercase tracking-widest hover:bg-slate-50 transition-all">
+                                    取消并返回
                                 </a>
                             </div>
                         </form>
@@ -417,29 +378,66 @@
             </div>
         </div>
 
-        {{-- RIGHT --}}
+        {{-- RIGHT: 统计与状态摘要 --}}
         <div class="space-y-6">
-            {{-- Driver --}}
-            <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5 sm:p-6">
-                <div class="text-xs font-black tracking-widest uppercase text-slate-400">司机</div>
-                <div class="mt-2 text-lg font-extrabold text-slate-900">{{ $driverName ?? '未指派' }}</div>
-                <div class="mt-1 text-sm text-slate-500 font-semibold">
-                    班次：<span
-                        class="text-slate-900 font-extrabold">{{ $driverShift ? ($driverShift === 'day' ? '白班' : '夜班') : '—' }}</span>
+
+            {{-- 财务摘要 --}}
+            <div class="rounded-[2rem] bg-slate-900 p-8 shadow-xl shadow-slate-200 relative overflow-hidden group">
+                <div
+                    class="absolute -right-6 -bottom-6 h-32 w-32 bg-white/5 rounded-full group-hover:scale-110 transition-transform duration-700">
                 </div>
 
-                <div class="mt-4 rounded-2xl bg-gray-50 border border-gray-100 p-4 text-sm text-slate-700">
-                    <div class="font-extrabold text-slate-900">指派时间</div>
-                    <div class="mt-1">{{ $assignedAt ?? '—' }}</div>
+                <div class="relative z-10">
+                    <span class="text-[10px] font-black tracking-[0.2em] uppercase text-slate-400">Payment Summary</span>
+                    <div class="mt-4 flex items-baseline gap-2 text-white font-black text-4xl tracking-tighter">
+                        <span class="text-xl text-slate-500 font-bold tracking-normal">RM</span>
+                        {{ number_format($order->amount ?? 0, 2) }}
+                    </div>
+                    <div class="mt-6 flex items-center justify-between py-3 border-t border-white/10">
+                        <span class="text-xs font-bold text-slate-400">付款方式</span>
+                        <span
+                            class="text-xs font-black text-emerald-400 uppercase tracking-widest">{{ $payTypeText($paymentType) ?? '未设置' }}</span>
+                    </div>
                 </div>
             </div>
 
-            {{-- Manager --}}
-            <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5 sm:p-6">
-                <div class="text-xs font-black tracking-widest uppercase text-slate-400">调度员</div>
-                <div class="mt-2 text-lg font-extrabold text-slate-900">{{ $managerName ?? '—' }}</div>
-                <div class="mt-1 text-sm text-slate-500 font-semibold">
-                    （若订单由调度员派单则会显示）
+            {{-- 司机状态 --}}
+            <div class="rounded-[2rem] bg-white border border-slate-100 p-8 shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <span class="text-xs font-black tracking-[0.2em] uppercase text-slate-400">司机指派</span>
+                    <span class="h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                </div>
+
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center text-2xl shadow-inner">
+                        {{ $driverName ? '👨‍✈️' : '⏳' }}
+                    </div>
+                    <div>
+                        <div class="text-lg font-black text-slate-900 leading-none">{{ $driverName ?? '等待指派中' }}</div>
+                        <div class="mt-2 text-xs font-black text-slate-400 uppercase tracking-wider">
+                            班次：<span
+                                class="text-slate-900">{{ $driverShift ? ($driverShift === 'day' ? '白班' : '夜班') : '—' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-slate-50/50 border border-slate-50">
+                    <div class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">指派时间</div>
+                    <div class="text-sm font-bold text-slate-700">{{ $assignedAt ?? '尚未指派' }}</div>
+                </div>
+            </div>
+
+            {{-- 经办人 --}}
+            <div class="rounded-[2rem] bg-white border border-slate-100 p-6 shadow-sm flex items-center gap-4">
+                <div class="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="text-xs font-black text-slate-400 uppercase tracking-widest">调度员</div>
+                    <div class="text-sm font-black text-slate-900">{{ $managerName ?? '系统自动' }}</div>
                 </div>
             </div>
 

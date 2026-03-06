@@ -105,7 +105,7 @@
                                 </div>
                             </td>
 
-                            {{-- 信用额 --}}
+                            {{-- 挂单数额 --}}
                             <td class="px-5 sm:px-6 py-4">
 
                                 @php
@@ -114,12 +114,13 @@
                                 @endphp
 
                                 <span
-                                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold {{ $isZero ? 'bg-indigo-50 text-indigo-700' : 'bg-rose-50 text-rose-700' }}">
-                                    RM {{ number_format($credit, 2) }}
+                                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold {{ $isZero ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700' }}">
+
+                                    RM {{ $isZero ? '' : '-' }}{{ number_format($credit, 2) }}
+
                                 </span>
 
                             </td>
-
                             {{-- 状态开关 --}}
                             <td class="px-5 sm:px-6 py-4">
                                 <div class="flex flex-col items-start gap-1">

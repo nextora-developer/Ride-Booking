@@ -180,7 +180,7 @@
         {{-- 右侧：信息卡片 --}}
         <div class="space-y-6">
 
-            {{-- 信用额概览 --}}
+            {{-- 挂单额概览 --}}
             <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-6">
 
                 <div class="text-xs font-black tracking-widest uppercase text-slate-400">
@@ -189,31 +189,37 @@
 
                 @php
                     $balance = (float) ($customer->credit_balance ?? 0);
+                    $isDebt = $balance > 0; // 有挂单 = 欠款
                 @endphp
 
                 <div class="mt-4 text-center">
-                    <div
-                        class="text-3xl font-extrabold
-            {{ $balance > 0 ? 'text-emerald-600' : ($balance < 0 ? 'text-rose-600' : 'text-slate-900') }}">
-                        RM {{ number_format($balance, 2) }}
+
+                    {{-- 金额 --}}
+                    <div class="text-3xl font-extrabold
+            {{ $isDebt ? 'text-rose-600' : 'text-emerald-600' }}">
+
+                        RM {{ $isDebt ? '-' : '' }}{{ number_format(abs($balance), 2) }}
+
                     </div>
 
+                    {{-- 状态 --}}
                     <div
                         class="mt-2 text-xs font-black uppercase tracking-widest
-            {{ $balance > 0 ? 'text-emerald-600' : ($balance < 0 ? 'text-rose-600' : 'text-slate-400') }}">
+            {{ $isDebt ? 'text-rose-500' : 'text-emerald-600' }}">
 
-                        @if ($balance > 0)
-                            顾客尚有余额
-                        @elseif ($balance < 0)
+                        @if ($isDebt)
                             顾客欠款
                         @else
-                            暂无欠款/余额
+                            暂无挂单
                         @endif
 
                     </div>
+
                 </div>
 
+                {{-- 额外信息 --}}
                 <div class="mt-6 grid grid-cols-2 gap-3 text-center text-xs font-semibold text-slate-500">
+
                     <div class="rounded-2xl bg-gray-50 border border-gray-100 py-3">
                         顾客ID
                         <div class="mt-1 font-extrabold text-slate-900">
@@ -227,6 +233,7 @@
                             {{ $customer->is_active ? '启用' : '停用' }}
                         </div>
                     </div>
+
                 </div>
 
             </div>
