@@ -157,27 +157,64 @@
 
                         {{-- Body: Visual Route --}}
                         <div class="relative pl-8 space-y-6">
-                            {{-- Dash Line Connector --}}
+
+                            {{-- Dash Line --}}
                             <div
                                 class="absolute left-[11px] top-2 bottom-2 w-[2px] border-l-2 border-dashed border-slate-200">
                             </div>
 
-                            {{-- Points --}}
+                            {{-- Pickup --}}
                             <div class="relative">
                                 <div
                                     class="absolute -left-[25px] top-1 h-4 w-4 rounded-full border-4 border-white bg-slate-400 shadow-sm">
                                 </div>
-                                <p class="text-xs font-black text-slate-500 uppercase tracking-wide">上车地点</p>
-                                <p class="text-sm font-bold text-slate-800 line-clamp-1 mt-0.5">{{ $o->pickup }}</p>
+
+                                <p class="text-xs font-black text-slate-500 uppercase tracking-wide">
+                                    上车地点
+                                </p>
+
+                                <p class="text-sm font-bold text-slate-800 line-clamp-1 mt-0.5">
+                                    {{ $o->pickup }}
+                                </p>
                             </div>
 
-                            <div class="relative">
-                                <div
-                                    class="absolute -left-[25px] top-1 h-4 w-4 rounded-full border-4 border-white bg-slate-900 shadow-sm">
+                            {{-- Dropoffs --}}
+                            @if (!empty($o->dropoffs))
+                                @foreach ($o->dropoffs as $i => $point)
+                                    <div class="relative">
+
+                                        <div
+                                            class="absolute -left-[25px] top-1 h-4 w-4 rounded-full border-4 border-white shadow-sm
+                    {{ $loop->last ? 'bg-emerald-600' : 'bg-slate-900' }}">
+                                        </div>
+
+                                        <p class="text-xs font-black text-slate-500 uppercase tracking-wide">
+                                            {{ $loop->last ? '最终目的地' : '下车点 ' . ($i + 1) }}
+                                        </p>
+
+                                        <p class="text-sm font-black text-slate-900 line-clamp-1 mt-0.5">
+                                            {{ $point }}
+                                        </p>
+
+                                    </div>
+                                @endforeach
+                            @else
+                                {{-- 旧系统兼容 --}}
+                                <div class="relative">
+                                    <div
+                                        class="absolute -left-[25px] top-1 h-4 w-4 rounded-full border-4 border-white bg-emerald-600 shadow-sm">
+                                    </div>
+
+                                    <p class="text-xs font-black text-slate-500 uppercase tracking-wide">
+                                        目的地
+                                    </p>
+
+                                    <p class="text-sm font-black text-slate-900 line-clamp-1 mt-0.5">
+                                        {{ $o->dropoff }}
+                                    </p>
                                 </div>
-                                <p class="text-xs font-black text-slate-500 uppercase tracking-wide">目的地</p>
-                                <p class="text-sm font-black text-slate-900 line-clamp-1 mt-0.5">{{ $o->dropoff }}</p>
-                            </div>
+                            @endif
+
                         </div>
 
                         {{-- Footer: Meta --}}

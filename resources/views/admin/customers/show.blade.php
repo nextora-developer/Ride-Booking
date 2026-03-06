@@ -83,6 +83,27 @@
 
                 <div class="divide-y divide-slate-50">
                     @forelse($orders as $o)
+                        @php
+                            $routePoints = [];
+
+                            if (!empty($o->pickup)) {
+                                $routePoints[] = $o->pickup;
+                            }
+
+                            if (!empty($o->dropoffs) && is_array($o->dropoffs)) {
+                                $routePoints = array_merge($routePoints, array_values(array_filter($o->dropoffs)));
+                            } elseif (!empty($o->dropoff)) {
+                                $routePoints[] = $o->dropoff;
+                            }
+
+                            $displayPoints = array_slice($routePoints, 0, 3);
+                            $routeText = !empty($displayPoints) ? implode(' → ', $displayPoints) : '-';
+
+                            if (count($routePoints) > 3) {
+                                $routeText .= ' → ...';
+                            }
+                        @endphp
+
                         <a href="{{ route('admin.orders.show', $o) }}"
                             class="group block px-8 py-6 hover:bg-slate-50/80 transition-all">
                             <div class="flex items-center justify-between gap-6">
@@ -96,15 +117,12 @@
                                         <span
                                             class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ $o->created_at->format('d M, Y') }}</span>
                                     </div>
-                                    <div class="mt-2 flex items-center text-xs font-bold text-slate-600">
-                                        <span class="truncate">{{ $o->pickup }}</span>
-                                        <svg class="mx-2 h-3 w-3 shrink-0 text-slate-300" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" stroke-width="3">
-                                            <path d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                        </svg>
-                                        <span class="truncate">{{ $o->dropoff }}</span>
+
+                                    <div class="mt-2 text-xs font-bold text-slate-600 truncate">
+                                        {{ $routeText }}
                                     </div>
                                 </div>
+
                                 <div class="shrink-0">
                                     @php
                                         $status = strtolower(trim((string) ($o->status ?? '')));
@@ -135,7 +153,7 @@
 
                                     <span
                                         class="inline-flex px-3 py-1 rounded-xl text-[10px] font-black tracking-tighter border shadow-sm transition-all
-                                        {{ $statusClasses }}">
+                        {{ $statusClasses }}">
                                         {{ $statusLabel }}
                                     </span>
                                 </div>
@@ -186,8 +204,7 @@
 
                             <div class="mt-1 flex items-baseline gap-1">
 
-                                <span
-                                    class="text-xl font-bold {{ $isDebt ? 'text-red-300' : 'text-emerald-300' }}">
+                                <span class="text-xl font-bold {{ $isDebt ? 'text-red-300' : 'text-emerald-300' }}">
                                     RM
                                 </span>
 

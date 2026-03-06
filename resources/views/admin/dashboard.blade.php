@@ -303,9 +303,29 @@
                                     {{ $serviceLabel($o->service_type ?? '-') }}
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-slate-900 font-semibold">
-                                        {{ $o->pickup ?? '-' }} → {{ $o->dropoff ?? '-' }}
+                                    @php
+                                        $routePoints = [];
+
+                                        if (!empty($o->pickup)) {
+                                            $routePoints[] = $o->pickup;
+                                        }
+
+                                        if (!empty($o->dropoffs) && is_array($o->dropoffs)) {
+                                            $routePoints = array_merge(
+                                                $routePoints,
+                                                array_values(array_filter($o->dropoffs)),
+                                            );
+                                        } elseif (!empty($o->dropoff)) {
+                                            $routePoints[] = $o->dropoff;
+                                        }
+
+                                        $routeText = !empty($routePoints) ? implode(' → ', $routePoints) : '-';
+                                    @endphp
+
+                                    <div class="text-slate-900 font-semibold truncate">
+                                        {{ $routeText }}
                                     </div>
+
                                     <div class="text-xs text-slate-500 font-medium mt-1">
                                         顾客：{{ optional($o->customer)->name ?? '—' }}
                                     </div>

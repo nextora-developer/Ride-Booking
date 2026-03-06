@@ -127,6 +127,7 @@
             <div class="absolute -left-12 -bottom-12 h-44 w-44 rounded-full bg-slate-50 opacity-70"></div>
 
             <div class="relative pl-10 space-y-10">
+
                 {{-- Connector --}}
                 <div class="absolute left-[13px] top-2 bottom-2 w-[2px] border-l-2 border-dashed border-slate-200"></div>
 
@@ -136,20 +137,65 @@
                         class="absolute -left-[35px] top-1 h-6 w-6 rounded-full border-4 border-white bg-slate-300 flex items-center justify-center shadow-[0_10px_24px_rgba(15,23,42,0.10)]">
                         <div class="h-2 w-2 rounded-full bg-slate-700"></div>
                     </div>
-                    <p class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1">上车地点</p>
-                    <h3 class="text-base font-black text-slate-900 leading-snug">{{ $order->pickup }}</h3>
+
+                    <p class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                        上车地点
+                    </p>
+
+                    <h3 class="text-base font-black text-slate-900 leading-snug">
+                        {{ $order->pickup }}
+                    </h3>
                 </div>
 
-                {{-- Dropoff --}}
-                <div class="relative">
-                    <div
-                        class="absolute -left-[35px] top-1 h-6 w-6 rounded-full border-4 border-white bg-slate-900 flex items-center justify-center
-                           shadow-[0_16px_38px_rgba(15,23,42,0.18)]">
-                        <div class="h-2 w-2 rounded-full bg-white"></div>
+
+                {{-- Multiple Dropoffs --}}
+                @if (!empty($order->dropoffs))
+
+                    @foreach ($order->dropoffs as $i => $point)
+                        <div class="relative">
+
+                            <div
+                                class="absolute -left-[35px] top-1 h-6 w-6 rounded-full border-4 border-white flex items-center justify-center
+                    {{ $loop->last ? 'bg-emerald-600 shadow-[0_16px_38px_rgba(16,185,129,0.35)]' : 'bg-slate-900 shadow-[0_16px_38px_rgba(15,23,42,0.18)]' }}">
+
+                                <div class="h-2 w-2 rounded-full bg-white"></div>
+
+                            </div>
+
+                            <p class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                                {{ $loop->last ? '最终目的地' : '中途下车点 ' . ($i + 1) }}
+                            </p>
+
+                            <h3 class="text-base font-black text-slate-900 leading-snug">
+                                {{ $point }}
+                            </h3>
+
+                        </div>
+                    @endforeach
+                @else
+                    {{-- 旧系统兼容 --}}
+                    <div class="relative">
+
+                        <div
+                            class="absolute -left-[35px] top-1 h-6 w-6 rounded-full border-4 border-white bg-emerald-600 flex items-center justify-center
+                       shadow-[0_16px_38px_rgba(16,185,129,0.35)]">
+
+                            <div class="h-2 w-2 rounded-full bg-white"></div>
+
+                        </div>
+
+                        <p class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                            目的地
+                        </p>
+
+                        <h3 class="text-base font-black text-slate-900 leading-snug">
+                            {{ $order->dropoff }}
+                        </h3>
+
                     </div>
-                    <p class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1">目的地</p>
-                    <h3 class="text-base font-black text-slate-900 leading-snug">{{ $order->dropoff }}</h3>
-                </div>
+
+                @endif
+
             </div>
         </div>
 

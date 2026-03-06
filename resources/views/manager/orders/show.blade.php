@@ -115,8 +115,10 @@
             {{-- Route Card --}}
             <div
                 class="bg-white rounded-[2.5rem] p-8
-                    shadow-[0_14px_34px_rgba(15,23,42,0.08)]
-                    border border-slate-200 relative overflow-hidden">
+        shadow-[0_14px_34px_rgba(15,23,42,0.08)]
+        border border-slate-200 relative overflow-hidden">
+
+                {{-- Background decoration --}}
                 <div class="absolute top-0 right-0 p-6 opacity-[0.04] pointer-events-none">
                     <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24">
                         <path
@@ -126,25 +128,73 @@
 
                 <div class="absolute -left-12 -bottom-12 h-44 w-44 rounded-full bg-slate-100 opacity-70"></div>
 
-                <div class="relative z-10">
-                    <div class="flex items-start gap-5">
-                        <div class="flex flex-col items-center gap-1 shrink-0 mt-1">
-                            <div class="h-3 w-3 rounded-full border-2 border-slate-300 bg-white"></div>
-                            <div class="h-16 w-0.5 border-l-2 border-slate-200 border-dashed"></div>
-                            <div class="h-3 w-3 rounded-full bg-slate-900 shadow-[0_12px_26px_rgba(15,23,42,0.18)]"></div>
-                        </div>
+                {{-- Route --}}
+                <div class="relative">
+                    {{-- Vertical line --}}
+                    <div class="absolute left-[10px] top-4 bottom-4 w-px border-l-2 border-dashed border-slate-200"></div>
 
-                        <div class="flex-1 min-w-0">
-                            <div class="mb-6">
-                                <label class="text-xs font-black text-slate-500 uppercase tracking-[0.2em]">上车地点</label>
-                                <div class="text-xl font-black text-slate-900 mt-1 truncate">{{ $order->pickup }}</div>
+                    <div class="space-y-7">
+                        {{-- Pickup --}}
+                        <div class="relative flex items-start gap-4">
+                            <div class="relative z-10 shrink-0 pt-1">
+                                <div
+                                    class="h-5 w-5 rounded-full border-4 border-white bg-slate-300 shadow-[0_8px_18px_rgba(15,23,42,0.08)] flex items-center justify-center">
+                                    <div class="h-1.5 w-1.5 rounded-full bg-slate-700"></div>
+                                </div>
                             </div>
 
-                            <div>
-                                <label class="text-xs font-black text-slate-500 uppercase tracking-[0.2em]">目的地</label>
-                                <div class="text-xl font-black text-slate-900 mt-1 truncate">{{ $order->dropoff }}</div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">
+                                    上车地点
+                                </p>
+                                <div class="text-lg font-black text-slate-900 leading-tight break-words">
+                                    {{ $order->pickup }}
+                                </div>
                             </div>
                         </div>
+
+                        @if (!empty($order->dropoffs))
+                            @foreach ($order->dropoffs as $i => $point)
+                                <div class="relative flex items-start gap-4">
+                                    <div class="relative z-10 shrink-0 pt-1">
+                                        <div
+                                            class="h-5 w-5 rounded-full border-4 border-white flex items-center justify-center shadow-[0_8px_18px_rgba(15,23,42,0.10)]
+                                {{ $loop->last ? 'bg-emerald-500' : 'bg-slate-900' }}">
+                                            <div class="h-1.5 w-1.5 rounded-full bg-white"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">
+                                            {{ $loop->last ? '最终目的地' : '下车点 ' . ($i + 1) }}
+                                        </p>
+                                        <div
+                                            class="{{ $loop->last ? 'text-lg font-black text-slate-900' : 'text-base font-black text-slate-800' }} leading-tight break-words">
+                                            {{ $point }}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            {{-- 旧系统兼容 --}}
+                            <div class="relative flex items-start gap-4">
+                                <div class="relative z-10 shrink-0 pt-1">
+                                    <div
+                                        class="h-5 w-5 rounded-full border-4 border-white bg-emerald-500 shadow-[0_8px_18px_rgba(16,185,129,0.20)] flex items-center justify-center">
+                                        <div class="h-1.5 w-1.5 rounded-full bg-white"></div>
+                                    </div>
+                                </div>
+
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">
+                                        目的地
+                                    </p>
+                                    <div class="text-lg font-black text-slate-900 leading-tight break-words">
+                                        {{ $order->dropoff }}
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

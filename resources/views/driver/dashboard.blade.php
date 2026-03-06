@@ -55,7 +55,6 @@
 @section('content')
 
     @php
-        // ✅ 先给默认值（currentOrder=null 也不会报错）
         $customerName = '顾客';
         $rawPhone = null;
         $phoneDigits = null;
@@ -65,6 +64,7 @@
 
         $pickup = '';
         $dropoff = '';
+        $dropoffs = [];
         $navPickupUrl = '#';
         $navDropoffUrl = '#';
 
@@ -81,7 +81,7 @@
                 $phoneDigits = '60' . ltrim($phoneDigits, '0');
             }
 
-            $scheduledAt = $currentOrder->scheduled_at ?? ($currentOrder->scheduledAt ?? null); // 你实际字段用哪个就留哪个
+            $scheduledAt = $currentOrder->scheduled_at ?? ($currentOrder->scheduledAt ?? null);
             $scheduleText =
                 ($currentOrder->schedule_type ?? '') === 'scheduled' && $scheduledAt
                     ? \Carbon\Carbon::parse($scheduledAt)->format('d M Y, h:i A')
@@ -93,9 +93,21 @@
 
             $pickup = $currentOrder->pickup ?? '';
             $dropoff = $currentOrder->dropoff ?? '';
+
+            // ✅ multiple dropoffs
+            $dropoffs = is_array($currentOrder->dropoffs ?? null)
+                ? array_values(array_filter($currentOrder->dropoffs))
+                : [];
+
+            // 如果新字段空，旧系统就 fallback 到单一下车点
+            if (empty($dropoffs) && !empty($dropoff)) {
+                $dropoffs = [$dropoff];
+            }
+
             $navPickupUrl = $pickup ? 'https://www.google.com/maps/dir/?api=1&destination=' . urlencode($pickup) : '#';
-            $navDropoffUrl = $dropoff
-                ? 'https://www.google.com/maps/dir/?api=1&destination=' . urlencode($dropoff)
+
+            $navDropoffUrl = !empty($dropoffs[0])
+                ? 'https://www.google.com/maps/dir/?api=1&destination=' . urlencode($dropoffs[0])
                 : '#';
         }
     @endphp
@@ -296,15 +308,19 @@
 
                 {{-- ✅ Route Cards --}}
                 <div class="px-5 py-5 space-y-3">
+                    {{-- Pickup --}}
                     <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <div class="flex items-center gap-2">
-                                    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                                    <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest">上车地点</div>
+                                    <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
+                                    <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                        上车地点
+                                    </div>
                                 </div>
+
                                 <div class="text-sm font-black text-slate-900 mt-2 leading-snug break-words">
-                                    {{ $pickup }}
+                                    {{ $pickup ?: '未设置' }}
                                 </div>
                             </div>
 
@@ -313,6 +329,7 @@
                                     class="h-9 px-3 rounded-xl bg-slate-100 border border-slate-200 text-[11px] font-black text-slate-700 active:scale-95 transition">
                                     复制
                                 </button>
+
                                 <a href="{{ $navPickupUrl }}" target="_blank"
                                     class="h-9 px-3 rounded-xl bg-slate-900 text-white text-[11px] font-black flex items-center active:scale-95 transition">
                                     导航
@@ -321,30 +338,70 @@
                         </div>
                     </div>
 
-                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="min-w-0">
-                                <div class="flex items-center gap-2">
-                                    <span class="h-2 w-2 rounded-full bg-rose-500"></span>
-                                    <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest">下车地点</div>
-                                </div>
-                                <div class="text-sm font-black text-slate-900 mt-2 leading-snug break-words">
-                                    {{ $dropoff }}
+                    {{-- Dropoffs --}}
+                    @if (!empty($dropoffs))
+                        @foreach ($dropoffs as $i => $point)
+                            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-2">
+                                            <span
+                                                class="h-2 w-2 rounded-full {{ $loop->last ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
+                                            <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                                {{ $loop->last ? '最终目的地' : '下车点 ' . ($i + 1) }}
+                                            </div>
+                                        </div>
+
+                                        <div class="text-sm font-black text-slate-900 mt-2 leading-snug break-words">
+                                            {{ $point }}
+                                        </div>
+                                    </div>
+
+                                    <div class="shrink-0 flex gap-2">
+                                        <button type="button" onclick="copyText(@js($point), this)"
+                                            class="h-9 px-3 rounded-xl bg-slate-100 border border-slate-200 text-[11px] font-black text-slate-700 active:scale-95 transition">
+                                            复制
+                                        </button>
+
+                                        <a href="https://www.google.com/maps?q={{ urlencode($point) }}" target="_blank"
+                                            class="h-9 px-3 rounded-xl bg-slate-900 text-white text-[11px] font-black flex items-center active:scale-95 transition">
+                                            导航
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
+                        @endforeach
+                    @else
+                        {{-- 旧系统兼容 --}}
+                        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                        <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                            下车地点
+                                        </div>
+                                    </div>
 
-                            <div class="shrink-0 flex gap-2">
-                                <button type="button" onclick="copyText(@js($dropoff), this)"
-                                    class="h-9 px-3 rounded-xl bg-slate-100 border border-slate-200 text-[11px] font-black text-slate-700 active:scale-95 transition">
-                                    复制
-                                </button>
-                                <a href="{{ $navDropoffUrl }}" target="_blank"
-                                    class="h-9 px-3 rounded-xl bg-slate-900 text-white text-[11px] font-black flex items-center active:scale-95 transition">
-                                    导航
-                                </a>
+                                    <div class="text-sm font-black text-slate-900 mt-2 leading-snug break-words">
+                                        {{ $dropoff ?: '未设置' }}
+                                    </div>
+                                </div>
+
+                                <div class="shrink-0 flex gap-2">
+                                    <button type="button" onclick="copyText(@js($dropoff), this)"
+                                        class="h-9 px-3 rounded-xl bg-slate-100 border border-slate-200 text-[11px] font-black text-slate-700 active:scale-95 transition">
+                                        复制
+                                    </button>
+
+                                    <a href="{{ $navDropoffUrl }}" target="_blank"
+                                        class="h-9 px-3 rounded-xl bg-slate-900 text-white text-[11px] font-black flex items-center active:scale-95 transition">
+                                        导航
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
 
                 {{-- ✅ Action Button --}}

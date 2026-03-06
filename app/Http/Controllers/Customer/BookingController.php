@@ -19,7 +19,8 @@ class BookingController extends Controller
         $data = $request->validate([
             'service_type'  => ['required', 'in:pickup_dropoff,charter,designated_driver,purchase,big_car,driver_only'],
             'pickup'        => ['required', 'string', 'max:255'],
-            'dropoff'       => ['required', 'string', 'max:255'],
+            'dropoffs'      => ['required', 'array', 'min:1'],
+            'dropoffs.*'    => ['required', 'string', 'max:255'],
             'pax'           => ['required', 'integer', 'min:1', 'max:12'],
             'note'          => ['nullable', 'string', 'max:2000'],
             'schedule_type' => ['nullable', 'in:now,scheduled'],
@@ -35,11 +36,30 @@ class BookingController extends Controller
 
         $shift = $this->decideShift($when);
 
+        // 清掉空白值，重新整理 index
+        $dropoffs = collect($data['dropoffs'])
+            ->map(fn($item) => trim((string) $item))
+            ->filter(fn($item) => $item !== '')
+            ->values()
+            ->all();
+
+        if (count($dropoffs) === 0) {
+            return back()
+                ->withErrors(['dropoffs' => '请至少填写一个下车点'])
+                ->withInput();
+        }
+
         Order::create([
             'user_id'       => $request->user()->id,
             'service_type'  => $data['service_type'],
             'pickup'        => $data['pickup'],
-            'dropoff'       => $data['dropoff'],
+
+            // 兼容旧系统：主下车点先放第一站
+            'dropoff'       => $dropoffs[0],
+
+            // 如果你数据库已有 dropoffs json 欄位，就打开这行
+            'dropoffs'    => $dropoffs,
+
             'pax'           => (int) $data['pax'],
             'note'          => $data['note'] ?? null,
             'schedule_type' => $scheduleType,
@@ -57,6 +77,7 @@ class BookingController extends Controller
     {
         // 06:00–17:59 => day, else night
         $hour = (int) $dt->format('H');
+
         return ($hour >= 6 && $hour <= 17) ? 'day' : 'night';
     }
 }

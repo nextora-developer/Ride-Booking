@@ -219,7 +219,17 @@
                             <span class="h-px flex-1 bg-slate-200/70 ml-4"></span>
                         </div>
 
-                        <div class="relative space-y-4">
+                        <div class="relative space-y-4" x-data="{
+                            dropoffs: @js(old('dropoffs', [''])),
+                            addDropoff() {
+                                this.dropoffs.push('');
+                            },
+                            removeDropoff(index) {
+                                if (this.dropoffs.length > 1) {
+                                    this.dropoffs.splice(index, 1);
+                                }
+                            }
+                        }">
                             <div
                                 class="absolute left-[22px] top-10 bottom-10 w-0.5 bg-gradient-to-b from-indigo-500 via-slate-300 to-emerald-500 hidden sm:block">
                             </div>
@@ -231,19 +241,44 @@
                                 <input type="text" name="pickup" value="{{ old('pickup') }}" required
                                     placeholder="从哪里出发？"
                                     class="w-full bg-white/70 border border-slate-200 rounded-[1.5rem] pl-12 pr-4 py-4 text-sm font-bold text-slate-900
-                                           shadow-[0_12px_30px_rgba(15,23,42,0.06)]
-                                           focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-200 transition-all placeholder:text-slate-400">
+                   shadow-[0_12px_30px_rgba(15,23,42,0.06)]
+                   focus:bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-200 transition-all placeholder:text-slate-400">
                             </div>
 
-                            {{-- Dropoff --}}
-                            <div class="relative group">
-                                <span
-                                    class="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 rounded-full border-4 border-white bg-emerald-500 shadow-sm z-10"></span>
-                                <input type="text" name="dropoff" value="{{ old('dropoff') }}" required
-                                    placeholder="要去哪里？"
-                                    class="w-full bg-white/70 border border-slate-200 rounded-[1.5rem] pl-12 pr-4 py-4 text-sm font-bold text-slate-900
-                                           shadow-[0_12px_30px_rgba(15,23,42,0.06)]
-                                           focus:bg-white focus:ring-4 focus:ring-emerald-100 focus:border-emerald-200 transition-all placeholder:text-slate-400">
+                            {{-- Multi Dropoff --}}
+                            <template x-for="(dropoff, index) in dropoffs" :key="index">
+                                <div class="relative group">
+                                    <span
+                                        class="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 rounded-full border-4 border-white bg-emerald-500 shadow-sm z-10"></span>
+
+                                    <input type="text" :name="'dropoffs[' + index + ']'" x-model="dropoffs[index]"
+                                        required :placeholder="index === 0 ? '第一个下车点' : '下一个下车点'"
+                                        class="w-full bg-white/70 border border-slate-200 rounded-[1.5rem] pl-12 pr-14 py-4 text-sm font-bold text-slate-900
+                       shadow-[0_12px_30px_rgba(15,23,42,0.06)]
+                       focus:bg-white focus:ring-4 focus:ring-emerald-100 focus:border-emerald-200 transition-all placeholder:text-slate-400">
+
+                                    <button type="button" x-show="dropoffs.length > 1" @click="removeDropoff(index)"
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl bg-rose-50 text-rose-600 border border-rose-100
+                       flex items-center justify-center hover:bg-rose-100 transition">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                            stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </template>
+
+                            {{-- Add button --}}
+                            <div class="pt-2">
+                                <button type="button" @click="addDropoff()"
+                                    class="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200
+                   text-xs font-black uppercase tracking-widest hover:bg-emerald-100 transition-all">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                        stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
+                                    </svg>
+                                    添加下车点
+                                </button>
                             </div>
                         </div>
 

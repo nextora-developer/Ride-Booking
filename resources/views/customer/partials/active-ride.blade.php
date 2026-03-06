@@ -37,8 +37,20 @@
                     </span>
                 </div>
 
-                <div class="text-sm font-semibold text-white/80">
-                    {{ $activeBooking->pickup }} → {{ $activeBooking->dropoff }}
+                @php
+                    $routePoints = [$activeBooking->pickup];
+
+                    if (!empty($activeBooking->dropoffs)) {
+                        $routePoints = array_merge($routePoints, $activeBooking->dropoffs);
+                    } elseif (!empty($activeBooking->dropoff)) {
+                        $routePoints[] = $activeBooking->dropoff;
+                    }
+
+                    $routeText = implode(' → ', $routePoints);
+                @endphp
+
+                <div class="text-sm font-semibold text-white/80 truncate">
+                    {{ $routeText }}
                 </div>
 
                 @if ($activeBooking->driver)

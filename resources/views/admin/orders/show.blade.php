@@ -95,6 +95,12 @@
         };
         $pickup = $order->pickup ?? '-';
         $dropoff = $order->dropoff ?? '-';
+
+        $dropoffs = is_array($order->dropoffs ?? null) ? array_values(array_filter($order->dropoffs)) : [];
+
+        if (empty($dropoffs) && !empty($dropoff) && $dropoff !== '-') {
+            $dropoffs = [$dropoff];
+        }
         $note = $order->note;
 
         $scheduleType = $order->schedule_type ?? 'now'; // now / scheduled
@@ -228,25 +234,52 @@
                     {{-- 路线展示 --}}
                     <div class="relative">
                         <div class="text-xs font-black tracking-[0.2em] uppercase text-slate-400 mb-6">行程路线</div>
-                        <div class="flex flex-col space-y-4">
-                            <div class="flex items-start gap-4">
-                                <div class="mt-1.5 flex flex-col items-center">
+
+                        <div class="relative">
+                            <div class="absolute left-[5px] top-3 bottom-3 w-0.5 bg-slate-100"></div>
+
+                            <div class="space-y-5">
+                                {{-- Pickup --}}
+                                <div class="relative flex items-start gap-4">
                                     <div
-                                        class="h-3 w-3 rounded-full border-2 border-indigo-500 bg-white shadow-[0_0_0_4px_rgba(99,102,241,0.1)]">
+                                        class="relative z-10 mt-1.5 h-3 w-3 rounded-full border-2 border-indigo-500 bg-white shadow-[0_0_0_4px_rgba(99,102,241,0.1)] shrink-0">
                                     </div>
-                                    <div class="w-0.5 h-10 bg-slate-100"></div>
+                                    <div class="min-w-0">
+                                        <p class="text-xs font-black text-slate-400 uppercase">起点 Pickup</p>
+                                        <p class="text-lg font-black text-slate-900 break-words">{{ $pickup }}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="text-xs font-black text-slate-400 uppercase">起点 Pickup</p>
-                                    <p class="text-lg font-black text-slate-900">{{ $pickup }}</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start gap-4">
-                                <div class="mt-1.5 h-3 w-3 rounded-full bg-slate-900 shadow-lg shadow-slate-200"></div>
-                                <div>
-                                    <p class="text-xs font-black text-slate-400 uppercase">终点 Dropoff</p>
-                                    <p class="text-lg font-black text-slate-900">{{ $dropoff }}</p>
-                                </div>
+
+                                {{-- Dropoffs --}}
+                                @if (!empty($dropoffs))
+                                    @foreach ($dropoffs as $i => $point)
+                                        <div class="relative flex items-start gap-4">
+                                            <div
+                                                class="relative z-10 mt-1.5 h-3 w-3 rounded-full shrink-0
+                            {{ $loop->last ? 'bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.12)]' : 'bg-slate-900 shadow-lg shadow-slate-200' }}">
+                                            </div>
+
+                                            <div class="min-w-0">
+                                                <p class="text-xs font-black text-slate-400 uppercase">
+                                                    {{ $loop->last ? '终点 Dropoff' : '下车点 ' . ($i + 1) }}
+                                                </p>
+                                                <p class="text-lg font-black text-slate-900 break-words">
+                                                    {{ $point }}</p>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <div class="relative flex items-start gap-4">
+                                        <div
+                                            class="relative z-10 mt-1.5 h-3 w-3 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.12)] shrink-0">
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="text-xs font-black text-slate-400 uppercase">终点 Dropoff</p>
+                                            <p class="text-lg font-black text-slate-900 break-words">{{ $dropoff }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -348,8 +381,7 @@
 
                                 {{-- Amount Input --}}
                                 <div class="space-y-2">
-                                    <label
-                                        class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1">订单金额
+                                    <label class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1">订单金额
                                         (RM)</label>
                                     <div class="relative">
                                         <div

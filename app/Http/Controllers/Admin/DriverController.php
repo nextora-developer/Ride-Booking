@@ -58,7 +58,7 @@ class DriverController extends Controller
         $orders = Order::query()
             ->where('driver_id', $driver->id)
             ->latest()
-            ->take(10)
+            ->take(5)
             ->get();
 
         // 简单统计（可扩展）

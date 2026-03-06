@@ -179,15 +179,65 @@
                 </div>
 
                 {{-- Route Visual --}}
-                <div class="flex gap-4">
-                    <div class="flex flex-col items-center py-1 shrink-0">
-                        <div class="h-2.5 w-2.5 rounded-full border-2 border-slate-400 bg-white"></div>
-                        <div class="w-px flex-1 bg-slate-200 my-1"></div>
-                        <div class="h-2.5 w-2.5 rounded-full bg-indigo-600"></div>
-                    </div>
-                    <div class="flex-1 min-w-0 space-y-3">
-                        <div class="text-sm font-bold text-slate-500 truncate leading-tight">{{ $o->pickup }}</div>
-                        <div class="text-sm font-black text-slate-900 truncate leading-tight">{{ $o->dropoff }}</div>
+                <div class="relative">
+                    {{-- Vertical line --}}
+                    <div class="absolute left-[5px] top-3 bottom-3 w-px bg-slate-200"></div>
+
+                    <div class="space-y-3">
+                        {{-- Pickup --}}
+                        <div class="relative flex items-start gap-3">
+                            <div class="relative z-10 shrink-0 pt-1">
+                                <div class="h-2.5 w-2.5 rounded-full border-2 border-slate-400 bg-white"></div>
+                            </div>
+
+                            <div class="min-w-0 flex-1">
+                                <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                    上车地点
+                                </div>
+                                <div class="text-sm font-bold text-slate-500 truncate leading-tight mt-0.5">
+                                    {{ $o->pickup }}
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Dropoffs --}}
+                        @if (!empty($o->dropoffs))
+                            @foreach ($o->dropoffs as $i => $point)
+                                <div class="relative flex items-start gap-3">
+                                    <div class="relative z-10 shrink-0 pt-1">
+                                        <div
+                                            class="h-2.5 w-2.5 rounded-full {{ $loop->last ? 'bg-emerald-600' : 'bg-slate-900' }}">
+                                        </div>
+                                    </div>
+
+                                    <div class="min-w-0 flex-1">
+                                        <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                            {{ $loop->last ? '最终目的地' : '下车点 ' . ($i + 1) }}
+                                        </div>
+                                        <div
+                                            class="text-sm {{ $loop->last ? 'font-black text-slate-900' : 'font-bold text-slate-700' }} truncate leading-tight mt-0.5">
+                                            {{ $point }}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            {{-- 旧系统兼容 --}}
+                            <div class="relative flex items-start gap-3">
+                                <div class="relative z-10 shrink-0 pt-1">
+                                    <div class="h-2.5 w-2.5 rounded-full bg-emerald-600"></div>
+                                </div>
+
+                                <div class="min-w-0 flex-1">
+                                    <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                        目的地
+                                    </div>
+                                    <div class="text-sm font-black text-slate-900 truncate leading-tight mt-0.5">
+                                        {{ $o->dropoff }}
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
 

@@ -13,6 +13,7 @@ class Order extends Model
         'service_type',
         'pickup',
         'dropoff',
+        'dropoffs',
         'pax',
         'note',
         'schedule_type',
@@ -29,6 +30,7 @@ class Order extends Model
     protected $casts = [
         'scheduled_at' => 'datetime',
         'assigned_at' => 'datetime',
+        'dropoffs' => 'array',
     ];
 
     public function customer()

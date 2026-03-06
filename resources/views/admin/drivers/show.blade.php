@@ -72,6 +72,27 @@
 
                 <div class="divide-y divide-slate-50">
                     @forelse($orders as $o)
+                        @php
+                            $routePoints = [];
+
+                            if (!empty($o->pickup)) {
+                                $routePoints[] = $o->pickup;
+                            }
+
+                            if (!empty($o->dropoffs) && is_array($o->dropoffs)) {
+                                $routePoints = array_merge($routePoints, array_values(array_filter($o->dropoffs)));
+                            } elseif (!empty($o->dropoff)) {
+                                $routePoints[] = $o->dropoff;
+                            }
+
+                            $displayPoints = array_slice($routePoints, 0, 3);
+                            $routeText = !empty($displayPoints) ? implode(' → ', $displayPoints) : '-';
+
+                            if (count($routePoints) > 3) {
+                                $routeText .= ' → ...';
+                            }
+                        @endphp
+
                         <a href="{{ route('admin.orders.show', $o) }}"
                             class="group block px-8 py-5 hover:bg-slate-50 transition-all">
                             <div class="flex items-center justify-between gap-6">
@@ -80,18 +101,15 @@
                                         class="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400 group-hover:bg-white transition-colors">
                                         #{{ substr($o->id, -3) }}
                                     </div>
+
                                     <div class="min-w-0">
                                         <div
                                             class="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors">
                                             ORD-{{ str_pad((string) $o->id, 6, '0', STR_PAD_LEFT) }}
                                         </div>
-                                        <div class="mt-1 flex items-center gap-2 text-[11px] font-bold text-slate-400">
-                                            <span class="truncate max-w-[120px]">{{ $o->pickup }}</span>
-                                            <svg class="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24"
-                                                stroke="currentColor" stroke-width="3">
-                                                <path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                                            </svg>
-                                            <span class="truncate max-w-[120px]">{{ $o->dropoff }}</span>
+
+                                        <div class="mt-1 text-[11px] font-bold text-slate-400 truncate">
+                                            {{ $routeText }}
                                         </div>
                                     </div>
                                 </div>
@@ -99,8 +117,8 @@
                                 <div class="shrink-0">
                                     <span
                                         class="inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest 
-                                        {{ $o->status === 'completed' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500' }}">
-                                        {{ $o->status === 'completed' ? '已完成' : ($o->status ?? '待处理') }}
+                        {{ $o->status === 'completed' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500' }}">
+                                        {{ $o->status === 'completed' ? '已完成' : $o->status ?? '待处理' }}
                                     </span>
                                 </div>
                             </div>
@@ -151,7 +169,7 @@
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            @foreach ([['姓名', $driver->full_name], ['身份证号码', $driver->ic_number], ['电话', $driver->phone], ['班次', ($driver->shift ? ($driver->shift === 'day' ? '白班' : '夜班') : null)]] as [$label, $val])
+                            @foreach ([['姓名', $driver->full_name], ['身份证号码', $driver->ic_number], ['电话', $driver->phone], ['班次', $driver->shift ? ($driver->shift === 'day' ? '白班' : '夜班') : null]] as [$label, $val])
                                 <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
                                     <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">
                                         {{ $label }}

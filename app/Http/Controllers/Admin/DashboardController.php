@@ -31,7 +31,7 @@ class DashboardController extends Controller
         // Latest bookings
         $latestOrders = Order::with(['customer', 'driver'])
             ->latest()
-            ->take(10)
+            ->take(5)
             ->get();
 
         // Payment mix (Today) - 按今天 created 的订单统计 payment_type

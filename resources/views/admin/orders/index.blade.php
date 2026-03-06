@@ -218,7 +218,14 @@
                 $payment = $order->payment_type ?? null;
                 $service = $order->service_type ?? ($order->type ?? '服务');
                 $fromLoc = $order->pickup ?? ($order->from ?? '-');
-                $toLoc = $order->dropoff ?? ($order->to ?? '-');
+                $dropoffs = is_array($order->dropoffs ?? null) ? array_values(array_filter($order->dropoffs)) : [];
+
+                if (empty($dropoffs) && !empty($order->dropoff)) {
+                    $dropoffs = [$order->dropoff];
+                }
+
+                $routePoints = array_filter(array_merge([$fromLoc], $dropoffs));
+                $routeText = !empty($routePoints) ? implode(' → ', $routePoints) : '-';
                 $when = optional($order->created_at)->format('d M Y, h:i A');
 
                 $driverName = optional($order->driver)->name ?? ($order->driver_name ?? null);
@@ -266,7 +273,9 @@
 
                                 <span class="font-extrabold text-slate-900">{{ $serviceLabel }}</span>
                                 <span class="text-slate-400">•</span>
-                                {{ $fromLoc }} → {{ $toLoc }}
+                                <span class="truncate inline-block max-w-full align-bottom">
+                                    {{ $routeText }}
+                                </span>
                             </div>
 
                             <div class="mt-2 text-xs text-slate-500 font-semibold">

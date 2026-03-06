@@ -108,10 +108,19 @@
                             $statusText = $isCompleted ? '已完成' : ($isCancelled ? '已取消' : '进行中');
                             $statusChip = $isCompleted
                                 ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
-                                : ($isCancelled ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-indigo-100 text-indigo-700 border-indigo-200');
+                                : ($isCancelled
+                                    ? 'bg-rose-100 text-rose-700 border-rose-200'
+                                    : 'bg-indigo-100 text-indigo-700 border-indigo-200');
 
                             $pay = strtoupper($o->payment_type ?? '-');
-                            $payZh = $pay === 'CASH' ? '现金' : ($pay === 'TRANSFER' ? '转账' : ($pay === 'CREDIT' ? '挂单' : $pay));
+                            $payZh =
+                                $pay === 'CASH'
+                                    ? '现金'
+                                    : ($pay === 'TRANSFER'
+                                        ? '转账'
+                                        : ($pay === 'CREDIT'
+                                            ? '挂单'
+                                            : $pay));
 
                             $pax = (int) ($o->pax ?? 1);
                             $amount = (float) ($o->amount ?? 0);
@@ -134,7 +143,8 @@
                                     </div>
 
                                     <div class="mt-2">
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black border {{ $statusChip }}">
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black border {{ $statusChip }}">
                                             {{ $statusText }}
                                         </span>
                                     </div>
@@ -151,24 +161,48 @@
                             </div>
 
                             {{-- Route mini timeline --}}
-                            <div class="space-y-2 relative">
-                                <div class="absolute left-[6px] top-[6px] bottom-[6px] w-[2px] bg-slate-200 rounded-full"></div>
-
-                                <div class="flex items-center gap-3 pl-5">
-                                    <div class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></div>
-                                    <div class="text-xs font-bold text-slate-700 truncate">
-                                        {{ $o->pickup ?? '-' }}
-                                    </div>
+                            <div class="relative">
+                                <div class="absolute left-[6px] top-[6px] bottom-[6px] w-[2px] bg-slate-200 rounded-full">
                                 </div>
 
-                                <div class="flex items-center gap-3 pl-5">
-                                    <div class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></div>
-                                    <div class="text-xs font-bold text-slate-700 truncate">
-                                        {{ $o->dropoff ?? '-' }}
+                                <div class="space-y-2">
+
+                                    {{-- Pickup --}}
+                                    <div class="relative flex items-center gap-3 pl-5">
+                                        <div class="relative z-10 w-2 h-2 rounded-full bg-indigo-500 shrink-0"></div>
+                                        <div class="text-xs font-bold text-slate-700 truncate">
+                                            上车：{{ $o->pickup ?? '-' }}
+                                        </div>
                                     </div>
+
+                                    {{-- Dropoffs --}}
+                                    @if (!empty($o->dropoffs))
+                                        @foreach ($o->dropoffs as $i => $point)
+                                            <div class="relative flex items-center gap-3 pl-5">
+
+                                                <div
+                                                    class="relative z-10 w-2 h-2 rounded-full
+                        {{ $loop->last ? 'bg-emerald-500' : 'bg-slate-400' }} shrink-0">
+                                                </div>
+
+                                                <div class="text-xs font-bold text-slate-700 truncate">
+                                                    {{ $loop->last ? '终点：' : '下车点 ' . ($i + 1) . '：' }}{{ $point }}
+                                                </div>
+
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        {{-- 旧系统兼容 --}}
+                                        <div class="relative flex items-center gap-3 pl-5">
+                                            <div class="relative z-10 w-2 h-2 rounded-full bg-emerald-500 shrink-0"></div>
+                                            <div class="text-xs font-bold text-slate-700 truncate">
+                                                终点：{{ $o->dropoff ?? '-' }}
+                                            </div>
+                                        </div>
+                                    @endif
+
                                 </div>
                             </div>
-
                             {{-- Bottom chips --}}
                             <div class="mt-4 pt-4 border-t border-slate-200 flex items-center justify-between">
                                 <div class="flex gap-2">
@@ -180,7 +214,8 @@
                                     </span>
                                 </div>
 
-                                <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
+                                <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="3"
+                                    stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                 </svg>
                             </div>
