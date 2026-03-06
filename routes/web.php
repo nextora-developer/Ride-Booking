@@ -11,6 +11,7 @@ use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\ActiveRideController;
 use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
 use App\Http\Controllers\Customer\CreditLogController as CustomerCreditLogController;
+use App\Http\Controllers\Customer\ReviewController as CustomerReviewController;
 
 use App\Http\Controllers\Manager\OrderController as ManagerOrderController;
 use App\Http\Controllers\Manager\DriverController as ManagerDriverController;
@@ -20,7 +21,6 @@ use App\Http\Controllers\Driver\DashboardController;
 use App\Http\Controllers\Driver\HistoryController;
 use App\Http\Controllers\Driver\DriverOnlineController;
 use App\Http\Controllers\Driver\ProfileController as DriverProfileController;
-
 
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
@@ -151,7 +151,7 @@ Route::prefix('manager')
         Route::patch('/credits/{customer}', [ManagerCreditController::class, 'update'])->name('credits.update');
         Route::post('/credits/{customer}/clear', [ManagerCreditController::class, 'clear'])->name('credits.clear');
 
-        Route::get('/credit-logs', [ManagerCreditLogController::class, 'index'])->name('credit.logs.index');
+        // Route::get('/credit-logs', [ManagerCreditLogController::class, 'index'])->name('credit.logs.index');
     });
 
 Route::prefix('driver')
@@ -181,6 +181,9 @@ Route::prefix('app')
 
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show'); // ✅ add
+        
+        Route::get('/orders/{order}/review', [CustomerReviewController::class, 'create'])->name('reviews.create');
+        Route::post('/orders/{order}/review', [CustomerReviewController::class, 'store'])->name('reviews.store');
 
         Route::get('/active-ride', [ActiveRideController::class, 'show'])
             ->name('active.ride');
@@ -190,7 +193,8 @@ Route::prefix('app')
 
         Route::get('/password', [CustomerProfileController::class, 'editPassword'])->name('password.edit');
         Route::patch('/password', [CustomerProfileController::class, 'updatePassword'])->name('password.update');
-        Route::get('/credit-logs', [CustomerCreditLogController::class, 'index']) ->name('credit.logs');
+
+        Route::get('/credit-logs', [CustomerCreditLogController::class, 'index'])->name('credit.logs');
     });
 
 /*

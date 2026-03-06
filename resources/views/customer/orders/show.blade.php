@@ -12,6 +12,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
             </a>
+            
             <div class="text-center">
                 <h1 class="text-base font-black text-slate-900">订单详情</h1>
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">编号：#{{ $order->id }}</p>
@@ -312,6 +313,84 @@
                 </div>
                 <p class="text-sm font-bold text-amber-900 leading-relaxed">“{{ $order->note }}”</p>
             </div>
+        @endif
+
+        {{-- 6. Review Card --}}
+        @if ($order->status === 'completed')
+            @if ($order->review)
+                <div
+                    class="bg-white rounded-[2.5rem] p-6 border border-amber-200 shadow-[0_14px_34px_rgba(15,23,42,0.08)] overflow-hidden relative">
+                    <div class="absolute top-0 right-0 p-5 opacity-[0.06] pointer-events-none text-6xl">⭐</div>
+
+                    <div class="relative">
+                        <div class="flex items-center justify-between gap-4 mb-5">
+                            <div>
+                                <p class="text-[11px] font-black text-amber-600 uppercase tracking-widest">我的评价</p>
+                                <h3 class="text-xl font-black text-slate-900 mt-1">感谢您的反馈</h3>
+                            </div>
+
+                            <span
+                                class="inline-flex items-center px-3 py-1.5 rounded-xl bg-amber-100 text-amber-700 text-xs font-black uppercase tracking-wider">
+                                已评价
+                            </span>
+                        </div>
+
+                        <div class="flex items-center gap-1 text-2xl mb-4">
+                            @for ($i = 1; $i <= 5; $i++)
+                                <span class="{{ $i <= $order->review->rating ? '' : 'opacity-25' }}">⭐</span>
+                            @endfor
+                        </div>
+
+                        @if ($order->review->comment)
+                            <div class="rounded-2xl bg-slate-50 border border-slate-100 p-4">
+                                <p class="text-sm font-bold text-slate-700 leading-relaxed">
+                                    “{{ $order->review->comment }}”
+                                </p>
+                            </div>
+                        @else
+                            <div class="rounded-2xl bg-slate-50 border border-slate-100 p-4">
+                                <p class="text-sm font-bold text-slate-400">
+                                    您没有留下文字评价
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @else
+                <div
+                    class="bg-gradient-to-br from-amber-50 to-white rounded-[2.5rem] p-6 border border-amber-200 shadow-[0_14px_34px_rgba(15,23,42,0.08)] overflow-hidden relative">
+                    <div class="absolute -right-4 -top-4 text-8xl opacity-[0.08] pointer-events-none">⭐</div>
+
+                    <div class="relative">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <p class="text-[11px] font-black text-amber-600 uppercase tracking-widest">订单评价</p>
+                                <h3 class="text-xl font-black text-slate-900 mt-1">本次行程还满意吗？</h3>
+                                <p class="text-sm font-bold text-slate-500 mt-2 leading-relaxed">
+                                    您的评价可以帮助我们持续优化服务体验。
+                                </p>
+                            </div>
+
+                            <div
+                                class="h-14 w-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shadow-sm">
+                                <span class="text-2xl">⭐</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <a href="{{ route('customer.reviews.create', $order) }}"
+                                class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-slate-900 text-white text-sm font-black hover:bg-slate-800 active:scale-[0.98] transition shadow-lg shadow-slate-200">
+                                <span>去评价</span>
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @endif
         @endif
 
     </div>

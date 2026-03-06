@@ -473,6 +473,71 @@
                 </div>
             </div>
 
+            {{-- 顾客评价 --}}
+            <div class="rounded-[2rem] bg-white border border-slate-100 p-6 shadow-sm">
+
+                <div class="flex items-center justify-between mb-4">
+                    <div class="text-xs font-black text-slate-400 uppercase tracking-widest">
+                        顾客评价
+                    </div>
+
+                    @if ($order->review)
+                        <span class="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase">
+                            已评价
+                        </span>
+                    @else
+                        <span class="px-2 py-1 rounded-lg bg-slate-100 text-slate-500 text-[10px] font-black uppercase">
+                            暂无评价
+                        </span>
+                    @endif
+                </div>
+
+                @if ($order->review)
+
+                    {{-- 星级 --}}
+                    <div class="flex items-center gap-1 mb-4">
+
+                        @for ($i = 1; $i <= 5; $i++)
+                            <svg class="h-5 w-5 {{ $i <= $order->review->rating ? 'text-yellow-400' : 'text-slate-200' }}"
+                                fill="currentColor" viewBox="0 0 20 20">
+
+                                <path
+                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.966a1 1 0 00.95.69h4.173c.969 0 1.371 1.24.588 1.81l-3.377 2.455a1 1 0 00-.364 1.118l1.287 3.966c.3.921-.755 1.688-1.538 1.118l-3.377-2.455a1 1 0 00-1.176 0l-3.377 2.455c-.783.57-1.838-.197-1.538-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.098 9.393c-.783-.57-.38-1.81.588-1.81h4.173a1 1 0 00.95-.69l1.286-3.966z" />
+
+                            </svg>
+                        @endfor
+
+                        <span class="ml-2 text-sm font-black text-slate-700">
+                            {{ $order->review->rating }}/5
+                        </span>
+
+                    </div>
+
+                    {{-- 评论 --}}
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+
+                        @if ($order->review->comment)
+                            <p class="text-sm font-bold text-slate-700 leading-relaxed">
+                                "{{ $order->review->comment }}"
+                            </p>
+                        @else
+                            <p class="text-sm font-bold text-slate-400">
+                                顾客没有留下文字评价
+                            </p>
+                        @endif
+
+                    </div>
+                @else
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                        <p class="text-sm font-bold text-slate-400">
+                            该订单尚未收到顾客评价。
+                        </p>
+                    </div>
+
+                @endif
+
+            </div>
+
         </div>
     </div>
 @endsection

@@ -73,9 +73,16 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load(['customer', 'driver', 'manager']);
+        $order->load([
+            'customer',
+            'driver',
+            'manager',
+            'review.user',
+        ]);
 
-        $drivers = User::where('role', 'driver')->orderBy('name')->get();
+        $drivers = User::where('role', 'driver')
+            ->orderBy('name')
+            ->get();
 
         return view('admin.orders.show', compact('order', 'drivers'));
     }

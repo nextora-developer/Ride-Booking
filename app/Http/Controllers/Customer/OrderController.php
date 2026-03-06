@@ -12,6 +12,7 @@ class OrderController extends Controller
     {
         $orders = Order::query()
             ->where('user_id', $request->user()->id)
+            ->with(['review', 'driver'])
             ->latest()
             ->paginate(5);
 
@@ -22,6 +23,11 @@ class OrderController extends Controller
     {
         // ✅ security: 只能看自己的订单
         abort_unless((int) $order->user_id === (int) $request->user()->id, 403);
+
+        $order->load([
+            'driver',
+            'review',
+        ]);
 
         return view('customer.orders.show', compact('order'));
     }

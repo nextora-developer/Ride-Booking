@@ -57,7 +57,9 @@
                         $isBook = request()->routeIs('customer.book');
                         $isOrder = request()->routeIs('customer.orders.*');
                         $isProfile =
-                            request()->routeIs('customer.profile*') || request()->routeIs('customer.password*') || request()->routeIs('customer.credit.logs*');
+                            request()->routeIs('customer.profile*') ||
+                            request()->routeIs('customer.password*') ||
+                            request()->routeIs('customer.credit.logs*');
                     @endphp
 
                     <nav class="hidden md:flex items-center bg-gray-100/50 p-1 rounded-2xl border border-gray-100">
@@ -95,8 +97,8 @@
                                 <a href="{{ route('customer.profile') }}"
                                     class="block px-3 py-2 rounded-lg text-sm transition-colors
                                             {{ $isProfile
-                                            ? 'bg-slate-100 text-slate-900 font-semibold'
-                                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                                                ? 'bg-slate-100 text-slate-900 font-semibold'
+                                                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                                     个人资料
                                 </a>
                             </div>
@@ -437,6 +439,38 @@
         </footer>
 
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @if (session('success'))
+        <div id="app-toast" class="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+
+            <div
+                class="bg-black/85 text-white px-6 py-5 rounded-3xl
+                flex flex-col items-center gap-2
+                shadow-[0_20px_40px_rgba(0,0,0,0.35)]
+                animate-[fadeIn_.2s_ease]">
+
+                <div class="text-3xl">✔</div>
+
+                <div class="text-sm font-bold">
+                    {{ session('success') }}
+                </div>
+
+            </div>
+
+        </div>
+
+        <script>
+            setTimeout(() => {
+                const toast = document.getElementById('app-toast');
+                if (toast) {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 500);
+                }
+            }, 1500);
+        </script>
+    @endif
 </body>
 
 </html>

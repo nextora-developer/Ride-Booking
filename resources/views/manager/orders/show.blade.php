@@ -237,6 +237,73 @@
                     <p class="text-sm font-bold text-amber-900 leading-relaxed">{{ $order->note }}</p>
                 </div>
             @endif
+
+            {{-- Customer Review --}}
+            @if ($order->status === 'completed')
+                <div
+                    class="bg-white rounded-[2rem] p-6 border border-slate-200
+                        shadow-[0_10px_24px_rgba(15,23,42,0.06)] overflow-hidden relative">
+
+                    <div class="absolute top-0 right-0 p-5 opacity-[0.05] pointer-events-none text-6xl">★</div>
+
+                    <div class="relative">
+                        <div class="flex items-center justify-between gap-4 mb-5">
+                            <div>
+                                <div class="text-xs font-black text-slate-500 uppercase tracking-widest leading-none">
+                                    顾客评价
+                                </div>
+                                <div class="text-lg font-black text-slate-900 mt-2">
+                                    {{ $order->review ? '已提交评价' : '暂未评价' }}
+                                </div>
+                            </div>
+
+                            <span
+                                class="inline-flex items-center px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider
+                                {{ $order->review ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">
+                                {{ $order->review ? '已评价' : '无评价' }}
+                            </span>
+                        </div>
+
+                        @if ($order->review)
+                            <div class="flex items-center gap-1 mb-4">
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <svg class="h-6 w-6 {{ $i <= $order->review->rating ? 'text-yellow-400' : 'text-slate-200' }}"
+                                        fill="currentColor" viewBox="0 0 20 20">
+                                        <path
+                                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.966a1 1 0 00.95.69h4.173c.969 0 1.371 1.24.588 1.81l-3.377 2.455a1 1 0 00-.364 1.118l1.287 3.966c.3.921-.755 1.688-1.538 1.118l-3.377-2.455a1 1 0 00-1.176 0l-3.377 2.455c-.783.57-1.838-.197-1.538-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.098 9.393c-.783-.57-.38-1.81.588-1.81h4.173a1 1 0 00.95-.69l1.286-3.966z" />
+                                    </svg>
+                                @endfor
+
+                                <span class="ml-2 text-sm font-black text-slate-700">
+                                    {{ $order->review->rating }}/5
+                                </span>
+                            </div>
+
+                            <div class="rounded-2xl bg-slate-50 border border-slate-100 p-4">
+                                <div class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">
+                                    评价内容
+                                </div>
+
+                                @if ($order->review->comment)
+                                    <p class="text-sm font-bold text-slate-700 leading-relaxed">
+                                        “{{ $order->review->comment }}”
+                                    </p>
+                                @else
+                                    <p class="text-sm font-bold text-slate-400">
+                                        顾客没有留下文字评价
+                                    </p>
+                                @endif
+                            </div>
+                        @else
+                            <div class="rounded-2xl bg-slate-50 border border-slate-100 p-5">
+                                <p class="text-sm font-bold text-slate-500 leading-relaxed">
+                                    该订单已完成，但顾客暂时还没有提交评价。
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
         </div>
 
         {{-- Right: Assignment Panel --}}

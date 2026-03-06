@@ -74,6 +74,13 @@ class OrderController extends Controller
     {
         $manager = $request->user();
 
+        // ✅ 先载入订单相关资料
+        $order->load([
+            'user',
+            'driver',
+            'review.user',
+        ]);
+
         $driversQuery = User::query()
             ->where('role', 'driver')
             ->where('driver_status', 'approved')
@@ -107,7 +114,6 @@ class OrderController extends Controller
 
         return view('manager.orders.show', compact('order', 'drivers'));
     }
-
     public function assign(Request $request, Order $order)
     {
         $manager = $request->user();
