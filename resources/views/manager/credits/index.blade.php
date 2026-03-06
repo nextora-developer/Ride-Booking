@@ -60,24 +60,37 @@
 
             {{-- 总挂单金额卡片 --}}
             <div
-                class="bg-rose-100/35 rounded-[2.5rem] p-6 border border-rose-200/60 shadow-[0_12px_28px_rgba(15,23,42,0.08)] relative overflow-hidden group">
-                {{-- 背景装饰：警告色调的装饰物 --}}
+                class="bg-rose-100/35 rounded-[2.5rem] p-5 sm:p-6 border border-rose-200/60 shadow-[0_12px_28px_rgba(15,23,42,0.08)] relative overflow-hidden group">
+
+                {{-- 背景装饰 --}}
                 <div
-                    class="absolute -right-2 -bottom-2 text-6xl opacity-[0.12] group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500 select-none">
+                    class="absolute -right-2 -bottom-2 text-5xl sm:text-6xl opacity-[0.12] group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500 select-none">
                     💰
                 </div>
 
                 <div class="relative z-10">
+
                     <div class="flex items-center gap-2">
                         <div class="h-2 w-2 rounded-full bg-rose-600 animate-pulse"></div>
-                        <div class="text-xs font-black text-rose-600/70 uppercase tracking-[0.2em]">总挂单金额</div>
-                    </div>
-                    <div class="flex items-baseline gap-0.5 mt-2">
-                        <div class="text-sm font-black text-rose-700 self-start mt-1">RM</div>
-                        <div class="text-3xl font-black text-rose-700 tracking-tighter">
-                            {{ number_format($totalCredit, 2) }}
+                        <div class="text-[10px] sm:text-xs font-black text-rose-600/70 uppercase tracking-[0.2em]">
+                            总挂单金额
                         </div>
                     </div>
+
+                    {{-- 金额 --}}
+                    <div class="mt-3">
+
+                        <div class="text-xs font-black text-rose-600 uppercase tracking-widest">
+                            RM
+                        </div>
+
+                        <div
+                            class="text-2xl sm:text-3xl font-black text-rose-700 tracking-tight sm:tracking-tighter leading-none tabular-nums mt-1">
+                            {{ number_format($totalCredit, 2) }}
+                        </div>
+
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -119,8 +132,7 @@
 
         <div class="mt-6 space-y-3">
             @forelse($customers as $c)
-                <div
-                    class="bg-white rounded-3xl p-5 border border-slate-200 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
+                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
                     <div class="flex items-start justify-between gap-4">
                         <div class="min-w-0">
                             <div class="flex items-center gap-3">
@@ -199,7 +211,8 @@
                         <div
                             class="mb-6 h-24 w-24 rounded-[2.5rem] bg-emerald-100/60 border border-emerald-200/60 flex items-center justify-center text-4xl
                                    shadow-[inset_0_0_0_1px_rgba(255,255,255,0.6)]">
-                            <span class="filter drop-shadow-sm group-hover:scale-125 transition-transform duration-300">✨</span>
+                            <span
+                                class="filter drop-shadow-sm group-hover:scale-125 transition-transform duration-300">✨</span>
                         </div>
 
                         {{-- 文字内容 --}}
