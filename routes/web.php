@@ -30,18 +30,24 @@ use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\CreditLogController as AdminCreditLogController;
 
 
-
-
-
 use Illuminate\Support\Facades\Route;
 
+
+// Route::get('/', function () {
+//     // ✅ customer 一进来先 login/register
+//     // 如果已登录：按 role 导去各自 dashboard
+//     return auth()->check()
+//         ? redirect()->route('home')
+//         : redirect()->route('login');
+// });
+
 Route::get('/', function () {
-    // ✅ customer 一进来先 login/register
-    // 如果已登录：按 role 导去各自 dashboard
-    return auth()->check()
-        ? redirect()->route('home')
-        : redirect()->route('login');
-});
+    return view('landing');
+})->name('landing');
+
+// Legal pages
+Route::view('/terms', 'terms')->name('terms');
+Route::view('/privacy', 'privacy')->name('privacy');
 
 /*
 |--------------------------------------------------------------------------
@@ -181,7 +187,7 @@ Route::prefix('app')
 
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show'); // ✅ add
-        
+
         Route::get('/orders/{order}/review', [CustomerReviewController::class, 'create'])->name('reviews.create');
         Route::post('/orders/{order}/review', [CustomerReviewController::class, 'store'])->name('reviews.store');
 
