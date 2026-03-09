@@ -302,10 +302,9 @@
                                 <td class="px-6 py-4 font-bold text-slate-900">
                                     {{ $serviceLabel($o->service_type ?? '-') }}
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-top">
                                     @php
                                         $routePoints = [];
-
                                         if (!empty($o->pickup)) {
                                             $routePoints[] = $o->pickup;
                                         }
@@ -319,15 +318,70 @@
                                             $routePoints[] = $o->dropoff;
                                         }
 
-                                        $routeText = !empty($routePoints) ? implode(' → ', $routePoints) : '-';
+                                        $totalPoints = count($routePoints);
                                     @endphp
 
-                                    <div class="text-slate-900 font-semibold truncate">
-                                        {{ $routeText }}
+                                    <div class="relative max-w-[420px]">
+                                        {{-- Vertical Connecting Line --}}
+                                        @if ($totalPoints > 1)
+                                            <div class="absolute left-[5px] top-2 bottom-2 w-px bg-slate-200"></div>
+                                        @endif
+
+                                        <div class="space-y-3">
+                                            @forelse ($routePoints as $index => $point)
+                                                <div class="relative flex items-start gap-3 group">
+                                                    {{-- Status Indicator Icons --}}
+                                                    <div
+                                                        class="relative z-10 flex items-center justify-center mt-1.5 shrink-0">
+                                                        @if ($index === 0)
+                                                            <div
+                                                                class="w-[11px] h-[11px] rounded-full bg-blue-600 ring-4 ring-blue-50">
+                                                            </div>
+                                                        @elseif ($index === $totalPoints - 1)
+                                                            <div
+                                                                class="w-[11px] h-[11px] rounded-full bg-emerald-500 ring-4 ring-emerald-50">
+                                                            </div>
+                                                        @else
+                                                            <div
+                                                                class="w-[11px] h-[11px] rounded-full bg-slate-300 ring-4 ring-white">
+                                                            </div>
+                                                        @endif
+                                                    </div>
+
+                                                    {{-- Address Text --}}
+                                                    <div class="flex flex-col min-w-0">
+                                                        <span
+                                                            class="text-xs font-bold uppercase tracking-wider text-slate-400 leading-none mb-1">
+                                                            @if ($index === 0)
+                                                                起点
+                                                            @elseif($index === $totalPoints - 1)
+                                                                终点
+                                                            @else
+                                                                途径
+                                                            @endif
+                                                        </span>
+                                                        <span
+                                                            class="text-sm text-slate-700 font-medium leading-relaxed break-words">
+                                                            {{ $point }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            @empty
+                                                <div class="text-slate-400 italic text-sm">暂无路线信息</div>
+                                            @endforelse
+                                        </div>
                                     </div>
 
-                                    <div class="text-xs text-slate-500 font-medium mt-1">
-                                        顾客：{{ optional($o->customer)->name ?? '—' }}
+                                    {{-- Customer Tag --}}
+                                    <div
+                                        class="inline-flex items-center gap-1.5 mt-4 px-2 py-1 bg-slate-100 rounded text-[11px] text-slate-600 font-semibold border border-slate-200/50">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                                            <circle cx="12" cy="7" r="4" />
+                                        </svg>
+                                        {{ optional($o->customer)->name ?? '无客户信息' }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">

@@ -7,6 +7,8 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Exports\SalesReportExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
@@ -146,63 +148,26 @@ class ReportController extends Controller
     public function export(Request $request)
     {
         $from = $request->filled('from')
-            ? \Carbon\Carbon::parse($request->from)->startOfDay()
+            ? Carbon::parse($request->from)->startOfDay()
             : now()->startOfMonth();
 
         $to = $request->filled('to')
-            ? \Carbon\Carbon::parse($request->to)->endOfDay()
+            ? Carbon::parse($request->to)->endOfDay()
             : now()->endOfDay();
 
         $shift = $request->input('shift');
         $paymentType = $request->input('payment_type');
 
-        $query = \App\Models\Order::query()
-            ->whereBetween('created_at', [$from, $to]);
+        $fileName = 'sales-report-' . $from->format('Ymd') . '-to-' . $to->format('Ymd') . '.xlsx';
 
-        if ($shift) {
-            $query->where('shift', $shift);
-        }
-
-        if ($paymentType) {
-            $query->where('payment_type', $paymentType);
-        }
-
-        $orders = $query->with(['driver:id,name'])->get();
-
-        $filename = 'orders_report_' . now()->format('Ymd_His') . '.csv';
-
-        return response()->streamDownload(function () use ($orders) {
-
-            $handle = fopen('php://output', 'w');
-
-            // CSV Header
-            fputcsv($handle, [
-                'Order ID',
-                'Date',
-                'Customer',
-                'Driver',
-                'Status',
-                'Payment Type',
-                'Shift',
-                'Service Type',
-                'Amount'
-            ]);
-
-            foreach ($orders as $order) {
-                fputcsv($handle, [
-                    $order->id,
-                    $order->created_at->format('Y-m-d H:i'),
-                    $order->customer_name ?? '',
-                    optional($order->driver)->name ?? '',
-                    $order->status,
-                    $order->payment_type,
-                    $order->shift,
-                    $order->service_type,
-                    $order->amount,
-                ]);
-            }
-
-            fclose($handle);
-        }, $filename);
+        return Excel::download(
+            new SalesReportExport(
+                $from->toDateString(),
+                $to->toDateString(),
+                $shift,
+                $paymentType
+            ),
+            $fileName
+        );
     }
 }

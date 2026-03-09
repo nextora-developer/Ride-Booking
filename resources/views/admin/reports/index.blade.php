@@ -81,7 +81,10 @@
                 @endif
 
                 {{-- 导出（你有 route 再打开） --}}
-                {{-- <a href="{{ route('admin.reports.export', request()->query()) }}" class="h-11 inline-flex items-center justify-center px-6 rounded-2xl border border-gray-200 bg-white text-sm font-extrabold hover:bg-gray-50 transition">导出 CSV</a> --}}
+                <a href="{{ route('admin.reports.export', request()->query()) }}"
+                    class="h-11 inline-flex items-center justify-center px-6 rounded-2xl border border-gray-200 bg-white text-sm font-extrabold hover:bg-gray-50 transition">
+                    导出 Excel
+                </a>
             </div>
         </form>
     </div>
