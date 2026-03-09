@@ -16,31 +16,25 @@ class ManagerAuthController extends Controller
 
     public function store(Request $request)
     {
-        $credentials = $request->validate([
+        $data = $request->validate([
             'email'    => ['required', 'email'],
             'password' => ['required', 'string'],
         ]);
 
         $remember = $request->boolean('remember');
 
-        if (!Auth::attempt($credentials, $remember)) {
+        if (!Auth::attempt([
+            'email'     => $data['email'],
+            'password'  => $data['password'],
+            'role'      => 'manager',
+            'is_active' => 1,
+        ], $remember)) {
             throw ValidationException::withMessages([
-                'email' => 'Invalid credentials.',
+                'email' => 'Invalid credentials or account inactive.',
             ]);
         }
 
         $request->session()->regenerate();
-
-        // ✅ role check
-        if ((Auth::user()->role ?? null) !== 'manager') {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            throw ValidationException::withMessages([
-                'email' => 'This account is not a manager.',
-            ]);
-        }
 
         return redirect()->route('manager.dashboard');
     }

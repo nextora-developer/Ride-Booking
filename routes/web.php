@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\DriverController as AdminDriverController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\CreditLogController as AdminCreditLogController;
+use App\Http\Controllers\Admin\ManagerController as AdminManagerController;
 
 
 use Illuminate\Support\Facades\Route;
@@ -118,6 +119,7 @@ Route::prefix('admin')
         Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
         Route::patch('/orders/{order}/assign', [AdminOrderController::class, 'assign'])->name('orders.assign');
 
+        // Customers
         Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
         Route::get('/customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
         Route::get('/customers/{customer}/edit', [AdminCustomerController::class, 'edit'])->name('customers.edit');
@@ -126,6 +128,7 @@ Route::prefix('admin')
         Route::patch('/customers/{customer}/credit/clear', [AdminCustomerController::class, 'clearCredit'])->name('customers.credit.clear');
         Route::patch('/customers/{customer}/toggle', [AdminCustomerController::class, 'toggle'])->name('customers.toggle');
 
+        // Drivers
         Route::get('/drivers', [AdminDriverController::class, 'index'])->name('drivers.index');
         Route::get('/drivers/{driver}', [AdminDriverController::class, 'show'])->name('drivers.show');
         Route::get('/drivers/{driver}/edit', [AdminDriverController::class, 'edit'])->name('drivers.edit');
@@ -133,6 +136,16 @@ Route::prefix('admin')
         Route::patch('/drivers/{driver}/toggle-online', [AdminDriverController::class, 'toggleOnline'])->name('drivers.toggle-online');
         Route::patch('/drivers/{driver}/toggle-account', [AdminDriverController::class, 'toggleAccount'])->name('drivers.toggle-account');
 
+        // Managers
+        Route::get('/managers', [AdminManagerController::class, 'index'])->name('managers.index');
+        Route::get('/managers/create', [AdminManagerController::class, 'create'])->name('managers.create');
+        Route::post('/managers', [AdminManagerController::class, 'store'])->name('managers.store');
+        Route::get('/managers/{manager}', [AdminManagerController::class, 'show'])->name('managers.show');
+        Route::get('/managers/{manager}/edit', [AdminManagerController::class, 'edit'])->name('managers.edit');
+        Route::patch('/managers/{manager}', [AdminManagerController::class, 'update'])->name('managers.update');
+        Route::patch('/managers/{manager}/toggle', [AdminManagerController::class, 'toggle'])->name('managers.toggle');
+
+        // Reports
         Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export', [AdminReportController::class, 'export'])->name('reports.export');
 
