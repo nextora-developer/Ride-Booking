@@ -471,6 +471,8 @@
             }, 1500);
         </script>
     @endif
+
+    @stack('scripts')
 </body>
 
 </html>

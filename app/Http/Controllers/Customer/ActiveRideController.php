@@ -13,9 +13,15 @@ class ActiveRideController extends Controller
         $userId = $request->user()->id;
 
         $activeBooking = Order::where('user_id', $userId)
-            ->whereIn('status', ['assigned', 'on_the_way', 'arrived', 'in_trip'])
-            ->latest()
+            ->whereIn('status', [
+                'pending',
+                'assigned',
+                'on_the_way',
+                'arrived',
+                'in_trip',
+            ])
             ->with('driver')
+            ->latest('id')
             ->first();
 
         return view('customer.partials.active-ride', compact('activeBooking'));

@@ -1,8 +1,8 @@
 @extends('layouts.customer-app')
 
-@if ($activeBooking)
+{{-- @if ($activeBooking)
     <meta http-equiv="refresh" content="10">
-@endif
+@endif --}}
 
 @section('title', '首页')
 
@@ -184,43 +184,63 @@
     </div>
 @endsection
 
-@push('scripts')
-    <script>
-        (function() {
-            const wrap = document.getElementById('activeRideWrap');
-            if (!wrap) return;
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const wrap = document.getElementById('activeRideWrap');
+        if (!wrap) return;
 
-            let timer = null;
+        let pollingTimer = null;
+        let isRequesting = false;
 
-            async function refreshActiveRide() {
-                // 页面切到后台就不刷，省资源
-                if (document.hidden) return;
+        function startPolling() {
+            if (pollingTimer) return;
+            pollingTimer = setInterval(refreshActiveRide, 10000);
+        }
 
-                try {
-                    const res = await fetch("{{ route('customer.active.ride') }}", {
-                        headers: {
-                            "X-Requested-With": "XMLHttpRequest"
-                        }
-                    });
-
-                    if (!res.ok) return;
-
-                    const html = await res.text();
-                    wrap.innerHTML = html;
-                } catch (e) {
-                    // 静默失败，不打扰用户
-                }
+        function stopPolling() {
+            if (pollingTimer) {
+                clearInterval(pollingTimer);
+                pollingTimer = null;
             }
+        }
 
-            // 先刷一次（避免刚好状态更新但你页面没变）
-            refreshActiveRide();
+        async function refreshActiveRide() {
+            if (document.hidden) return;
+            if (isRequesting) return;
 
-            timer = setInterval(refreshActiveRide, 10000);
+            isRequesting = true;
 
-            // 离开页面时清掉
-            window.addEventListener('beforeunload', () => {
-                if (timer) clearInterval(timer);
-            });
-        })();
-    </script>
-@endpush
+            try {
+                const res = await fetch("{{ route('customer.active.ride') }}", {
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Accept": "text/html"
+                    },
+                    cache: "no-store"
+                });
+
+                if (!res.ok) return;
+
+                const html = await res.text();
+                wrap.innerHTML = html;
+            } catch (e) {
+                console.error('active ride refresh failed:', e);
+            } finally {
+                isRequesting = false;
+            }
+        }
+
+        refreshActiveRide();
+        startPolling();
+
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                refreshActiveRide();
+            }
+        });
+
+        window.addEventListener('beforeunload', function() {
+            stopPolling();
+        });
+    });
+</script>
