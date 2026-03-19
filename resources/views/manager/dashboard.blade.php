@@ -248,4 +248,104 @@
         </div>
 
     </div>
+
+    <audio id="newManagerOrderSound" preload="auto" playsinline>
+        <source src="{{ asset('sounds/carhorn.mp3') }}" type="audio/mpeg">
+    </audio>
+
+    <script>
+        let lastPendingOrderId = @json(\App\Models\Order::query()->where('shift', $shiftValue)->where('status', 'pending')->latest()->value('id'));
+
+        let lastPendingCount = @json($pendingCount);
+        let isCheckingManagerOrders = false;
+
+        function playManagerNewOrderSound() {
+            const audio = document.getElementById('newManagerOrderSound');
+            if (!audio) return;
+
+            audio.pause();
+            audio.currentTime = 0;
+            audio.muted = false;
+            audio.volume = 1;
+
+            const playPromise = audio.play();
+
+            if (playPromise !== undefined) {
+                playPromise.catch((err) => {
+                    console.error('经理端提示音播放失败:', err);
+                });
+            }
+        }
+
+        function unlockManagerAudio() {
+            const audio = document.getElementById('newManagerOrderSound');
+            if (!audio) return;
+
+            audio.muted = false;
+            audio.volume = 1;
+
+            const p = audio.play();
+            if (p !== undefined) {
+                p.then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }).catch(() => {});
+            }
+        }
+
+        async function checkManagerPendingOrders() {
+            if (isCheckingManagerOrders) return;
+            isCheckingManagerOrders = true;
+
+            try {
+                const response = await fetch("{{ route('manager.pending-order-check') }}", {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    cache: 'no-store'
+                });
+
+                const data = await response.json();
+
+                const hasNewOrder =
+                    (!lastPendingOrderId && data.order_id) ||
+                    (lastPendingOrderId && data.order_id && String(lastPendingOrderId) !== String(data.order_id));
+
+                const pendingCountIncreased =
+                    Number(data.pending_count || 0) > Number(lastPendingCount || 0);
+
+                if (hasNewOrder || pendingCountIncreased) {
+                    lastPendingOrderId = data.order_id;
+                    lastPendingCount = data.pending_count || 0;
+
+                    playManagerNewOrderSound();
+
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1200);
+
+                    return;
+                }
+
+                lastPendingOrderId = data.order_id;
+                lastPendingCount = data.pending_count || 0;
+
+            } catch (error) {
+                console.error('检查经理新订单失败:', error);
+            } finally {
+                isCheckingManagerOrders = false;
+            }
+        }
+
+        document.addEventListener('click', unlockManagerAudio, {
+            once: true
+        });
+        document.addEventListener('touchstart', unlockManagerAudio, {
+            once: true
+        });
+
+        setInterval(checkManagerPendingOrders, 3000);
+    </script>
 @endsection

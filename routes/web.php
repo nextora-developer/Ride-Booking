@@ -169,8 +169,27 @@ Route::prefix('manager')
         Route::get('/credits', [ManagerCreditController::class, 'index'])->name('credits.index');
         Route::patch('/credits/{customer}', [ManagerCreditController::class, 'update'])->name('credits.update');
         Route::post('/credits/{customer}/clear', [ManagerCreditController::class, 'clear'])->name('credits.clear');
-
         // Route::get('/credit-logs', [ManagerCreditLogController::class, 'index'])->name('credit.logs.index');
+
+        Route::get('/pending-order-check', function () {
+            $shift = auth()->user()->shift ?? 'day';
+            $isNight = in_array(strtolower((string) $shift), ['night', '晚班']);
+            $shiftValue = $isNight ? 'night' : 'day';
+
+            $latestPendingOrder = \App\Models\Order::query()
+                ->where('shift', $shiftValue)
+                ->where('status', 'pending')
+                ->latest()
+                ->first();
+
+            return response()->json([
+                'order_id' => $latestPendingOrder?->id,
+                'pending_count' => \App\Models\Order::query()
+                    ->where('shift', $shiftValue)
+                    ->where('status', 'pending')
+                    ->count(),
+            ]);
+        })->name('pending-order-check');
     });
 
 Route::prefix('driver')
@@ -189,6 +208,17 @@ Route::prefix('driver')
         Route::post('/offline', [DriverOnlineController::class, 'offline'])->name('offline');
 
         Route::get('/profile', [DriverProfileController::class, 'show'])->name('profile.show');
+
+        Route::get('/current-order-check', function () {
+            $order = \App\Models\Order::where('driver_id', auth()->id())
+                ->whereIn('status', ['assigned', 'on_the_way', 'arrived', 'in_trip'])
+                ->latest()
+                ->first();
+
+            return response()->json([
+                'order_id' => $order?->id,
+            ]);
+        })->name('current-order-check');
     });
 
 Route::prefix('app')

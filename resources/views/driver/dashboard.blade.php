@@ -445,9 +445,10 @@
         @endphp
     @endif
 
+    <audio id="newOrderSound" src="{{ asset('sounds/carhorn.mp3') }}" preload="auto"></audio>
+
     <script>
         function copyText(text, btn) {
-            // 1) 优先用 clipboard（HTTPS / localhost 通常 OK）
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text).then(() => {
                     if (btn) {
@@ -459,7 +460,6 @@
                 return;
             }
 
-            // 2) fallback：HTTP 也能用
             const ta = document.createElement('textarea');
             ta.value = text;
             ta.style.position = 'fixed';
@@ -484,11 +484,174 @@
         }
     </script>
 
-    @if (!$currentOrder)
-        <script>
-            setInterval(function() {
-                window.location.reload();
-            }, 10000);
-        </script>
-    @endif
+    <script>
+        let lastOrderId = @json($currentOrder?->id);
+        let isCheckingOrder = false;
+
+        function playNewOrderSound() {
+            const audio = document.getElementById('newOrderSound');
+            if (!audio) return;
+
+            audio.currentTime = 0;
+            audio.play().catch(() => {
+                console.log('声音播放被浏览器阻止，用户需先点击页面一次');
+            });
+        }
+
+        async function checkDriverCurrentOrder() {
+            if (isCheckingOrder) return;
+            isCheckingOrder = true;
+
+            try {
+                const response = await fetch("{{ route('driver.current-order-check') }}", {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    cache: 'no-store'
+                });
+
+                const data = await response.json();
+
+                if (!lastOrderId && data.order_id) {
+                    lastOrderId = data.order_id;
+                    playNewOrderSound();
+
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1200);
+
+                    return;
+                }
+
+                if (lastOrderId && data.order_id && String(lastOrderId) !== String(data.order_id)) {
+                    lastOrderId = data.order_id;
+                    playNewOrderSound();
+
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1200);
+
+                    return;
+                }
+
+                if (lastOrderId && !data.order_id) {
+                    lastOrderId = null;
+                    window.location.reload();
+                    return;
+                }
+
+            } catch (error) {
+                console.error('检查订单失败:', error);
+            } finally {
+                isCheckingOrder = false;
+            }
+        }
+
+        document.addEventListener('click', function unlockAudioOnce() {
+            const audio = document.getElementById('newOrderSound');
+            if (audio) {
+                audio.play().then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }).catch(() => {});
+            }
+
+            document.removeEventListener('click', unlockAudioOnce);
+        });
+
+        @if ($isOnline)
+            setInterval(checkDriverCurrentOrder, 3000);
+        @endif
+    </script>
+
+    <script>
+        let lastOrderId = @json($currentOrder?->id);
+        let isCheckingOrder = false;
+
+        function playNewOrderSound() {
+            const audio = document.getElementById('newOrderSound');
+            if (!audio) return;
+
+            audio.currentTime = 0;
+            audio.play().catch(() => {
+                console.log('声音播放被浏览器阻止，用户需先点击页面一次');
+            });
+        }
+
+        async function checkDriverCurrentOrder() {
+            if (isCheckingOrder) return;
+            isCheckingOrder = true;
+
+            try {
+                const response = await fetch("{{ route('driver.current-order-check') }}", {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    cache: 'no-store'
+                });
+
+                const data = await response.json();
+
+                // 原本没单，现在有新单
+                if (!lastOrderId && data.order_id) {
+                    lastOrderId = data.order_id;
+
+                    playNewOrderSound();
+
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1200);
+
+                    return;
+                }
+
+                // 原本有单，但订单变成另一张
+                if (lastOrderId && data.order_id && String(lastOrderId) !== String(data.order_id)) {
+                    lastOrderId = data.order_id;
+
+                    playNewOrderSound();
+
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1200);
+
+                    return;
+                }
+
+                // 原本有单，现在没单
+                if (lastOrderId && !data.order_id) {
+                    lastOrderId = null;
+                    window.location.reload();
+                    return;
+                }
+
+            } catch (error) {
+                console.error('检查订单失败:', error);
+            } finally {
+                isCheckingOrder = false;
+            }
+        }
+
+        // 先点击一次页面，解锁声音
+        document.addEventListener('click', function unlockAudioOnce() {
+            const audio = document.getElementById('newOrderSound');
+            if (audio) {
+                audio.play().then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }).catch(() => {});
+            }
+
+            document.removeEventListener('click', unlockAudioOnce);
+        });
+
+        @if ($isOnline)
+            setInterval(checkDriverCurrentOrder, 3000);
+        @endif
+    </script>
+
 @endsection
