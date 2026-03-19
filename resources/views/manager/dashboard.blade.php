@@ -249,9 +249,9 @@
 
     </div>
 
-    <audio id="newManagerOrderSound" preload="auto" playsinline>
+    {{-- <audio id="newManagerOrderSound" preload="auto" playsinline>
         <source src="{{ asset('sounds/carhorn.mp3') }}" type="audio/mpeg">
-    </audio>
+    </audio> --}}
 
     <script>
         let lastPendingOrderId = @json(\App\Models\Order::query()->where('shift', $shiftValue)->where('status', 'pending')->latest()->value('id'));

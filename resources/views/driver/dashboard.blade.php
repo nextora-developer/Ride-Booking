@@ -445,7 +445,7 @@
         @endphp
     @endif
 
-    <audio id="newOrderSound" src="{{ asset('sounds/carhorn.mp3') }}" preload="auto"></audio>
+    {{-- <audio id="newOrderSound" src="{{ asset('sounds/carhorn.mp3') }}" preload="auto"></audio> --}}
 
     <script>
         function copyText(text, btn) {

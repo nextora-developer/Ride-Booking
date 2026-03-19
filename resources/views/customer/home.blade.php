@@ -194,7 +194,7 @@
 
         function startPolling() {
             if (pollingTimer) return;
-            pollingTimer = setInterval(refreshActiveRide, 10000);
+            pollingTimer = setInterval(refreshActiveRide, 3000);
         }
 
         function stopPolling() {
