@@ -339,17 +339,52 @@
                     </div>
 
                     {{-- Dropoffs --}}
+                    @php
+                        $dropoffCount = count($dropoffs);
+                        $completedDropoffCount = (int) ($currentOrder->completed_dropoff_count ?? 0);
+                    @endphp
+
+                    {{-- Dropoffs --}}
                     @if (!empty($dropoffs))
                         @foreach ($dropoffs as $i => $point)
+                            @php
+                                $stepNo = $i + 1;
+
+                                if ($stepNo <= $completedDropoffCount) {
+                                    $stopState = 'done';
+                                    $dotClass = 'bg-emerald-500';
+                                    $badgeText = '已完成';
+                                    $badgeClass = 'bg-emerald-100 text-emerald-700';
+                                } elseif (
+                                    $stepNo === $completedDropoffCount + 1 &&
+                                    $currentOrder->status === 'in_trip'
+                                ) {
+                                    $stopState = 'current';
+                                    $dotClass = 'bg-indigo-500';
+                                    $badgeText = '当前目的地';
+                                    $badgeClass = 'bg-indigo-100 text-indigo-700';
+                                } else {
+                                    $stopState = 'waiting';
+                                    $dotClass = 'bg-slate-300';
+                                    $badgeText = '待前往';
+                                    $badgeClass = 'bg-slate-100 text-slate-600';
+                                }
+                            @endphp
+
                             <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="min-w-0">
-                                        <div class="flex items-center gap-2">
-                                            <span
-                                                class="h-2 w-2 rounded-full {{ $loop->last ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <span class="h-2 w-2 rounded-full {{ $dotClass }}"></span>
+
                                             <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                                                {{ $loop->last ? '最终目的地' : '下车点 ' . ($i + 1) }}
+                                                {{ $loop->last ? '最终目的地' : '下车点 ' . $stepNo }}
                                             </div>
+
+                                            <span
+                                                class="px-2 py-1 rounded-full text-[10px] font-black {{ $badgeClass }}">
+                                                {{ $badgeText }}
+                                            </span>
                                         </div>
 
                                         <div class="text-sm font-black text-slate-900 mt-2 leading-snug break-words">
@@ -404,16 +439,85 @@
                     @endif
                 </div>
 
+                @php
+                    $dropoffCount = count($dropoffs);
+                    $completedDropoffCount = (int) ($currentOrder->completed_dropoff_count ?? 0);
+
+                    $nextAction = null;
+
+                    if ($currentOrder->status === 'assigned') {
+                        $nextAction = [
+                            'type' => 'status',
+                            'value' => 'on_the_way',
+                            'label' => '开始出发',
+                            'color' => 'bg-indigo-600',
+                        ];
+                    } elseif ($currentOrder->status === 'on_the_way') {
+                        $nextAction = [
+                            'type' => 'status',
+                            'value' => 'arrived',
+                            'label' => '已到达上车点',
+                            'color' => 'bg-amber-500',
+                        ];
+                    } elseif ($currentOrder->status === 'arrived') {
+                        $nextAction = [
+                            'type' => 'status',
+                            'value' => 'in_trip',
+                            'label' => '开始行程',
+                            'color' => 'bg-blue-600',
+                        ];
+                    } elseif ($currentOrder->status === 'in_trip') {
+                        if ($dropoffCount <= 1) {
+                            $nextAction = [
+                                'type' => 'status',
+                                'value' => 'completed',
+                                'label' => '完成行程',
+                                'color' => 'bg-emerald-600',
+                            ];
+                        } else {
+                            $nextStopNumber = $completedDropoffCount + 1;
+
+                            if ($nextStopNumber < $dropoffCount) {
+                                $nextAction = [
+                                    'type' => 'dropoff',
+                                    'value' => $nextStopNumber,
+                                    'label' => '到达第 ' . $nextStopNumber . ' 个下车点',
+                                    'color' => 'bg-emerald-600',
+                                ];
+                            } elseif ($nextStopNumber === $dropoffCount) {
+                                $nextAction = [
+                                    'type' => 'dropoff',
+                                    'value' => $nextStopNumber,
+                                    'label' => '到达最终目的地',
+                                    'color' => 'bg-emerald-700',
+                                ];
+                            }
+                        }
+                    }
+                @endphp
+
                 {{-- ✅ Action Button --}}
                 <div class="p-5 bg-slate-100/60 border-t border-slate-200">
-                    <form method="POST" action="{{ route('driver.orders.status', $currentOrder) }}"> @csrf
-                        @method('PATCH') @php $nextStatus = [ 'assigned' => [ 'val' => 'on_the_way', 'label' => '开始出发', 'color' => 'bg-indigo-600', ], 'on_the_way' => [ 'val' => 'arrived', 'label' => '已到达上车点', 'color' => 'bg-amber-500', ], 'arrived' => ['val' => 'in_trip', 'label' => '开始行程', 'color' => 'bg-blue-600'], 'in_trip' => [ 'val' => 'completed', 'label' => '完成行程', 'color' => 'bg-emerald-600', ], ][$currentOrder->status] ?? null; @endphp @if ($nextStatus)
-                            <input type="hidden" name="status" value="{{ $nextStatus['val'] }}"> <button
-                                class="w-full h-16 rounded-[1.5rem] {{ $nextStatus['color'] }} text-white font-black text-lg shadow-sm active:scale-95 transition flex items-center justify-center gap-3">
-                                <span>{{ $nextStatus['label'] }}</span> <svg class="w-5 h-5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <form method="POST" action="{{ route('driver.orders.status', $currentOrder) }}">
+                        @csrf
+                        @method('PATCH')
+
+                        @if ($nextAction)
+                            @if ($nextAction['type'] === 'status')
+                                <input type="hidden" name="status" value="{{ $nextAction['value'] }}">
+                            @elseif ($nextAction['type'] === 'dropoff')
+                                <input type="hidden" name="action" value="complete_dropoff">
+                                <input type="hidden" name="dropoff_index" value="{{ $nextAction['value'] }}">
+                            @endif
+
+                            <button
+                                class="w-full h-16 rounded-[1.5rem] {{ $nextAction['color'] }} text-white font-black text-lg shadow-sm active:scale-95 transition flex items-center justify-center gap-3">
+                                <span>{{ $nextAction['label'] }}</span>
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                    stroke-width="3">
                                     <path d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg> </button>
+                                </svg>
+                            </button>
                         @endif
                     </form>
                 </div>
