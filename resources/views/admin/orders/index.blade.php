@@ -322,7 +322,8 @@
                                             class="w-full h-11 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-extrabold focus:ring-4 focus:ring-black/5 focus:border-black outline-none">
                                             <option value="">请选择司机</option>
                                             @foreach ($drivers as $d)
-                                                <option value="{{ $d->id }}">
+                                                <option value="{{ $d->id }}"
+                                                    {{ old('driver_id', $order->driver_id ?? '') == $d->id ? 'selected' : '' }}>
                                                     {{ $d->name }}{{ $d->shift ? '（' . ($d->shift === 'day' ? '白班' : '夜班') . '）' : '' }}
                                                 </option>
                                             @endforeach
@@ -345,30 +346,33 @@
                                     <div class="mt-3 flex flex-wrap gap-2">
                                         <label class="cursor-pointer">
                                             <input type="radio" name="payment_type" value="cash"
-                                                class="sr-only peer" required>
+                                                class="sr-only peer" required
+                                                {{ old('payment_type', $order->payment_type ?? '') === 'cash' ? 'checked' : '' }}>
                                             <span
                                                 class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
-                                                       peer-checked:bg-black peer-checked:text-white peer-checked:border-black transition">
+               peer-checked:bg-black peer-checked:text-white peer-checked:border-black transition">
                                                 现金
                                             </span>
                                         </label>
 
                                         <label class="cursor-pointer">
                                             <input type="radio" name="payment_type" value="credit"
-                                                class="sr-only peer" required>
+                                                class="sr-only peer" required
+                                                {{ old('payment_type', $order->payment_type ?? '') === 'credit' ? 'checked' : '' }}>
                                             <span
                                                 class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
-                                                       peer-checked:bg-rose-50 peer-checked:text-rose-700 peer-checked:border-rose-200 transition">
+               peer-checked:bg-rose-50 peer-checked:text-rose-700 peer-checked:border-rose-200 transition">
                                                 挂单
                                             </span>
                                         </label>
 
                                         <label class="cursor-pointer">
                                             <input type="radio" name="payment_type" value="transfer"
-                                                class="sr-only peer" required>
+                                                class="sr-only peer" required
+                                                {{ old('payment_type', $order->payment_type ?? '') === 'transfer' ? 'checked' : '' }}>
                                             <span
                                                 class="inline-flex items-center px-3 py-2 rounded-2xl text-sm font-extrabold border border-gray-200 bg-white
-                                                       peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-checked:border-emerald-200 transition">
+               peer-checked:bg-emerald-50 peer-checked:text-emerald-700 peer-checked:border-emerald-200 transition">
                                                 转账
                                             </span>
                                         </label>

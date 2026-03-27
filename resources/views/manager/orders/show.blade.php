@@ -307,21 +307,29 @@
         </div>
 
         {{-- Right: Assignment Panel --}}
+        @php
+            $canEditAssign = in_array($order->status, ['pending', 'assigned']);
+        @endphp
+
         <div class="lg:col-span-5">
             <div
                 class="bg-slate-900 rounded-[2.5rem] p-8
-                    shadow-[0_22px_60px_rgba(15,23,42,0.25)]
-                    sticky top-24">
+            shadow-[0_22px_60px_rgba(15,23,42,0.25)]
+            sticky top-24">
                 <div class="flex items-center justify-between mb-8">
-                    <h3 class="text-white text-lg font-black">派单操作</h3>
+                    <h3 class="text-white text-lg font-black">
+                        {{ $order->driver_id ? '编辑派单' : '派单操作' }}
+                    </h3>
                 </div>
 
-                @if ($order->status !== 'pending')
-                    <div class="mb-6 p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3"> <span
-                            class="text-xl">🔒</span>
-                        <p class="text-xs font-bold text-slate-400">订单已处理，无法修改派单信息。</p>
+                @unless ($canEditAssign)
+                    <div class="mb-6 p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3">
+                        <span class="text-xl">🔒</span>
+                        <p class="text-xs font-bold text-slate-400">
+                            当前订单状态为 {{ $order->status }}，无法修改派单信息。
+                        </p>
                     </div>
-                @endif
+                @endunless
 
                 <form method="POST" action="{{ route('manager.orders.assign', $order) }}" class="space-y-6">
                     @csrf
@@ -332,8 +340,8 @@
                         <label class="text-xs font-black text-slate-200 uppercase tracking-widest ml-1">选择司机</label>
                         <select name="driver_id"
                             class="w-full bg-slate-800/80 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white
-                               focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition disabled:opacity-50"
-                            {{ $order->status !== 'pending' ? 'disabled' : '' }}>
+                           focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition disabled:opacity-50"
+                            {{ !$canEditAssign ? 'disabled' : '' }}>
                             <option value="">点击选择司机...</option>
                             @foreach ($drivers as $d)
                                 <option value="{{ $d->id }}"
@@ -342,6 +350,10 @@
                                 </option>
                             @endforeach
                         </select>
+
+                        @error('driver_id')
+                            <p class="text-xs text-rose-400 font-bold mt-2">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     {{-- Payment Type Chips --}}
@@ -353,18 +365,22 @@
                                     <input type="radio" name="payment_type" value="{{ $value }}"
                                         class="peer sr-only"
                                         {{ old('payment_type', $order->payment_type ?? 'cash') === $value ? 'checked' : '' }}
-                                        {{ $order->status !== 'pending' ? 'disabled' : '' }}>
+                                        {{ !$canEditAssign ? 'disabled' : '' }}>
                                     <div
                                         class="py-3 text-center rounded-xl border border-white/10
-                                           bg-slate-800/80 text-slate-300 text-xs font-black cursor-pointer
-                                           peer-checked:bg-white peer-checked:text-slate-900
-                                           peer-checked:shadow-[0_16px_34px_rgba(255,255,255,0.10)]
-                                           transition-all">
+                                       bg-slate-800/80 text-slate-300 text-xs font-black cursor-pointer
+                                       peer-checked:bg-white peer-checked:text-slate-900
+                                       peer-checked:shadow-[0_16px_34px_rgba(255,255,255,0.10)]
+                                       transition-all">
                                         {{ $label }}
                                     </div>
                                 </label>
                             @endforeach
                         </div>
+
+                        @error('payment_type')
+                            <p class="text-xs text-rose-400 font-bold mt-2">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     {{-- Amount --}}
@@ -376,18 +392,22 @@
                             <input type="number" step="0.01" name="amount"
                                 value="{{ old('amount', $order->amount) }}"
                                 class="w-full bg-slate-800/80 border border-white/10 rounded-2xl pl-12 pr-5 py-4 text-xl font-black text-white
-                                   focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition
-                                   placeholder:text-slate-600 disabled:opacity-50"
-                                placeholder="0.00" {{ $order->status !== 'pending' ? 'disabled' : '' }}>
+                               focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition
+                               placeholder:text-slate-600 disabled:opacity-50"
+                                placeholder="0.00" {{ !$canEditAssign ? 'disabled' : '' }}>
                         </div>
+
+                        @error('amount')
+                            <p class="text-xs text-rose-400 font-bold mt-2">{{ $message }}</p>
+                        @enderror
                     </div>
 
-                    <button
+                    <button type="submit"
                         class="w-full py-5 rounded-[1.5rem] bg-indigo-500 hover:bg-indigo-400 text-white font-black tracking-widest text-sm
-                           shadow-[0_18px_50px_rgba(99,102,241,0.35)]
-                           active:scale-[0.98] transition-all disabled:hidden"
-                        {{ $order->status !== 'pending' ? 'disabled' : '' }}>
-                        立即派单
+                       shadow-[0_18px_50px_rgba(99,102,241,0.35)]
+                       active:scale-[0.98] transition-all disabled:hidden"
+                        {{ !$canEditAssign ? 'disabled' : '' }}>
+                        {{ $order->driver_id ? '更新派单' : '立即派单' }}
                     </button>
                 </form>
 
@@ -396,18 +416,24 @@
                         <div class="flex items-center gap-3 min-w-0">
                             <div
                                 class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center font-black text-white
-                                   shadow-[0_16px_38px_rgba(99,102,241,0.40)]">
+                               shadow-[0_16px_38px_rgba(99,102,241,0.40)]">
                                 {{ substr($order->driver->name, 0, 1) }}
                             </div>
                             <div class="min-w-0">
                                 <div class="text-[10px] font-black text-slate-400 uppercase">已指派司机</div>
-                                <div class="text-sm font-black text-white mt-0.5 truncate">{{ $order->driver->name }}
+                                <div class="text-sm font-black text-white mt-0.5 truncate">
+                                    {{ $order->driver->name }}
+                                </div>
+                                <div class="text-xs text-slate-400 mt-1">
+                                    付款方式：{{ $payOptions[$order->payment_type] ?? '-' }} · 金额：RM
+                                    {{ number_format((float) $order->amount, 2) }}
                                 </div>
                             </div>
                         </div>
+
                         <a href="tel:{{ $order->driver->phone ?? '' }}"
                             class="h-8 w-8 rounded-full border border-white/12 bg-white/5
-                               flex items-center justify-center text-slate-300 hover:text-white transition"
+                           flex items-center justify-center text-slate-300 hover:text-white transition"
                             aria-label="联系司机">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                 stroke-width="2.5">

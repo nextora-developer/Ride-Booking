@@ -146,17 +146,21 @@
 
             <div class="grid grid-cols-2 gap-4">
                 {{-- Stat Item --}}
-                <div
-                    class="bg-white p-5 rounded-[2rem] shadow-[0_10px_24px_rgba(15,23,42,0.08)] border border-slate-200 relative group active:scale-95 transition-all">
+                <a href="{{ route('manager.orders.index', ['status' => 'pending']) }}"
+                    class="block bg-white p-5 rounded-[2rem] shadow-[0_10px_24px_rgba(15,23,42,0.08)] border border-slate-200 
+                            relative group active:scale-95 hover:-translate-y-1 hover:shadow-xl transition-all">
+
                     <div class="h-8 w-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center mb-3">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
+
                     <div class="text-[10px] font-black text-slate-600 uppercase">待派单</div>
                     <div class="text-2xl font-black text-slate-900 mt-0.5">{{ $pendingCount }}</div>
+
                     <div class="absolute top-5 right-5 h-1.5 w-1.5 rounded-full bg-rose-600 animate-pulse"></div>
-                </div>
+                </a>
 
                 <div
                     class="bg-white p-5 rounded-[2rem] shadow-[0_10px_24px_rgba(15,23,42,0.08)] border border-slate-200 active:scale-95 transition-all">

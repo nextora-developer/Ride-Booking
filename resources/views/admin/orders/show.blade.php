@@ -355,7 +355,7 @@
                                             class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                                         </div>
                                     </div>
-                                    <p class="text-[10px] font-bold text-slate-400 ml-1 italic">当前指派: <span
+                                    <p class="text-xs font-bold text-slate-400 ml-1">当前指派: <span
                                             class="text-indigo-600">{{ $driverName ?? '未指派' }}</span></p>
                                 </div>
 

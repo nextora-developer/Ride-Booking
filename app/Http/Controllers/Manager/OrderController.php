@@ -142,8 +142,10 @@ class OrderController extends Controller
         }
 
         // ✅ 只允许 pending 才能派（你要允许改派就改掉这段）
-        if ($order->status !== 'pending') {
-            return back()->withErrors(['driver_id' => 'Only pending orders can be assigned.'])->withInput();
+        if (!in_array($order->status, ['pending', 'assigned'])) {
+            return back()->withErrors([
+                'driver_id' => 'This order can no longer be edited.'
+            ])->withInput();
         }
 
         $order->update([
