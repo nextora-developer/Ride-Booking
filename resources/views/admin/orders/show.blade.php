@@ -136,7 +136,7 @@
 
                     <span
                         class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black {{ $statusBadge($status) }}">
-                        {{ $statusText($status) }}
+                        {{ $statusText($order->status) }}
                     </span>
 
                 </div>
@@ -307,6 +307,11 @@
             </div>
 
             {{-- Assign: 派单操作 --}}
+            @php
+                $canAssign = in_array($order->status, ['pending', 'assigned']);
+                $canCancel = in_array($order->status, ['pending', 'assigned', 'on_the_way', 'arrived']);
+            @endphp
+
             <div id="assign"
                 class="rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
                 <div class="px-8 py-6 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
@@ -314,97 +319,149 @@
                         <h3 class="text-sm font-black text-slate-900 uppercase tracking-widest">指派司机与计费</h3>
                         <p class="text-[11px] text-slate-400 font-bold mt-1">请核对司机空档及金额后再确认</p>
                     </div>
+
                     @if (!$canAssign)
                         <span
-                            class="px-3 py-1 rounded-lg bg-rose-100 text-rose-600 text-[10px] font-black uppercase">订单已锁定</span>
+                            class="px-3 py-1 rounded-lg {{ $order->status === 'cancelled' ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-500' }} text-[10px] font-black uppercase">
+                            {{ $order->status === 'cancelled' ? '订单已取消' : '订单已锁定' }}
+                        </span>
                     @endif
                 </div>
 
-                <div class="p-8">
+                <div class="px-8 py-6">
                     @if (!$canAssign)
                         <div
                             class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 text-sm font-bold text-slate-500">
-                            <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="h-5 w-5 {{ $order->status === 'cancelled' ? 'text-rose-400' : 'text-slate-400' }}"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
-                            当前状态为 {{ $statusText($status) }}，派单信息已归档，无法修改。
+
+                            @if ($order->status === 'cancelled')
+                                当前状态为 {{ $statusText($order->status) }}，此订单已取消，不参与司机指派、计费与统计。
+                            @else
+                                当前状态为 {{ $statusText($order->status) }}，派单信息已归档，无法修改。
+                            @endif
                         </div>
                     @else
-                        <form method="POST" action="{{ route('admin.orders.assign', $order) }}" class="space-y-8">
+                        {{-- ASSIGN FORM --}}
+                        <form method="POST" action="{{ route('admin.orders.assign', $order) }}" class="space-y-2">
                             @csrf
                             @method('PATCH')
 
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {{-- Driver Select --}}
                                 <div class="space-y-2">
-                                    <label
-                                        class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1">选择承运司机</label>
+                                    <label class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
+                                        选择承运司机
+                                    </label>
+
                                     <div class="relative group">
                                         <select name="driver_id" required
                                             class="appearance-none w-full h-14 rounded-2xl border border-slate-200 bg-slate-50/30 px-5 text-sm font-black text-slate-900 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all outline-none cursor-pointer">
                                             <option value="">点击选择司机...</option>
                                             @foreach ($drivers as $d)
-                                                <option value="{{ $d->id }}" @selected((int) $order->driver_id === (int) $d->id)>
+                                                <option value="{{ $d->id }}" @selected((int) old('driver_id', $order->driver_id) === (int) $d->id)>
                                                     {{ $d->name }}
                                                     {{ $d->shift ? '(' . ($d->shift === 'day' ? '白班' : '夜班') . ')' : '' }}
                                                 </option>
                                             @endforeach
                                         </select>
-                                        <div
-                                            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                                        </div>
                                     </div>
-                                    <p class="text-xs font-bold text-slate-400 ml-1">当前指派: <span
-                                            class="text-indigo-600">{{ $driverName ?? '未指派' }}</span></p>
+
+                                    @error('driver_id')
+                                        <p class="text-xs font-bold text-rose-500 ml-1">{{ $message }}</p>
+                                    @enderror
+
+                                    <p class="text-xs font-bold text-slate-400 ml-1">
+                                        当前指派: <span class="text-indigo-600">{{ $driverName ?? '未指派' }}</span>
+                                    </p>
                                 </div>
 
-                                {{-- Payment Type --}}
                                 <div class="space-y-2 lg:col-span-1">
-                                    <label
-                                        class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1">结算方式</label>
+                                    <label class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
+                                        结算方式
+                                    </label>
+
                                     <div class="flex p-1 bg-slate-100 rounded-[1.25rem] h-14 items-center">
-                                        @php $curPay = strtolower((string)($order->payment_type ?? 'cash')); @endphp
+                                        @php
+                                            $curPay = strtolower(
+                                                (string) old('payment_type', $order->payment_type ?? 'cash'),
+                                            );
+                                        @endphp
+
                                         @foreach (['cash' => '现金', 'credit' => '挂单', 'transfer' => '转账'] as $val => $label)
                                             <label class="flex-1 cursor-pointer">
                                                 <input type="radio" name="payment_type" value="{{ $val }}"
                                                     class="sr-only peer" @checked($curPay === $val)>
                                                 <span
-                                                    class="flex items-center justify-center h-11 text-xs font-black rounded-xl transition-all
-                                                    peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-indigo-600 text-slate-500">
+                                                    class="flex items-center justify-center h-11 text-xs font-black rounded-xl transition-all peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-indigo-600 text-slate-500">
                                                     {{ $label }}
                                                 </span>
                                             </label>
                                         @endforeach
                                     </div>
+
+                                    @error('payment_type')
+                                        <p class="text-xs font-bold text-rose-500 ml-1">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
-                                {{-- Amount Input --}}
                                 <div class="space-y-2">
-                                    <label class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1">订单金额
-                                        (RM)</label>
+                                    <label class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
+                                        订单金额 (RM)
+                                    </label>
+
                                     <div class="relative">
                                         <div
                                             class="absolute left-5 top-1/2 -translate-y-1/2 text-sm font-black text-slate-300 pointer-events-none">
-                                            RM</div>
+                                            RM
+                                        </div>
+
                                         <input type="number" name="amount" step="0.01" min="0"
                                             value="{{ old('amount', $order->amount ?? '') }}" required
                                             class="w-full h-14 rounded-2xl border border-slate-200 bg-slate-50/30 pl-14 pr-5 text-lg font-black text-slate-900 focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all outline-none">
                                     </div>
+
+                                    @error('amount')
+                                        <p class="text-xs font-bold text-rose-500 ml-1">{{ $message }}</p>
+                                    @enderror
                                 </div>
                             </div>
 
-                            <div class="flex flex-col sm:flex-row items-center gap-4 pt-4 border-t border-slate-50">
-                                <button type="submit"
-                                    class="w-full sm:w-auto inline-flex items-center justify-center h-14 px-10 rounded-2xl bg-slate-900 text-white text-sm font-black uppercase tracking-widest hover:bg-black hover:shadow-xl hover:shadow-slate-200 transition-all active:scale-95">
-                                    确认指派此订单
-                                </button>
-                                <a href="{{ route('admin.orders.index') }}"
-                                    class="w-full sm:w-auto inline-flex items-center justify-center h-14 px-8 rounded-2xl bg-white border border-slate-200 text-slate-400 text-sm font-black uppercase tracking-widest hover:bg-slate-50 transition-all">
-                                    取消并返回
-                                </a>
+                            <div class="pt-4 border-t border-slate-50">
+                                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                                    <button type="submit"
+                                        class="w-full sm:w-auto inline-flex items-center justify-center h-14 px-10 rounded-2xl bg-slate-900 text-white text-sm font-black uppercase tracking-widest hover:bg-black transition-all">
+                                        确认指派此订单
+                                    </button>
+
+                                    <a href="{{ route('admin.orders.index') }}"
+                                        class="w-full sm:w-auto inline-flex items-center justify-center h-14 px-8 rounded-2xl bg-white border border-slate-200 text-slate-400 text-sm font-black uppercase tracking-widest hover:bg-slate-50 transition-all">
+                                        取消并返回
+                                    </a>
+
+                                    @if ($canCancel)
+                                        <div class="hidden sm:block w-px h-10 bg-slate-200"></div>
+
+                                        <button type="button"
+                                            onclick="if(confirm('确定要取消这个订单吗？取消后将不会计入司机、金额与统计。')) document.getElementById('cancel-form').submit();"
+                                            class="w-full sm:w-auto inline-flex items-center justify-center h-14 px-8 rounded-2xl bg-rose-500 text-white text-sm font-black uppercase tracking-widest hover:bg-rose-600 transition-all">
+                                            取消订单
+                                        </button>
+                                    @endif
+                                </div>
                             </div>
                         </form>
+
+                        {{-- CANCEL FORM：一定要在 assign form 外面 --}}
+                        @if ($canCancel)
+                            <form id="cancel-form" method="POST" action="{{ route('admin.orders.cancel', $order) }}"
+                                class="hidden">
+                                @csrf
+                                @method('PATCH')
+                            </form>
+                        @endif
                     @endif
                 </div>
             </div>

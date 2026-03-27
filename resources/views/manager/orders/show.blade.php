@@ -309,6 +309,7 @@
         {{-- Right: Assignment Panel --}}
         @php
             $canEditAssign = in_array($order->status, ['pending', 'assigned']);
+            $canCancelOrder = in_array($order->status, ['pending', 'assigned', 'on_the_way', 'arrived']);
         @endphp
 
         <div class="lg:col-span-5">
@@ -340,7 +341,7 @@
                         <label class="text-xs font-black text-slate-200 uppercase tracking-widest ml-1">选择司机</label>
                         <select name="driver_id"
                             class="w-full bg-slate-800/80 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white
-                           focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition disabled:opacity-50"
+                   focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition disabled:opacity-50"
                             {{ !$canEditAssign ? 'disabled' : '' }}>
                             <option value="">点击选择司机...</option>
                             @foreach ($drivers as $d)
@@ -368,10 +369,10 @@
                                         {{ !$canEditAssign ? 'disabled' : '' }}>
                                     <div
                                         class="py-3 text-center rounded-xl border border-white/10
-                                       bg-slate-800/80 text-slate-300 text-xs font-black cursor-pointer
-                                       peer-checked:bg-white peer-checked:text-slate-900
-                                       peer-checked:shadow-[0_16px_34px_rgba(255,255,255,0.10)]
-                                       transition-all">
+                               bg-slate-800/80 text-slate-300 text-xs font-black cursor-pointer
+                               peer-checked:bg-white peer-checked:text-slate-900
+                               peer-checked:shadow-[0_16px_34px_rgba(255,255,255,0.10)]
+                               transition-all">
                                         {{ $label }}
                                     </div>
                                 </label>
@@ -392,8 +393,8 @@
                             <input type="number" step="0.01" name="amount"
                                 value="{{ old('amount', $order->amount) }}"
                                 class="w-full bg-slate-800/80 border border-white/10 rounded-2xl pl-12 pr-5 py-4 text-xl font-black text-white
-                               focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition
-                               placeholder:text-slate-600 disabled:opacity-50"
+                       focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition
+                       placeholder:text-slate-600 disabled:opacity-50"
                                 placeholder="0.00" {{ !$canEditAssign ? 'disabled' : '' }}>
                         </div>
 
@@ -404,12 +405,27 @@
 
                     <button type="submit"
                         class="w-full py-5 rounded-[1.5rem] bg-indigo-500 hover:bg-indigo-400 text-white font-black tracking-widest text-sm
-                       shadow-[0_18px_50px_rgba(99,102,241,0.35)]
-                       active:scale-[0.98] transition-all disabled:hidden"
+               shadow-[0_18px_50px_rgba(99,102,241,0.35)]
+               active:scale-[0.98] transition-all disabled:hidden"
                         {{ !$canEditAssign ? 'disabled' : '' }}>
                         {{ $order->driver_id ? '更新派单' : '立即派单' }}
                     </button>
                 </form>
+
+                @if ($canCancelOrder)
+                    <form method="POST" action="{{ route('manager.orders.cancel', $order) }}" class="mt-3"
+                        onsubmit="return confirm('确定要取消这个订单吗？');">
+                        @csrf
+                        @method('PATCH')
+
+                        <button type="submit"
+                            class="w-full py-4 rounded-[1.5rem] bg-rose-500/90 hover:bg-rose-500 text-white font-black tracking-widest text-sm
+                   shadow-[0_18px_50px_rgba(244,63,94,0.28)]
+                   active:scale-[0.98] transition-all">
+                            取消订单
+                        </button>
+                    </form>
+                @endif
 
                 @if ($order->driver)
                     <div class="mt-8 pt-6 border-t border-white/10 flex items-center justify-between">

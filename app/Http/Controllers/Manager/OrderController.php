@@ -161,4 +161,22 @@ class OrderController extends Controller
             ->route('manager.orders.show', $order)
             ->with('status', 'Order assigned successfully.');
     }
+
+    public function cancel(Order $order)
+    {
+        if ($order->status === 'cancelled') {
+            return back()->with('error', '订单已经是取消状态。');
+        }
+
+        $order->update([
+            'status' => 'cancelled',
+
+            // 🔥 清掉所有业务数据
+            'driver_id' => null,
+            'payment_type' => null,
+            'amount' => 0,
+        ]);
+
+        return back()->with('success', '订单已取消（不计入任何统计）。');
+    }
 }

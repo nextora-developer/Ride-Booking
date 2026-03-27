@@ -118,6 +118,7 @@ Route::prefix('admin')
         Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
         Route::patch('/orders/{order}/assign', [AdminOrderController::class, 'assign'])->name('orders.assign');
+        Route::patch('/orders/{order}/cancel', [AdminOrderController::class, 'cancel']) ->name('orders.cancel');
 
         // Customers
         Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
@@ -161,6 +162,7 @@ Route::prefix('manager')
         Route::get('/orders', [ManagerOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [ManagerOrderController::class, 'show'])->name('orders.show');
         Route::patch('/orders/{order}/assign', [ManagerOrderController::class, 'assign'])->name('orders.assign');
+        Route::patch('/orders/{order}/cancel', [ManagerOrderController::class, 'cancel']) ->name('orders.cancel');
 
         Route::get('/drivers', [ManagerDriverController::class, 'index'])->name('drivers.index');
         Route::get('/drivers/{driver}/edit', [ManagerDriverController::class, 'edit'])->name('drivers.edit');

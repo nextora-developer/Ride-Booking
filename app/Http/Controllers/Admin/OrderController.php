@@ -121,4 +121,26 @@ class OrderController extends Controller
 
         return back()->with('status', 'Driver assigned successfully.');
     }
+
+    public function cancel(Order $order)
+    {
+        $cancellable = ['pending', 'assigned', 'on_the_way', 'arrived'];
+
+        if (!in_array(strtolower((string) $order->status), $cancellable, true)) {
+            return back()->with('error', '当前订单状态无法取消。');
+        }
+
+        $order->update([
+            'status' => 'cancelled',
+            'driver_id' => null,
+            'payment_type' => null,
+            'amount' => 0,
+            'assigned_at' => null,
+            'payment_status' => null,
+        ]);
+
+        return redirect()
+            ->route('admin.orders.show', $order)
+            ->with('success', '订单已取消。');
+    }
 }
