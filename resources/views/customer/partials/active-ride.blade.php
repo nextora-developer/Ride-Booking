@@ -13,6 +13,17 @@
         ];
 
         $statusLabel = $statusMap[$activeBooking->status] ?? '进行中';
+
+        // ✅ 多下车点处理（加这里）
+        $dropoffs = is_array($activeBooking->dropoffs ?? null)
+            ? array_values(array_filter($activeBooking->dropoffs))
+            : [];
+
+        if (empty($dropoffs) && !empty($activeBooking->dropoff)) {
+            $dropoffs = [$activeBooking->dropoff];
+        }
+
+        $completedDropoffCount = (int) ($activeBooking->completed_dropoff_count ?? 0);
     @endphp
 
     <div class="mb-8" data-has-active-ride="1">
@@ -51,6 +62,32 @@
                 <div class="text-sm font-semibold text-white/80 truncate">
                     {{ $routeText }}
                 </div>
+
+                {{-- @if ($activeBooking->status === 'in_trip' && count($dropoffs) > 1)
+                    <div class="mt-2 text-xs font-bold text-white/70">
+                        已完成 {{ $completedDropoffCount }} / {{ count($dropoffs) }} 个下车点
+                    </div>
+                @endif --}}
+
+                @if (!empty($dropoffs))
+                    <div class="space-y-1">
+                        @foreach ($dropoffs as $i => $point)
+                            @php
+                                $stepNo = $i + 1;
+                            @endphp
+
+                            <div class="text-xs text-white/70">
+                                @if ($stepNo <= $completedDropoffCount)
+                                    ✅ {{ $point }}
+                                @elseif ($activeBooking->status === 'in_trip' && $stepNo === $completedDropoffCount + 1)
+                                    🚗 正在前往：{{ $point }}
+                                @else
+                                    ⏳ {{ $point }}
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
 
                 @if ($activeBooking->driver)
                     @php

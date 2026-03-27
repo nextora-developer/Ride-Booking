@@ -184,7 +184,7 @@
     </div>
 @endsection
 
-<script>
+{{-- <script>
     document.addEventListener("DOMContentLoaded", function() {
         const wrap = document.getElementById('activeRideWrap');
         if (!wrap) return;
@@ -223,6 +223,101 @@
 
                 const html = await res.text();
                 wrap.innerHTML = html;
+            } catch (e) {
+                console.error('active ride refresh failed:', e);
+            } finally {
+                isRequesting = false;
+            }
+        }
+
+        refreshActiveRide();
+        startPolling();
+
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                refreshActiveRide();
+            }
+        });
+
+        window.addEventListener('beforeunload', function() {
+            stopPolling();
+        });
+    });
+</script> --}}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const wrap = document.getElementById('activeRideWrap');
+        if (!wrap) return;
+
+        let pollingTimer = null;
+        let isRequesting = false;
+        let completionAlertShown = false;
+
+        function hasActiveRide() {
+            return wrap.querySelector('[data-has-active-ride="1"]') !== null;
+        }
+
+        function startPolling() {
+            if (pollingTimer) return;
+            pollingTimer = setInterval(refreshActiveRide, 3000);
+        }
+
+        function stopPolling() {
+            if (pollingTimer) {
+                clearInterval(pollingTimer);
+                pollingTimer = null;
+            }
+        }
+
+        async function refreshActiveRide() {
+            if (document.hidden) return;
+            if (isRequesting) return;
+
+            isRequesting = true;
+
+            const hadActiveRide = hasActiveRide();
+
+            try {
+                const res = await fetch("{{ route('customer.active.ride') }}", {
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Accept": "text/html"
+                    },
+                    cache: "no-store"
+                });
+
+                if (!res.ok) return;
+
+                const html = await res.text();
+                wrap.innerHTML = html;
+
+                const hasRideNow = hasActiveRide();
+
+                // 原本有单，现在没单 = 行程结束
+                if (hadActiveRide && !hasRideNow && !completionAlertShown) {
+                    completionAlertShown = true;
+                    stopPolling();
+
+                    if (typeof Swal === 'undefined') {
+                        alert('行程已完成');
+                        window.location.reload();
+                        return;
+                    }
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: '行程已完成 🎉',
+                        text: '感谢您的使用！',
+                        confirmButtonColor: '#0f172a',
+                        confirmButtonText: '好的'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+
+                    return;
+                }
+
             } catch (e) {
                 console.error('active ride refresh failed:', e);
             } finally {

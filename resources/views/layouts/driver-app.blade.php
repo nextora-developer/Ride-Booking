@@ -136,7 +136,7 @@
                 {{-- Notifications --}}
                 <div class="space-y-4 mb-6">
                     @if (session('status'))
-                        <div
+                        <div id="status-toast"
                             class="flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-sm animate-in fade-in slide-in-from-top-2">
                             <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke-width="2"
                                 stroke="currentColor">
@@ -145,6 +145,15 @@
                             </svg>
                             <span class="font-medium">{{ session('status') }}</span>
                         </div>
+                        <script>
+                            setTimeout(() => {
+                                const toast = document.getElementById('status-toast');
+                                if (toast) {
+                                    toast.style.opacity = '0';
+                                    setTimeout(() => toast.remove(), 500);
+                                }
+                            }, 1800);
+                        </script>
                     @endif
 
                     @if ($errors->any())
@@ -193,8 +202,8 @@
                         {{-- Home --}}
                         <a href="{{ route('driver.dashboard') }}"
                             class="flex flex-col items-center justify-center py-2 transition-all duration-300 {{ $isDashboard ? $activeClass : $inactiveClass }}">
-                            <svg class="h-6 w-6" fill="{{ $isDashboard ? 'currentColor' : 'none' }}" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="2">
+                            <svg class="h-6 w-6" fill="{{ $isDashboard ? 'currentColor' : 'none' }}"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M2.25 12 11.204 3.045a1.125 1.125 0 0 1 1.591 0L21.75 12M4.5 9.75V20.25A1.5 1.5 0 0 0 6 21.75h3.75v-6a1.5 1.5 0 0 1 1.5-1.5h1.5a1.5 1.5 0 0 1 1.5 1.5v6H18a1.5 1.5 0 0 0 1.5-1.5V9.75" />
                             </svg>

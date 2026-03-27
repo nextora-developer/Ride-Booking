@@ -143,7 +143,7 @@
                 {{-- Notifications --}}
                 <div class="space-y-4 mb-6">
                     @if (session('status'))
-                        <div
+                        <div id="status-toast"
                             class="flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-800 text-sm animate-in fade-in slide-in-from-top-2">
                             <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke-width="2"
                                 stroke="currentColor">
@@ -152,6 +152,16 @@
                             </svg>
                             <span class="font-medium">{{ session('status') }}</span>
                         </div>
+
+                        <script>
+                            setTimeout(() => {
+                                const toast = document.getElementById('status-toast');
+                                if (toast) {
+                                    toast.style.opacity = '0';
+                                    setTimeout(() => toast.remove(), 500);
+                                }
+                            }, 1800);
+                        </script>
                     @endif
 
                     @if ($errors->any())
