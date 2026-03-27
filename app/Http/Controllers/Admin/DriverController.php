@@ -99,7 +99,7 @@ class DriverController extends Controller
 
         return redirect()
             ->route('admin.drivers.show', $driver)
-            ->with('success', 'Driver updated successfully.');
+            ->with('success', '司机资料已成功更新。');
     }
 
     public function toggleOnline(User $driver)
@@ -108,14 +108,14 @@ class DriverController extends Controller
 
         // ❗账号被 suspend 不允许 online
         if (!$driver->is_active) {
-            return back()->with('error', 'Driver account is suspended.');
+            return back()->with('error', '司机账号已被暂停。');
         }
 
         $driver->update([
             'is_online' => !$driver->is_online,
         ]);
 
-        return back()->with('success', 'Online status updated.');
+        return back()->with('success', '在线状态已更新。');
     }
 
     public function toggleAccount(User $driver)
@@ -130,6 +130,6 @@ class DriverController extends Controller
             'is_online' => $newActive ? $driver->is_online : false,
         ]);
 
-        return back()->with('success', 'Account status updated.');
+        return back()->with('success', '账号状态已更新。');
     }
 }

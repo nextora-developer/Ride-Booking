@@ -97,7 +97,7 @@ class CustomerController extends Controller
 
         return redirect()
             ->route('admin.customers.show', $customer)
-            ->with('success', 'Customer updated.');
+            ->with('success', '客户资料已成功更新。');
     }
 
     public function toggle(User $customer)
@@ -111,7 +111,7 @@ class CustomerController extends Controller
             'is_active' => !$customer->is_active,
         ]);
 
-        return back()->with('success', 'Customer status updated.');
+        return back()->with('success', '客户状态已成功更新。');
     }
 
     public function adjustCredit(Request $request, User $customer)
@@ -154,7 +154,7 @@ class CustomerController extends Controller
             ]);
         });
 
-        return back()->with('success', 'Credit updated.');
+        return back()->with('success', '挂单额度已成功更新。');
     }
 
     public function clearCredit(User $customer)
@@ -191,6 +191,6 @@ class CustomerController extends Controller
             ]);
         });
 
-        return back()->with('success', 'Credit cleared.');
+        return back()->with('success', '挂单额度已清除。');
     }
 }

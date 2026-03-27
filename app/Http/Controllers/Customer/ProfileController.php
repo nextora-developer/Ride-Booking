@@ -27,7 +27,7 @@ class ProfileController extends Controller
 
         $user->update($data);
 
-        return back()->with('status', 'Profile updated successfully.');
+        return back()->with('status', '资料已成功更新。');
     }
 
     public function editPassword()

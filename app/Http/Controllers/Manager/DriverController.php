@@ -142,6 +142,6 @@ class DriverController extends Controller
 
         return redirect()
             ->route('manager.drivers.index')
-            ->with('status', 'Driver info updated ✅');
+            ->with('status', '司机资料已更新 ✅');
     }
 }

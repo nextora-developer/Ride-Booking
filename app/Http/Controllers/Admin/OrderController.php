@@ -93,7 +93,7 @@ class OrderController extends Controller
         $locked = ['on_the_way', 'arrived', 'in_trip', 'completed', 'cancelled'];
 
         if (in_array(strtolower((string) $order->status), $locked, true)) {
-            return back()->withErrors(['status' => 'This order cannot be assigned at the current status.']);
+            return back()->withErrors(['status' => '当前订单状态无法进行指派。']);
         }
 
         $data = $request->validate([
@@ -119,7 +119,7 @@ class OrderController extends Controller
 
         $order->save();
 
-        return back()->with('status', 'Driver assigned successfully.');
+        return back()->with('status', '司机已成功指派。');
     }
 
     public function cancel(Order $order)

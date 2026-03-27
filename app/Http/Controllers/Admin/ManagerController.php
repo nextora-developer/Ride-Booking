@@ -82,7 +82,7 @@ class ManagerController extends Controller
 
         return redirect()
             ->route('admin.managers.show', $manager)
-            ->with('success', 'Manager account created.');
+            ->with('success', '管理员账号已创建。');
     }
 
     public function edit(User $manager)
@@ -115,7 +115,7 @@ class ManagerController extends Controller
 
         return redirect()
             ->route('admin.managers.show', $manager)
-            ->with('success', 'Manager updated.');
+            ->with('success', '管理员资料已更新。');
     }
 
     public function toggle(User $manager)
@@ -129,6 +129,6 @@ class ManagerController extends Controller
             'is_active' => !$manager->is_active,
         ]);
 
-        return back()->with('success', 'Manager status updated.');
+        return back()->with('success', '管理员状态已更新。');
     }
 }

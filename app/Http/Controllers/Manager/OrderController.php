@@ -132,19 +132,19 @@ class OrderController extends Controller
 
         if (!$driver->is_online) {
             return back()
-                ->withErrors(['driver_id' => 'Driver is offline. Please select an online driver.'])
+                ->withErrors(['driver_id' => '司机当前不在线，请选择在线的司机。'])
                 ->withInput();
         }
 
         // ✅ 默认限制：manager 只能派同 shift 的 driver（要允许跨班次就删掉）
         if (!empty($manager->shift) && !empty($driver->shift) && $driver->shift !== $manager->shift) {
-            return back()->withErrors(['driver_id' => 'Selected driver is not in your shift.'])->withInput();
+            return back()->withErrors(['driver_id' => '所选司机不在您的班次内。'])->withInput();
         }
 
         // ✅ 只允许 pending 才能派（你要允许改派就改掉这段）
         if (!in_array($order->status, ['pending', 'assigned'])) {
             return back()->withErrors([
-                'driver_id' => 'This order can no longer be edited.'
+                'driver_id' => '该订单已无法编辑。'
             ])->withInput();
         }
 
@@ -159,7 +159,7 @@ class OrderController extends Controller
 
         return redirect()
             ->route('manager.orders.show', $order)
-            ->with('status', 'Order assigned successfully.');
+            ->with('status', '订单已成功指派。');
     }
 
     public function cancel(Order $order)
