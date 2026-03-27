@@ -378,34 +378,41 @@
                                     </p>
                                 </div>
 
-                                <div class="space-y-2 lg:col-span-1">
-                                    <label class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
-                                        结算方式
-                                    </label>
+                                <div class="space-y-2 lg:col-span-1 min-w-0">
+    <label class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
+        结算方式
+    </label>
 
-                                    <div class="flex p-1 bg-slate-100 rounded-[1.25rem] h-14 items-center">
-                                        @php
-                                            $curPay = strtolower(
-                                                (string) old('payment_type', $order->payment_type ?? 'cash'),
-                                            );
-                                        @endphp
+    <div class="flex p-1 bg-slate-100 rounded-[1.25rem] min-h-14 items-center overflow-hidden">
+        @php
+            $curPay = strtolower((string) old('payment_type', $order->payment_type ?? 'cash'));
+        @endphp
 
-                                        @foreach (['cash' => '现金', 'credit' => '挂单', 'transfer' => '转账'] as $val => $label)
-                                            <label class="flex-1 cursor-pointer">
-                                                <input type="radio" name="payment_type" value="{{ $val }}"
-                                                    class="sr-only peer" @checked($curPay === $val)>
-                                                <span
-                                                    class="flex items-center justify-center h-11 text-xs font-black rounded-xl transition-all peer-checked:bg-white peer-checked:shadow-sm peer-checked:text-indigo-600 text-slate-500">
-                                                    {{ $label }}
-                                                </span>
-                                            </label>
-                                        @endforeach
-                                    </div>
+        @foreach (['cash' => '现金', 'credit' => '挂单', 'transfer' => '转账'] as $val => $label)
+            <label class="relative flex-1 min-w-0 cursor-pointer">
+                <input
+                    type="radio"
+                    name="payment_type"
+                    value="{{ $val }}"
+                    class="absolute inset-0 opacity-0 pointer-events-none peer"
+                    @checked($curPay === $val)
+                >
+                <span
+                    class="flex items-center justify-center h-11 w-full min-w-0 text-xs font-black rounded-xl transition-all
+                           text-slate-500
+                           peer-checked:bg-white
+                           peer-checked:text-indigo-600
+                           peer-checked:shadow-sm">
+                    {{ $label }}
+                </span>
+            </label>
+        @endforeach
+    </div>
 
-                                    @error('payment_type')
-                                        <p class="text-xs font-bold text-rose-500 ml-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
+    @error('payment_type')
+        <p class="text-xs font-bold text-rose-500 ml-1">{{ $message }}</p>
+    @enderror
+</div>
 
                                 <div class="space-y-2">
                                     <label class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
